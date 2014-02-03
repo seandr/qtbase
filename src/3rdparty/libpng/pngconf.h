@@ -47,6 +47,9 @@
 #endif
 
 #ifdef PNG_SETJMP_SUPPORTED
+#if defined(__vxworks)
+#  include <vxWorksCommon.h>    /* needed for setjmp.h */
+#endif
    /* Required for the definition of jmp_buf and the declaration of longjmp: */
 #  include <setjmp.h>
 #endif

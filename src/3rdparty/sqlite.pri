@@ -9,6 +9,7 @@ winrt {
 qnx: DEFINES += _QNX_SOURCE
 !win32:!winrt:!winphone: DEFINES += HAVE_USLEEP=1
 integrity: QMAKE_CFLAGS += -include qplatformdefs.h
+vxworks: DEFINES += HAVE_UTIME
 INCLUDEPATH +=  $$PWD/sqlite
 SOURCES +=      $$PWD/sqlite/sqlite3.c
 

@@ -121,6 +121,10 @@ typedef char JOCTET;
  * typedefs live at a different point on the speed/space tradeoff curve.)
  */
 
+#ifdef __vxworks
+#include "vxWorks.h"
+#else
+
 /* UINT8 must hold at least the values 0..255. */
 
 #ifdef HAVE_UNSIGNED_CHAR
@@ -177,6 +181,7 @@ typedef short INT16;
 #ifndef _BASETSD_H              /* MinGW is slightly different */
 #ifndef QGLOBAL_H               /* Qt defines it in qglobal.h */
 typedef long INT32;
+#endif
 #endif
 #endif
 #endif
