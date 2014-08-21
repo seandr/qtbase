@@ -42,6 +42,8 @@ freebsd {
     SUBDIRS += bsdfb
 }
 
+contains(QT_CONFIG, vxworksfb): SUBDIRS += vxworksfb
+
 haiku {
     SUBDIRS += haiku
 }
