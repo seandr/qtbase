@@ -69,6 +69,10 @@ QEvdevKeyboardManager::QEvdevKeyboardManager(const QString &key, const QString &
             // if device is specified try to use it
             devices.append(arg);
             args.removeAll(arg);
+        } else if (arg.startsWith(QLatin1String("/input/"))) {
+            // if device is specified try to use it
+            devices.append(arg);
+            args.removeAll(arg);
         }
     }
 
