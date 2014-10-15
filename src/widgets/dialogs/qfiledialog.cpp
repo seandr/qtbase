@@ -1130,7 +1130,7 @@ Q_AUTOTEST_EXPORT QString qt_tildeExpansion(const QString &path)
     if (separatorPosition == 1) {
         return QDir::homePath() + path.midRef(1);
     } else {
-#if defined(Q_OS_VXWORKS) || defined(Q_OS_INTEGRITY)
+#if defined(Q_OS_INTEGRITY)
         const QString homePath = QDir::homePath();
 #else
         const QByteArray userName = path.midRef(1, separatorPosition - 1).toLocal8Bit();

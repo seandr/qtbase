@@ -830,7 +830,7 @@ QString QFileSystemEngine::resolveUserName(uint userId)
 
 #if !defined(Q_OS_INTEGRITY) && !defined(Q_OS_WASM)
     struct passwd *pw = 0;
-#if QT_CONFIG(thread) && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && !defined(Q_OS_OPENBSD) && !defined(Q_OS_VXWORKS)
+#if QT_CONFIG(thread) && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && !defined(Q_OS_OPENBSD)
     struct passwd entry;
     getpwuid_r(userId, &entry, buf.data(), buf.size(), &pw);
 #else
