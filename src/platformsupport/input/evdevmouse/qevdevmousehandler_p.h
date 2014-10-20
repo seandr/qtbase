@@ -78,7 +78,9 @@ private:
     QEvdevMouseHandler(const QString &device, int fd, bool abs, bool compression, int jitterLimit);
 
     void sendMouseEvent();
+#ifndef Q_OS_VXWORKS
     bool getHardwareMaximum();
+#endif
 
     QString m_device;
     int m_fd;

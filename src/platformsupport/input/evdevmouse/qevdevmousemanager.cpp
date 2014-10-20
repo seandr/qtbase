@@ -71,6 +71,10 @@ QEvdevMouseManager::QEvdevMouseManager(const QString &key, const QString &specif
             // if device is specified try to use it
             devices.append(arg);
             args.removeAll(arg);
+        } else if (arg.startsWith(QLatin1String("/input/"))) {
+            // if device is specified try to use it
+            devices.append(arg);
+            args.removeAll(arg);
         } else if (arg.startsWith(QLatin1String("xoffset="))) {
             m_xoffset = arg.mid(8).toInt();
         } else if (arg.startsWith(QLatin1String("yoffset="))) {
