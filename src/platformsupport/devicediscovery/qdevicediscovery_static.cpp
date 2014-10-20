@@ -101,6 +101,33 @@ QDeviceDiscoveryStatic::QDeviceDiscoveryStatic(QDeviceTypes types, QObject *pare
 QStringList QDeviceDiscoveryStatic::scanConnectedDevices()
 {
     QStringList devices;
+#ifdef Q_OS_VXWORKS
+    QStringList inputDevices;
+    UINT32 devCount = 0;
+    QString device(QString::fromLatin1("/input/event0"));
+    int fd = QT_OPEN(device.toLocal8Bit().constData(), O_RDONLY | O_NDELAY, 0);
+    if (fd >= 0) {
+        if (ERROR == ioctl(fd, EV_DEV_IO_GET_DEV_COUNT, (char *)&devCount)) {
+                qWarning() << "DeviceDiscovery cannot open device" << device;
+                return devices;
+        }
+        for (int i=0; i<=devCount; i++)
+            inputDevices << QString::fromLatin1("/input/event%1").arg(i);
+
+    } else {
+        for (int i=0; i<=EV_DEV_DEVICE_MAX; i++)
+            inputDevices << QString::fromLatin1("/input/event%1").arg(i);
+    }
+    QT_CLOSE(fd);
+
+    // check for input devices
+    if (m_types & Device_InputMask) {
+        foreach (const QString &deviceFile, inputDevices) {
+            if (checkDeviceType(deviceFile))
+                devices << deviceFile;
+        }
+    }
+#else
     QDir dir;
     dir.setFilter(QDir::System);
 
@@ -125,6 +152,7 @@ QStringList QDeviceDiscoveryStatic::scanConnectedDevices()
                 devices << absoluteFilePath;
         }
     }
+#endif
 
     qCDebug(lcDD) << "Found matching devices" << devices;
 
@@ -147,6 +175,32 @@ bool QDeviceDiscoveryStatic::checkDeviceType(const QString &device)
     }
 
     long bitsAbs[LONG_FIELD_SIZE(ABS_CNT)];
+#ifdef Q_OS_VXWORKS
+    UINT32 devCap = 0;
+    if (ERROR != ioctl(fd, EV_DEV_IO_GET_CAP, (char *)&devCap)) {
+        if (!ret && (m_types & Device_Keyboard) && (devCap & EV_DEV_KEY)) {
+            if (!(devCap & EV_DEV_REL) && !(devCap & EV_DEV_ABS)) {
+                qCDebug(lcDD) << "DeviceDiscovery found keyboard at" << device;
+                ret = true;
+            }
+        }
+
+        if (!ret && (m_types & Device_Mouse)) {
+            if ((devCap & EV_DEV_REL) && (devCap & EV_DEV_KEY)) {
+                    qCDebug(lcDD) << "DeviceDiscovery found mouse at" << device;
+                ret = true;
+            }
+        }
+
+        if (!ret && (m_types & (Device_Touchpad | Device_Touchscreen))) {
+            if ((m_types & Device_Touchscreen) && (devCap & EV_DEV_ABS && (devCap & EV_DEV_KEY))) {
+                qCDebug(lcDD) << "DeviceDiscovery found touchscreen at" << device;
+                ret = true;
+            }
+        }
+    }
+    QT_CLOSE(fd);
+#else
     long bitsKey[LONG_FIELD_SIZE(KEY_CNT)];
     long bitsRel[LONG_FIELD_SIZE(REL_CNT)];
     memset(bitsAbs, 0, sizeof(bitsAbs));
@@ -198,6 +252,7 @@ bool QDeviceDiscoveryStatic::checkDeviceType(const QString &device)
             return true;
         }
     }
+#endif
 
     return false;
 }
