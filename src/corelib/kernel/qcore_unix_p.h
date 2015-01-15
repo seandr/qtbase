@@ -85,7 +85,10 @@
 #endif
 
 #if defined(Q_OS_VXWORKS)
-#  include <ioLib.h>
+# include <ioLib.h>
+# include <pipeDrv.h>
+# include <stdio.h>
+# include <sockLib.h>
 #endif
 
 #ifdef QT_NO_NATIVE_POLL
@@ -204,7 +207,10 @@ static inline int qt_safe_open(const char *pathname, int flags, mode_t mode = 07
 #undef QT_OPEN
 #define QT_OPEN         qt_safe_open
 
-#ifndef Q_OS_VXWORKS // no POSIX pipes in VxWorks
+#ifdef Q_OS_VXWORKS
+    static int vxworks_pipe_counter = 0;
+    const int vxworks_pipe_name_len = 32;
+#endif
 // don't call ::pipe
 // call qt_safe_pipe
 static inline int qt_safe_pipe(int pipefd[2], int flags = 0)
@@ -216,12 +222,22 @@ static inline int qt_safe_pipe(int pipefd[2], int flags = 0)
     flags |= O_CLOEXEC;
     return ::pipe2(pipefd, flags); // pipe2 is documented not to return EINTR
 #else
+
+#ifdef Q_OS_VXWORKS
+    char name[vxworks_pipe_name_len];
+    snprintf(name, sizeof(name)-1, "/pipe/qtpipe%d", vxworks_pipe_counter++);
+    if (pipeDevCreate(name, 10, 128) != OK)
+        return -1;
+    pipefd[0] = open(name, O_RDONLY, 0);
+    pipefd[1] = open(name, O_WRONLY, 0);
+#else
     int ret = ::pipe(pipefd);
     if (ret == -1)
         return -1;
 
     ::fcntl(pipefd[0], F_SETFD, FD_CLOEXEC);
     ::fcntl(pipefd[1], F_SETFD, FD_CLOEXEC);
+#endif
 
     // set non-block too?
     if (flags & O_NONBLOCK) {
@@ -233,7 +249,6 @@ static inline int qt_safe_pipe(int pipefd[2], int flags = 0)
 #endif
 }
 
-#endif // Q_OS_VXWORKS
 
 // don't call dup or fcntl(F_DUPFD)
 static inline int qt_safe_dup(int oldfd, int atleast = 0, int flags = FD_CLOEXEC)
