@@ -148,6 +148,9 @@ public:
 
     QTimerInfoList timerList;
     QAtomicInt interrupt; // bool
+#if defined(Q_OS_VXWORKS)
+    char pipe_name[_POSIX_PATH_MAX];
+#endif
 };
 
 inline QSocketNotifierSetUNIX::QSocketNotifierSetUNIX() Q_DECL_NOTHROW

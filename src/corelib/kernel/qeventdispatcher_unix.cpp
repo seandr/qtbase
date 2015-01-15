@@ -59,14 +59,13 @@
 #  include <sys/eventfd.h>
 #endif
 
-// VxWorks doesn't correctly set the _POSIX_... options
 #if defined(Q_OS_VXWORKS)
-#  if defined(_POSIX_MONOTONIC_CLOCK) && (_POSIX_MONOTONIC_CLOCK <= 0)
-#    undef _POSIX_MONOTONIC_CLOCK
-#    define _POSIX_MONOTONIC_CLOCK 1
-#  endif
 #  include <pipeDrv.h>
-#  include <sys/time.h>
+#  include <selectLib.h>
+#  include <taskLib.h>
+#  include "qdatetime.h"
+#  include "qdir.h" // to get application name
+#  include <rtpLib.h>
 #endif
 
 #if (_POSIX_MONOTONIC_CLOCK-0 <= 0) || defined(QT_BOOTSTRAPPED)
@@ -133,24 +132,38 @@ bool QThreadPipe::init()
 #if defined(Q_OS_NACL) || defined(Q_OS_WASM)
    // do nothing.
 #elif defined(Q_OS_VXWORKS)
-    qsnprintf(name, sizeof(name), "/pipe/qt_%08x", int(taskIdSelf()));
+    RTP_DESC rtpStruct;
+    rtpInfoGet(NULL, &rtpStruct);
+
+    qsrand(QDateTime::currentDateTime().toTime_t());
+    int random = qrand();
+
+    QString path(rtpStruct.pathName);
+    QByteArray binary(path.mid(path.lastIndexOf(QDir::separator())+1, path.size()).toLatin1());
+
+    Qt::HANDLE threadId = QThread::currentThreadId();
+
+    qsnprintf(pipe_name, sizeof(pipe_name), "/pipe/qevloop_%s_%08x_%08x_%d",
+        binary.data(),
+        int(rtpStruct.entrAddr),
+        threadId,
+        random);
 
     // make sure there is no pipe with this name
-    pipeDevDelete(name, true);
-
+    pipeDevDelete(pipe_name, true);
     // create the pipe
-    if (pipeDevCreate(name, 128 /*maxMsg*/, 1 /*maxLength*/) != OK) {
-        perror("QThreadPipe: Unable to create thread pipe device %s", name);
-        return false;
+    if (pipeDevCreate(pipe_name, 128 /*maxMsg*/, 1 /*maxLength*/) != OK) {
+        perror("QEventDispatcherUNIXPrivate(): Unable to create thread pipe device");
+        pipefail = true;
+    } else {
+        if ((thread_pipe[0] = open(pipe_name, O_RDWR, 0)) < 0) {
+            perror("QEventDispatcherUNIXPrivate(): Unable to create thread pipe");
+            pipefail = true;
+        } else {
+            initThreadPipeFD(thread_pipe[0]);
+            thread_pipe[1] = thread_pipe[0];
+        }
     }
-
-    if ((fds[0] = open(name, O_RDWR, 0)) < 0) {
-        perror("QThreadPipe: Unable to open pipe device %s", name);
-        return false;
-    }
-
-    initThreadPipeFD(fds[0]);
-    fds[1] = fds[0];
 #else
 #  ifndef QT_NO_EVENTFD
     if ((fds[0] = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC)) >= 0)
