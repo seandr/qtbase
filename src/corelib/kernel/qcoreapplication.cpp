@@ -2392,8 +2392,6 @@ qint64 QCoreApplication::applicationPid()
 {
 #if defined(Q_OS_WIN)
     return GetCurrentProcessId();
-#elif defined(Q_OS_VXWORKS)
-    return (pid_t) taskIdCurrent;
 #else
     return getpid();
 #endif
