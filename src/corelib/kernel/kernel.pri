@@ -183,13 +183,6 @@ unix|integrity {
     integrity: QMAKE_CXXFLAGS += --pending_instantiations=128
 }
 
-vxworks {
-        SOURCES += \
-                kernel/qfunctions_vxworks.cpp
-        HEADERS += \
-                kernel/qfunctions_vxworks.h
-}
-
 qnx:qtConfig(qqnx_pps) {
         QMAKE_USE_PRIVATE += pps
         SOURCES += \

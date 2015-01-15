@@ -41,12 +41,8 @@
 #include "qelapsedtimer.h"
 #include "qdeadlinetimer.h"
 #include "qdeadlinetimer_p.h"
-#if defined(Q_OS_VXWORKS)
-#include "qfunctions_vxworks.h"
-#else
 #include <sys/time.h>
 #include <time.h>
-#endif
 #include <unistd.h>
 
 #include <qatomic.h>
