@@ -54,8 +54,12 @@
 #include "private/qabstractfileengine_p.h"
 #include "private/qtemporaryfile_p.h"
 
-#if !defined(Q_OS_INTEGRITY)
+#if !defined(Q_OS_INTEGRITY) && !defined(Q_OS_VXWORKS)
 #include <sys/file.h>  // flock
+#endif
+
+#if defined(Q_OS_VXWORKS)
+# include <hostLib.h>
 #endif
 
 #include <sys/types.h> // kill
