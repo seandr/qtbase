@@ -357,6 +357,8 @@ QStringList QFileSelectorPrivate::platformSelectors()
     ret << QSysInfo::kernelType();
 #     ifdef Q_OS_MAC
     ret << QStringLiteral("mac"); // compatibility, since kernelType() is "darwin"
+#     elif defined(Q_OS_VXWORKS)
+    ret << QStringLiteral("vxworks");
 #     endif
 #  endif
     QString productName = QSysInfo::productType();
