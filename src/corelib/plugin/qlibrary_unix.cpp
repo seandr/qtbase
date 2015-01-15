@@ -144,7 +144,9 @@ bool QLibraryPrivate::load_sys()
     }
 #if !defined(Q_OS_CYGWIN)
     else {
+#if !defined(Q_OS_VXWORKS)
         dlFlags |= RTLD_LOCAL;
+#endif
     }
 #endif
 #if defined(RTLD_DEEPBIND)
