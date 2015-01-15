@@ -564,6 +564,10 @@ Q_CORE_EXPORT QBasicAtomicInteger<quint64> qt_cpu_features[1] = { Q_BASIC_ATOMIC
 #else
 Q_CORE_EXPORT QBasicAtomicInteger<unsigned> qt_cpu_features[2] = { Q_BASIC_ATOMIC_INITIALIZER(0), Q_BASIC_ATOMIC_INITIALIZER(0) };
 #endif
+#ifdef Q_OS_VXWORKS
+#include <ffsLib.h>
+#  define ffs ffsLsb_autosize
+#endif
 
 void qDetectCpuFeatures()
 {
