@@ -66,6 +66,11 @@ win32: {
     }
 }
 
+vxworks {
+    SOURCES += kernel/qdnslookup_vxworks.cpp
+    SOURCES -= kernel/qdnslookup_unix.cpp
+}
+
 mac {
     LIBS_PRIVATE += -framework CoreFoundation
     !uikit: LIBS_PRIVATE += -framework CoreServices -framework SystemConfiguration
