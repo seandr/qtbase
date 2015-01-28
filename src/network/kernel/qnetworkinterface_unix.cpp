@@ -55,6 +55,11 @@
 #  define QT_NO_GETIFADDRS
 #endif
 
+#if defined(Q_OS_VXWORKS)
+// VxWorks lacks if_nameindex
+# define QT_NO_IPV6IFNAME
+#endif
+
 #ifndef QT_NO_GETIFADDRS
 # include <ifaddrs.h>
 #endif
@@ -571,6 +576,7 @@ static QList<QNetworkInterfacePrivate *> createInterfaces(ifaddrs *rawList)
     Q_UNUSED(getMtu)
     QList<QNetworkInterfacePrivate *> interfaces;
 
+#ifndef QT_NO_IPV6IFNAME
     // make sure there's one entry for each interface
     for (ifaddrs *ptr = rawList; ptr; ptr = ptr->ifa_next) {
         // Get the interface index
@@ -593,6 +599,7 @@ static QList<QNetworkInterfacePrivate *> createInterfaces(ifaddrs *rawList)
         }
     }
 
+#endif
     return interfaces;
 }
 
