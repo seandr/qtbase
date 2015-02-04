@@ -26,6 +26,9 @@
 
 #include "hb-ot-shape-complex-private.hh"
 
+#ifdef __vxworks
+#undef NONE
+#endif
 
 /* Hangul shaper */
 

@@ -29,6 +29,9 @@
 #include "hb-ot-shape-complex-arabic-private.hh"
 #include "hb-ot-shape-private.hh"
 
+#ifdef __vxworks
+#undef NONE
+#endif
 
 /* buffer var allocations */
 #define arabic_shaping_action() complex_var_u8_0() /* arabic shaping action */
