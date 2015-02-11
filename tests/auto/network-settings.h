@@ -42,6 +42,10 @@
 #include <unistd.h>
 #endif
 
+#ifdef Q_OS_VXWORKS
+#  include <sockLib.h>
+#endif
+
 class QtNetworkSettings
 {
 public:

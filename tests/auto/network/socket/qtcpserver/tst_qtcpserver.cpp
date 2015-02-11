@@ -45,6 +45,10 @@
 #include <sys/ioctl.h>
 #endif
 
+#ifdef Q_OS_VXWORKS
+#  include <ioLib.h>
+#endif
+
 #include <qcoreapplication.h>
 #include <qtcpsocket.h>
 #include <qtcpserver.h>

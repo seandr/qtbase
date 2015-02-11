@@ -46,6 +46,10 @@
 #include <QtCore/qt_windows.h>
 #endif
 
+#ifdef Q_OS_VXWORKS
+#  include <sockLib.h>
+#endif
+
 Q_DECLARE_METATYPE(QLocalSocket::LocalSocketError)
 Q_DECLARE_METATYPE(QLocalSocket::LocalSocketState)
 Q_DECLARE_METATYPE(QLocalServer::SocketOption)
