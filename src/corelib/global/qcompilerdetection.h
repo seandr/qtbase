@@ -1022,6 +1022,9 @@
 #    undef Q_COMPILER_UNRESTRICTED_UNIONS
 #    undef Q_COMPILER_UNICODE_STRINGS
 #    undef Q_COMPILER_NOEXCEPT
+// The libcpp is missing constexpr keywords on important functions like std::numeric_limits<>::min()
+// Disable constexpr support on VxWorks even if the compiler supports it
+#    undef Q_COMPILER_CONSTEXPR
 # endif // Q_OS_VXWORKS
 # if (defined(Q_CC_CLANG) || defined(Q_CC_INTEL)) && defined(Q_OS_MAC) && defined(__GNUC_LIBSTD__) \
     && ((__GNUC_LIBSTD__-0) * 100 + __GNUC_LIBSTD_MINOR__-0 <= 402)
