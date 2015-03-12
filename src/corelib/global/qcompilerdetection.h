@@ -1014,17 +1014,20 @@
 # if defined(Q_OS_VXWORKS)
 // with shared libraries, thread_local (__thread) usage crash RTP process
 #undef Q_COMPILER_THREAD_LOCAL
-// libcpp (Dinkumware-based) doesn't have the std::move
-// header
+// Not supported by Dinkumware c++ library
+#  if defined(_HAS_DINKUM_CLIB) && !defined(_HAS_CPP0X)
+// Disable C++11 features that depend on library support
 #    undef Q_COMPILER_RVALUE_REFS
 #    undef Q_COMPILER_REF_QUALIFIERS
-#    undef Q_COMPILER_ATOMICS
 #    undef Q_COMPILER_UNRESTRICTED_UNIONS
 #    undef Q_COMPILER_UNICODE_STRINGS
 #    undef Q_COMPILER_NOEXCEPT
+#  endif
+#  if defined(_HAS_DINKUM_CLIB) && !defined(_HAS_CONSTEXPR)
 // The libcpp is missing constexpr keywords on important functions like std::numeric_limits<>::min()
 // Disable constexpr support on VxWorks even if the compiler supports it
 #    undef Q_COMPILER_CONSTEXPR
+#  endif
 # endif // Q_OS_VXWORKS
 # if (defined(Q_CC_CLANG) || defined(Q_CC_INTEL)) && defined(Q_OS_MAC) && defined(__GNUC_LIBSTD__) \
     && ((__GNUC_LIBSTD__-0) * 100 + __GNUC_LIBSTD_MINOR__-0 <= 402)
