@@ -7,6 +7,7 @@ DESTDIR = ../
 QT = core
 
 msvc: DEFINES += WIN32_MSVC
+vxworks: QMAKE_LFLAGS_SHLIB += -Wl,-lc -non-static -shared
 
 # This project is testdata for tst_qlibrary
 target.path = $$[QT_INSTALL_TESTS]/tst_qlibrary
