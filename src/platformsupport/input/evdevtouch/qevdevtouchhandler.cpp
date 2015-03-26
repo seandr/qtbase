@@ -63,6 +63,10 @@
 #define ABS_Y           EV_DEV_PTR_ABS_Y
 #define BTN_TOUCH       EV_DEV_PTR_BTN_TOUCH
 #define ABS_MAX         0x3f
+#define ABS_MT_SLOT     EV_DEV_PTR_ABS_MT_SLOT //0x2F
+#define ABS_MT_POSITION_X   EV_DEV_PTR_ABS_MT_POSITION_X //0x35
+#define ABS_MT_POSITION_Y   EV_DEV_PTR_ABS_MT_POSITION_Y //0x36
+#define ABS_MT_TRACKING_ID  EV_DEV_PTR_ABS_MT_TRACKING_ID //0x39
 #else
 #include <linux/input.h>
 #endif
