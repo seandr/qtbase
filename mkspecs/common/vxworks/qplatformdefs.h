@@ -47,9 +47,9 @@
 // Platform specific
 typedef unsigned char u_char;
 
-#include "../posix/qplatformdefs.h"
-
 #define QT_NO_USE_FSEEKO
+
+#include "../posix/qplatformdefs.h"
 
 #undef QT_SOCKLEN_T
 #define QT_SOCKLEN_T            int
