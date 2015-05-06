@@ -22,11 +22,12 @@
 #define QGRAPHICSSYSTEM_VXWORKSFB_H
 
 #include <qpa/qplatformintegration.h>
+#include <qpa/qplatformnativeinterface.h>
 
 QT_BEGIN_NAMESPACE
 
 class QVxWorksFbIntegrationPrivate;
-class QVxWorksFbIntegration : public QPlatformIntegration
+class QVxWorksFbIntegration : public QPlatformIntegration, public QPlatformNativeInterface
 {
 public:
     QVxWorksFbIntegration(const QStringList &paramList);
@@ -40,10 +41,13 @@ public:
     QPlatformBackingStore *createPlatformBackingStore(QWindow *window)  const Q_DECL_OVERRIDE;
     QAbstractEventDispatcher *createEventDispatcher()  const Q_DECL_OVERRIDE;
     QPlatformFontDatabase *fontDatabase()  const Q_DECL_OVERRIDE;
+    QPlatformInputContext *inputContext() const Q_DECL_OVERRIDE;
 
     QList<QPlatformScreen *> screens() const;
 
 private:
+    void createInputHandlers();
+
     QVxWorksFbIntegrationPrivate *d_ptr;
 };
 

@@ -37,6 +37,14 @@
 
 #include <QtGui/QPainter>
 
+#include <qpa/qplatforminputcontextfactory_p.h>
+
+#if !defined(QT_NO_EVDEV)
+#include <QtPlatformSupport/private/qevdevmousemanager_p.h>
+#include <QtPlatformSupport/private/qevdevkeyboardmanager_p.h>
+#include <QtPlatformSupport/private/qevdevtouchmanager_p.h>
+#endif
+
 QT_BEGIN_NAMESPACE
 
 class QVxWorksFbIntegrationPrivate
@@ -48,6 +56,8 @@ public:
     QPlatformFontDatabase *mFontDb;
     QVxWorksFbScreen *mPrimaryScreen;
     QList<QPlatformScreen *> mScreens;
+    QPlatformInputContext *m_inputContext;
+
     int fbfd;
 
 #ifndef QT_NO_VIRTUAL_PTR_VXWORKSFB
@@ -95,6 +105,11 @@ void QVxWorksFbIntegration::initialize()
     else
         qWarning("vxworksfb: Failed to initialize screen");
 
+#ifndef QT_NO_EVDEV
+    d_ptr->m_inputContext = QPlatformInputContextFactory::create();
+    if (!qEnvironmentVariableIntValue("QT_QPA_FB_DISABLE_INPUT"))
+        createInputHandlers();
+#endif
 #ifndef QT_NO_VIRTUAL_PTR_VXWORKSFB
     d_ptr->virtualPtr = new QVxWorksFbVirtualPtr(d_ptr->mPrimaryScreen->width(), d_ptr->mPrimaryScreen->height());
 #endif
@@ -142,5 +157,19 @@ QAbstractEventDispatcher *QVxWorksFbIntegration::createEventDispatcher() const
 QPlatformFontDatabase *QVxWorksFbIntegration::fontDatabase() const
 {
     return d_ptr->mFontDb;
+}
+
+QPlatformInputContext *QVxWorksFbIntegration::inputContext() const
+{
+    return d_ptr->m_inputContext;
+}
+
+void QVxWorksFbIntegration::createInputHandlers()
+{
+#if !defined(QT_NO_EVDEV)
+    new QEvdevKeyboardManager(QLatin1String("EvdevKeyboard"), QString(), this);
+    new QEvdevMouseManager(QLatin1String("EvdevMouse"), QString(), this);
+    new QEvdevTouchManager(QLatin1String("EvdevTouch"), QString() /* spec */, this);
+#endif
 }
 QT_END_NAMESPACE
