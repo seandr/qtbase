@@ -882,11 +882,14 @@
 #      define Q_COMPILER_ALIGNOF
 #      define Q_COMPILER_INHERITING_CONSTRUCTORS
 #      define Q_COMPILER_THREAD_LOCAL
-#      if Q_CC_GNU > 408 || __GNUC_PATCHLEVEL__ >= 1
+#    endif
+#    if Q_CC_GNU >= 409
+#      if Q_CC_GNU > 409 || __GNUC_PATCHLEVEL__ >= 1
+          /* see GCC bug 59296 */
 #         define Q_COMPILER_REF_QUALIFIERS
 #      endif
 #    endif
-     /* C++11 features are complete as of GCC 4.8.1 */
+     /* C++11 features are complete as of GCC 4.8.1 (modulo bugs fixed in later versions) */
 #  endif
 #  if __cplusplus > 201103L
 #    if Q_CC_GNU >= 409
