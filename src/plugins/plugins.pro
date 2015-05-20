@@ -10,5 +10,5 @@ qtHaveModule(gui) {
 }
 qtHaveModule(widgets): SUBDIRS += styles
 
-!winrt:qtHaveModule(printsupport): \
+!winrt:!vxworks:qtHaveModule(printsupport): \
     SUBDIRS += printsupport
