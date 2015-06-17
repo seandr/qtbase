@@ -1343,7 +1343,7 @@ void tst_QLocalSocket::verifyListenWithDescriptor()
 
 //    qDebug() << "socket" << path << abstract;
 
-    int listenSocket;
+    int listenSocket(-1);
 
     if (bound) {
         // create the unix socket
@@ -1371,11 +1371,15 @@ void tst_QLocalSocket::verifyListenWithDescriptor()
         // listen for connections
         QVERIFY2(-1 != ::listen(listenSocket, 50), "failed to call listen on test socket");
     } else {
+#ifdef Q_OS_VXWORKS
+        QSKIP("Missing socketpair function in VxWorks");
+#else
         int fds[2];
         QVERIFY2(-1 != ::socketpair(PF_UNIX, SOCK_STREAM, 0, fds), "failed to create socket pair");
 
         listenSocket = fds[0];
         close(fds[1]);
+#endif
     }
 
     QLocalServer server;
