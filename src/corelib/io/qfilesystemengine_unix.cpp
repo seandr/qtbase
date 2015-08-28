@@ -1502,8 +1502,27 @@ QString QFileSystemEngine::tempPath()
 bool QFileSystemEngine::setCurrentPath(const QFileSystemEntry &path)
 {
     int r;
+#ifdef Q_OS_VXWORKS
+    QString currentPath(path.nativeFilePath().constData());
+    char currentName[PATH_MAX+1];
+    if (::getcwd(currentName, PATH_MAX)) {
+        QString currentDir(currentName);
+        // check is device prefix missing from the path
+        QString devicePrefix = currentDir.left(currentDir.indexOf('/',1) + 1);
+        if (currentPath.left(devicePrefix.length()) != devicePrefix) {
+            // prepend device prefix to the path
+            if (currentPath.at(0) == '/')
+                currentPath = currentPath.prepend(devicePrefix.left(devicePrefix.length()-1));
+            else
+                currentPath = currentPath.prepend(devicePrefix);
+        }
+    }
+    r = QT_CHDIR(currentPath.toLatin1());
+#else
     r = QT_CHDIR(path.nativeFilePath().constData());
+#endif
     return r >= 0;
+
 }
 
 QFileSystemEntry QFileSystemEngine::currentPath()
