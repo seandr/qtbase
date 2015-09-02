@@ -1016,12 +1016,16 @@ bool QFileSystemEngine::fillMetaData(const QFileSystemEntry &entry, QFileSystemM
         auto checkAccess = [&](QFileSystemMetaData::MetaDataFlag flag, int mode) {
             if (entryErrno != 0 || (what & flag) == 0)
                 return;
+#ifndef QT_NO_FILESYSTEMPERMISSIONS
             if (QT_ACCESS(nativeFilePath, mode) == 0) {
                 // access ok (and file exists)
                 data.entryFlags |= flag | QFileSystemMetaData::ExistsAttribute;
             } else if (errno != EACCES && errno != EROFS) {
                 entryErrno = errno;
             }
+#else
+            data.entryFlags |= flag;
+#endif
         };
 
         checkAccess(QFileSystemMetaData::UserReadPermission, R_OK);
@@ -1365,7 +1369,12 @@ bool QFileSystemEngine::setPermissions(const QFileSystemEntry &entry, QFile::Per
         return emptyFileEntryWarning(), false;
 
     mode_t mode = toMode_t(permissions);
+#ifdef QT_NO_FILESYSTEMPERMISSIONS
+    bool success = true;
+#else
     bool success = ::chmod(entry.nativeFilePath().constData(), mode) == 0;
+#endif
+
     if (success && data) {
         data->entryFlags &= ~QFileSystemMetaData::Permissions;
         data->entryFlags |= QFileSystemMetaData::MetaDataFlag(uint(permissions));
