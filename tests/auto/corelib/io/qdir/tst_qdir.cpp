@@ -913,11 +913,18 @@ void tst_QDir::entryListWithTestFiles()
 
     bool doContentCheck = true;
 #if defined(Q_OS_UNIX)
+#ifdef QT_NO_FILESYSTEMPERMISSIONS
+    QString currentTag(QTest::currentDataTag());
+    if (currentTag.contains("QDir::Readable") ||
+        currentTag.contains("QDir::Writable"))
+            doContentCheck = false;
+#else
     if (qstrcmp(QTest::currentDataTag(), "QDir::AllEntries | QDir::Writable") == 0) {
         // for root, everything is writeable
         if (::getuid() == 0)
             doContentCheck = false;
     }
+#endif
 #endif
 
     for (int i = testFiles.size() - 1; i >= 0; --i)
@@ -2294,6 +2301,10 @@ void tst_QDir::isRelative()
 
 void tst_QDir::isReadable()
 {
+#ifdef QT_NO_FILESYSTEMPERMISSIONS
+        QSKIP("No filesystem permissions");
+#else
+
 #ifdef Q_OS_UNIX
     if (::getuid() == 0)
         QSKIP("Running this test as root doesn't make sense");
@@ -2308,10 +2319,16 @@ void tst_QDir::isReadable()
     QVERIFY(0 == ::chmod("nonreadabledir", S_IRUSR | S_IWUSR | S_IXUSR));
     QVERIFY(dir.rmdir("nonreadabledir"));
 #endif
+
+#endif // QT_NO_FILESYSTEMPERMISSIONS
 }
 
 void tst_QDir::cdNonreadable()
 {
+#ifdef QT_NO_FILESYSTEMPERMISSIONS
+        QSKIP("No filesystem permissions");
+#else
+
 #ifdef Q_OS_UNIX
     if (::getuid() == 0)
         QSKIP("Running this test as root doesn't make sense");
@@ -2325,6 +2342,8 @@ void tst_QDir::cdNonreadable()
     QVERIFY(0 == ::chmod("nonreadabledir2", S_IRUSR | S_IWUSR | S_IXUSR));
     QVERIFY(dir.rmdir("nonreadabledir2"));
 #endif
+
+#endif // QT_NO_FILESYSTEMPERMISSIONS
 }
 
 void tst_QDir::cdBelowRoot_data()
