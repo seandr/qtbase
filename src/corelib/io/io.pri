@@ -194,6 +194,10 @@ win32 {
                 io/qstandardpaths_haiku.cpp \
                 io/qstorageinfo_unix.cpp
             LIBS += -lbe
+        } else:vxworks {
+            SOURCES += \
+                io/qstandardpaths_unix.cpp \
+                io/qstorageinfo_stub.cpp
         } else {
             SOURCES += \
                 io/qstandardpaths_unix.cpp \
