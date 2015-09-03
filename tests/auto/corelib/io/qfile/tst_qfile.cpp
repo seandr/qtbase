@@ -622,6 +622,15 @@ void tst_QFile::open()
 
     QFETCH( bool, ok );
 
+#ifdef QT_NO_FILESYSTEMPERMISSIONS
+    if (strcmp(QTest::currentDataTag(), "exist_writeOnly") == 0 ||
+        strcmp(QTest::currentDataTag(), "exist_append") == 0 ||
+        strcmp(QTest::currentDataTag(), "readonlyfile") == 0 ||
+        strcmp(QTest::currentDataTag(), "noreadfile") == 0) {
+        QSKIP("No file permissions");
+    }
+#endif
+
 #if defined(Q_OS_UNIX) && !defined(Q_OS_VXWORKS)
     if (::getuid() == 0)
         // root and Chuck Norris don't care for file permissions. Skip.
@@ -1333,6 +1342,12 @@ void tst_QFile::permissions()
         QVERIFY(fc.write("hello\n"));
         fc.close();
     }
+
+#ifdef QT_NO_FILESYSTEMPERMISSIONS
+        if (strcmp(QTest::currentDataTag(), "data0") == 0) {
+            QSKIP("No file permissions");
+        }
+#endif
 
     QFile f(file);
     QFile::Permissions memberResult = f.permissions() & perms;
