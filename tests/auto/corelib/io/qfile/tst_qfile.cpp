@@ -1530,6 +1530,10 @@ static QString getWorkingDirectoryForLink(const QString &linkFileName)
 #ifndef Q_OS_WINRT
 void tst_QFile::link()
 {
+#ifdef QT_NO_FILESYSTEMSYMBOLICLINKS
+    QSKIP("No symbolic link support");
+#endif
+
     QFile::remove("myLink.lnk");
 
     QFileInfo info1(m_testSourceFile);
@@ -1556,6 +1560,10 @@ void tst_QFile::link()
 
 void tst_QFile::linkToDir()
 {
+#ifdef QT_NO_FILESYSTEMSYMBOLICLINKS
+    QSKIP("No symbolic link support");
+#endif
+
     QFile::remove("myLinkToDir.lnk");
     QDir dir;
     dir.mkdir("myDir");
@@ -1574,6 +1582,10 @@ void tst_QFile::linkToDir()
 
 void tst_QFile::absolutePathLinkToRelativePath()
 {
+#ifdef QT_NO_FILESYSTEMSYMBOLICLINKS
+    QSKIP("No symbolic link support");
+#endif
+
     QFile::remove("myDir/test.txt");
     QFile::remove("myDir/myLink.lnk");
     QDir dir;
@@ -1592,6 +1604,10 @@ void tst_QFile::absolutePathLinkToRelativePath()
 
 void tst_QFile::readBrokenLink()
 {
+#ifdef QT_NO_FILESYSTEMSYMBOLICLINKS
+    QSKIP("No symbolic link support");
+#endif
+
     QFile::remove("myLink2.lnk");
     QFileInfo info1("file12");
     QVERIFY(QFile::link("file12", "myLink2.lnk"));

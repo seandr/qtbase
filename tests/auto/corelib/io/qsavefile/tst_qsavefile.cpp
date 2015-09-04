@@ -378,6 +378,10 @@ void tst_QSaveFile::transactionalWriteErrorRenaming()
 
 void tst_QSaveFile::symlink()
 {
+#ifdef QT_NO_FILESYSTEMSYMBOLICLINKS
+    QSKIP("No symbolic link support");
+#endif
+
 #ifdef Q_OS_UNIX
     QByteArray someData = "some data";
     QTemporaryDir dir;
@@ -501,6 +505,7 @@ void tst_QSaveFile::directory()
         QVERIFY(!sf.open(QIODevice::WriteOnly));
     }
 
+#ifndef QT_NO_FILESYSTEMSYMBOLICLINKS
 #ifdef Q_OS_UNIX
     //link to a directory
     const QString linkToDir = dir.path() + QLatin1String("/linkToDir");
@@ -510,6 +515,7 @@ void tst_QSaveFile::directory()
         QFile sf(linkToDir);
         QVERIFY(!sf.open(QIODevice::WriteOnly));
     }
+#endif
 #endif
 }
 
