@@ -21,6 +21,7 @@ installed_cmake.depends = cmake
 
 uikit: SUBDIRS  = corelib gui
 
+vxworks:                                    SUBDIRS -= printsupport
 cross_compile:                              SUBDIRS -= tools cmake installed_cmake
 else:!qtConfig(process):                    SUBDIRS -= tools
 winrt|!qtHaveModule(opengl):                SUBDIRS -= opengl
