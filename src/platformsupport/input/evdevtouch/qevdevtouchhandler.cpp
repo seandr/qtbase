@@ -323,13 +323,25 @@ QEvdevTouchScreenHandler::QEvdevTouchScreenHandler(const QString &device, const 
         has_y_range = true;
     }
 #else
-    d->hw_range_x_min = screenGeometry.x();
-    d->hw_range_x_max = screenGeometry.width()-1;
-    has_x_range = true;
+    EV_DEV_DEVICE_AXIS_VAL axisVal[2];
+    axisVal[0].axisIndex = 0;
+    axisVal[1].axisIndex = 1;
 
-    d->hw_range_y_min = screenGeometry.y();
-    d->hw_range_y_max = screenGeometry.height()-1;
-    has_y_range = true;
+    if (ioctl(m_fd, EV_DEV_IO_GET_AXIS_VAL, (char *)&axisVal[0]) != ERROR) {
+        qCDebug(qLcEvdevTouch, "evdevtouch: %s: min X: %d max X: %d", qPrintable(device),
+                axisVal[0].minVal, axisVal[0].maxVal);
+        d->hw_range_x_min = axisVal[0].minVal;
+        d->hw_range_x_max = axisVal[0].maxVal;
+        has_x_range = true;
+    }
+
+    if (ioctl(m_fd, EV_DEV_IO_GET_AXIS_VAL, (char *)&axisVal[1]) != ERROR) {
+        qCDebug(qLcEvdevTouch, "evdevtouch: %s: min Y: %d max Y: %d", qPrintable(device),
+                axisVal[1].minVal, axisVal[1].maxVal);
+        d->hw_range_y_min = axisVal[1].minVal;
+        d->hw_range_y_max = axisVal[1].maxVal;
+        has_y_range = true;
+    }
 #endif
     if (!has_x_range || !has_y_range)
         qWarning("evdevtouch: %s: Invalid ABS limits, behavior unspecified", qPrintable(device));
