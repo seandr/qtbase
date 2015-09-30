@@ -98,7 +98,13 @@ static inline int qt_safe_socket(int domain, int type, int protocol, int flags =
 
     // set non-block too?
     if (flags & O_NONBLOCK)
+#if !defined(Q_OS_VXWORKS)
         ::fcntl(fd, F_SETFL, ::fcntl(fd, F_GETFL) | O_NONBLOCK);
+#else
+     {  int on = 1;
+        ::ioctl(fd, FIONBIO, (int)&on);
+     }
+#endif
 
     return fd;
 #endif
@@ -129,7 +135,13 @@ static inline int qt_safe_accept(int s, struct sockaddr *addr, QT_SOCKLEN_T *add
 
     // set non-block too?
     if (flags & O_NONBLOCK)
+#if !defined(Q_OS_VXWORKS)
         ::fcntl(fd, F_SETFL, ::fcntl(fd, F_GETFL) | O_NONBLOCK);
+#else
+     {  int on = 1;
+        ::ioctl(fd, FIONBIO, (int)&on);
+     }
+#endif
 
     return fd;
 #endif
