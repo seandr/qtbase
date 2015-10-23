@@ -693,6 +693,7 @@ class QDataStream;
 #if defined(Q_OS_VXWORKS)
 #  define QT_NO_FILESYSTEMPERMISSIONS
 #  define QT_NO_FILESYSTEMSYMBOLICLINKS
+#  define QT_NO_EGLFSMULTIPLEWINDOW
 #endif
 
 inline void qt_noop(void) {}

@@ -1171,6 +1171,9 @@ void tst_QOpenGL::aboutToBeDestroyed()
 // not have an explicit size set.
 void tst_QOpenGL::sizeLessWindow()
 {
+#ifdef QT_NO_EGLFSMULTIPLEWINDOW
+    QSKIP("EGLFS does not support multiple QWindow");
+#else
     // top-level window
     {
         QWindow window;
@@ -1202,6 +1205,7 @@ void tst_QOpenGL::sizeLessWindow()
     }
 
     QVERIFY(!QOpenGLContext::currentContext());
+#endif
 }
 
 void tst_QOpenGL::QTBUG15621_triangulatingStrokerDivZero()
