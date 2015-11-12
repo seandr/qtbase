@@ -287,9 +287,15 @@ QEvdevTouchScreenHandler::QEvdevTouchScreenHandler(const QString &device, const 
 #endif
 
 #ifdef Q_OS_VXWORKS
-    d->m_singleTouch = true;
-    QPlatformScreen *screenHandle = qApp->screens().first()->handle();
-    QRect screenGeometry = screenHandle->geometry();
+    UINT32  devCap = 0;
+
+    if (ioctl(m_fd, EV_DEV_IO_GET_CAP, (char *)&devCap) != ERROR) {
+        if (devCap & EV_DEV_ABS_MT)
+            d->m_typeB = true;
+    }
+
+    if (!d->m_typeB)
+        d->m_singleTouch = true;
 #endif
 
     d->deviceNode = device;
