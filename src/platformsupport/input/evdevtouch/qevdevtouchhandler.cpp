@@ -598,8 +598,12 @@ void QEvdevTouchScreenData::processInputEvent(EV_DEV_EVENT *data)
                 if (m_currentData.trackingId == -1) {
                     m_contacts[m_currentSlot].state = Qt::TouchPointReleased;
                 } else {
-                    m_contacts[m_currentSlot].state = Qt::TouchPointPressed;
-                    m_contacts[m_currentSlot].trackingId = m_currentData.trackingId;
+                    if (m_contacts.contains(m_currentData.trackingId)) {
+                        m_contacts[m_currentSlot].state = Qt::TouchPointMoved;
+                    } else {
+                        m_contacts[m_currentSlot].state = Qt::TouchPointPressed;
+                        m_contacts[m_currentSlot].trackingId = m_currentData.trackingId;
+                    }
                 }
             }
         } else if (data->code == ABS_MT_TOUCH_MAJOR) {
@@ -714,10 +718,7 @@ void QEvdevTouchScreenData::processInputEvent(EV_DEV_EVENT *data)
                 continue;
 
             if (contact.state == Qt::TouchPointReleased) {
-                if (m_typeB)
-                    contact.state = static_cast<Qt::TouchPointState>(0);
-                else
-                    it.remove();
+                it.remove();
             } else {
                 contact.state = Qt::TouchPointStationary;
             }
