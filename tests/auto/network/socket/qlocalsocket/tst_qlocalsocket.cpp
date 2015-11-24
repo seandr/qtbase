@@ -126,6 +126,12 @@ private slots:
 
 };
 
+#ifdef Q_OS_VXWORKS
+    QString serverName(const QString &serverName) { Q_UNUSED(serverName) return "/comp/socket/0x1234"; }
+#else
+    QString serverName(const QString &serverName) { return serverName; }
+#endif
+
 tst_QLocalSocket::tst_QLocalSocket()
 {
     qRegisterMetaType<QLocalSocket::LocalSocketState>("QLocalSocket::LocalSocketState");
@@ -285,8 +291,8 @@ void tst_QLocalSocket::listen_data()
     QTest::addColumn<bool>("canListen");
     QTest::addColumn<bool>("close");
     QTest::newRow("null") << QString() << false << false;
-    QTest::newRow("tst_localsocket") << "tst_localsocket" << true << true;
-    QTest::newRow("tst_localsocket") << "tst_localsocket" << true << false;
+    QTest::newRow("tst_localsocket") << serverName("tst_localsocket") << true << true;
+    QTest::newRow("tst_localsocket") << serverName("tst_localsocket") << true << false;
 }
 
 // start a server that listens, but don't connect a socket, make sure everything is in order
@@ -339,7 +345,7 @@ void tst_QLocalSocket::listenAndConnect_data()
             connections = 5;
         const QByteArray iB = QByteArray::number(i);
         QTest::newRow(("null " + iB).constData()) << QString() << false << connections;
-        QTest::newRow(("tst_localsocket " + iB).constData()) << "tst_localsocket" << true << connections;
+        QTest::newRow(("tst_localsocket " + iB).constData()) << serverName("tst_localsocket") << true << connections;
     }
 }
 
@@ -461,10 +467,10 @@ void tst_QLocalSocket::listenAndConnect()
 void tst_QLocalSocket::connectWithOpen()
 {
     LocalServer server;
-    QVERIFY(server.listen("tst_qlocalsocket"));
+    QVERIFY(server.listen(serverName("tst_qlocalsocket")));
 
     LocalSocket socket;
-    socket.setServerName("tst_qlocalsocket");
+    socket.setServerName(serverName("tst_qlocalsocket"));
     QVERIFY(socket.open());
 
     bool timedOut = true;
@@ -489,10 +495,10 @@ void tst_QLocalSocket::connectWithOldOpen()
     };
 
     LocalServer server;
-    QCOMPARE(server.listen("tst_qlocalsocket"), true);
+    QCOMPARE(server.listen(serverName("tst_qlocalsocket")), true);
 
     OverriddenOpen socket;
-    socket.connectToServer("tst_qlocalsocket");
+    socket.connectToServer(serverName("tst_qlocalsocket"));
 
     bool timedOut = true;
     QVERIFY(server.waitForNewConnection(3000, &timedOut));
@@ -596,14 +602,14 @@ void tst_QLocalSocket::readBufferOverflow()
 {
     const int readBufferSize = 128;
     const int dataBufferSize = readBufferSize * 2;
-    const QString serverName = QLatin1String("myPreciousTestServer");
+    const QString localServerName = serverName("myPreciousTestServer");
     LocalServer server;
-    server.listen(serverName);
+    server.listen(localServerName);
     QVERIFY(server.isListening());
 
     LocalSocket client;
     client.setReadBufferSize(readBufferSize);
-    client.connectToServer(serverName);
+    client.connectToServer(localServerName);
 
     bool timedOut = true;
     QVERIFY(server.waitForNewConnection(3000, &timedOut));
@@ -770,6 +776,9 @@ void tst_QLocalSocket::fullPath()
     QString path = "QLocalServer";
 #elif defined(Q_OS_WIN)
     QString path = "\\\\.\\pipe\\";
+#elif defined(Q_OS_VXWORKS)
+    QString path = "/comp/socket";
+    name = "0x1234";
 #else
     QString path = "/tmp";
 #endif
@@ -803,7 +812,7 @@ void tst_QLocalSocket::hitMaximumConnections()
 {
     QFETCH(int, max);
     LocalServer server;
-    QString name = "tst_localsocket";
+    QString name = serverName("tst_localsocket");
     server.setMaxPendingConnections(max);
     QVERIFY2(server.listen(name), server.errorString().toLatin1().constData());
     int connections = server.maxPendingConnections() + 1;
@@ -840,7 +849,11 @@ public:
         QString testLine = "test";
         LocalSocket socket;
         QSignalSpy spyReadyRead(&socket, SIGNAL(readyRead()));
+#ifndef Q_OS_VXWORKS
         socket.connectToServer("qlocalsocket_threadtest");
+#else
+        socket.connectToServer("/comp/socket/0x1234");
+#endif
         QVERIFY(socket.waitForConnected(1000));
 
         // We should *not* have this signal yet!
@@ -865,8 +878,13 @@ public:
         QString testLine = "test";
         LocalServer server;
         server.setMaxPendingConnections(10);
+#ifndef Q_OS_VXWORKS
         QVERIFY2(server.listen("qlocalsocket_threadtest"),
                  server.errorString().toLatin1().constData());
+#else
+        QVERIFY2(server.listen("/comp/socket/0x1234"),
+                 server.errorString().toLatin1().constData());
+#endif
         mutex.lock();
         wc.wakeAll();
         mutex.unlock();
@@ -898,8 +916,10 @@ void tst_QLocalSocket::threadedConnection_data()
     QTest::newRow("1 client") << 1;
     QTest::newRow("2 clients") << 2;
     QTest::newRow("5 clients") << 5;
+#if !defined(Q_OS_VXWORKS)
     QTest::newRow("10 clients") << 10;
     QTest::newRow("20 clients") << 20;
+#endif
 }
 
 void tst_QLocalSocket::threadedConnection()
@@ -1010,7 +1030,9 @@ void tst_QLocalSocket::processConnection()
 
 void tst_QLocalSocket::longPath()
 {
-#ifndef Q_OS_WIN
+#if defined(Q_OS_WIN) || defined(Q_OS_VXWORKS)
+    QSKIP("TODO: Does not work with OS");
+#else
     QString name;
     for (int i = 0; i < 256; ++i)
         name += 'a';
@@ -1025,7 +1047,10 @@ void tst_QLocalSocket::longPath()
 
 void tst_QLocalSocket::waitForDisconnect()
 {
-    QString name = "tst_localsocket";
+#ifdef Q_OS_VXWORKS
+    QFAIL("TODO: Does not work with VxWorks");
+#else
+    QString name = serverName("tst_localsocket");
     LocalServer server;
     QVERIFY(server.listen(name));
     LocalSocket socket;
@@ -1039,11 +1064,15 @@ void tst_QLocalSocket::waitForDisconnect()
     timer.start();
     QVERIFY(serverSocket->waitForDisconnected(3000));
     QVERIFY(timer.elapsed() < 2000);
+#endif
 }
 
 void tst_QLocalSocket::waitForDisconnectByServer()
 {
-    QString name = "tst_localsocket";
+#ifdef Q_OS_VXWORKS
+    QFAIL("TODO: Does not work with VxWorks");
+#else
+    QString name = serverName("tst_localsocket");
     LocalServer server;
     QVERIFY(server.listen(name));
     LocalSocket socket;
@@ -1058,30 +1087,36 @@ void tst_QLocalSocket::waitForDisconnectByServer()
     QCOMPARE(serverSocket->state(), QLocalSocket::UnconnectedState);
     QVERIFY(socket.waitForDisconnected(3000));
     QCOMPARE(spy.count(), 1);
+#endif
 }
 
 void tst_QLocalSocket::removeServer()
 {
+#ifdef Q_OS_VXWORKS
+    QSKIP("Not supported on VxWorks");
+#else
     // this is a hostile takeover, but recovering from a crash results in the same
     QLocalServer server, server2;
     QVERIFY(QLocalServer::removeServer("cleanuptest"));
     QVERIFY(server.listen("cleanuptest"));
-#ifndef Q_OS_WIN
+#if !defined(Q_OS_WIN)
     // on Windows, there can be several sockets listening on the same pipe
     // on Unix, there can only be one socket instance
     QVERIFY(! server2.listen("cleanuptest"));
 #endif
     QVERIFY(QLocalServer::removeServer("cleanuptest"));
     QVERIFY(server2.listen("cleanuptest"));
+#endif
 }
 
 void tst_QLocalSocket::recycleServer()
 {
     QLocalServer server;
     QLocalSocket client;
+    QString localServerName = serverName("recycletest1");
 
-    QVERIFY(server.listen("recycletest1"));
-    client.connectToServer("recycletest1");
+    QVERIFY(server.listen(localServerName));
+    client.connectToServer(localServerName);
     QVERIFY(client.waitForConnected(201));
     QVERIFY(server.waitForNewConnection(201));
     QVERIFY(server.nextPendingConnection() != 0);
@@ -1090,8 +1125,13 @@ void tst_QLocalSocket::recycleServer()
     client.disconnectFromServer();
     qApp->processEvents();
 
-    QVERIFY(server.listen("recycletest2"));
-    client.connectToServer("recycletest2");
+#ifndef Q_OS_VXWORKS
+    localServerName = serverName("recycletest2");
+#else
+    localServerName = "/comp/socket/0x1235";
+#endif
+    QVERIFY(server.listen(localServerName));
+    client.connectToServer(localServerName);
     QVERIFY(client.waitForConnected(202));
     QVERIFY(server.waitForNewConnection(202));
     QVERIFY(server.nextPendingConnection() != 0);
@@ -1131,12 +1171,13 @@ void tst_QLocalSocket::multiConnect()
     QLocalSocket client1;
     QLocalSocket client2;
     QLocalSocket client3;
+    QString localServerName = serverName("multiconnect");
 
-    QVERIFY(server.listen("multiconnect"));
+    QVERIFY(server.listen(localServerName));
 
-    client1.connectToServer("multiconnect");
-    client2.connectToServer("multiconnect");
-    client3.connectToServer("multiconnect");
+    client1.connectToServer(localServerName);
+    client2.connectToServer(localServerName);
+    client3.connectToServer(localServerName);
 
     QVERIFY(client1.waitForConnected(201));
     QVERIFY(client2.waitForConnected(202));
@@ -1153,10 +1194,11 @@ void tst_QLocalSocket::multiConnect()
 void tst_QLocalSocket::writeOnlySocket()
 {
     QLocalServer server;
-    QVERIFY(server.listen("writeOnlySocket"));
+    QString localServerName = serverName("writeOnlySocket");
+    QVERIFY(server.listen(localServerName));
 
     QLocalSocket client;
-    client.connectToServer("writeOnlySocket", QIODevice::WriteOnly);
+    client.connectToServer(localServerName, QIODevice::WriteOnly);
     QVERIFY(client.waitForConnected());
     QVERIFY(server.waitForNewConnection(200));
     QLocalSocket* serverSocket = server.nextPendingConnection();
@@ -1175,13 +1217,17 @@ void tst_QLocalSocket::writeToClientAndDisconnect_data()
 
 void tst_QLocalSocket::writeToClientAndDisconnect()
 {
+#ifdef Q_OS_VXWORKS
+    QFAIL("Does not work with VxWorks");
+#else
     QFETCH(int, chunks);
     QLocalServer server;
     QLocalSocket client;
+    QString localServerName = serverName("writeAndDisconnectServer");
     QSignalSpy readChannelFinishedSpy(&client, SIGNAL(readChannelFinished()));
 
-    QVERIFY(server.listen("writeAndDisconnectServer"));
-    client.connectToServer("writeAndDisconnectServer");
+    QVERIFY(server.listen(localServerName));
+    client.connectToServer(localServerName);
     QVERIFY(client.waitForConnected(200));
     QVERIFY(server.waitForNewConnection(200));
     QLocalSocket* clientSocket = server.nextPendingConnection();
@@ -1201,6 +1247,7 @@ void tst_QLocalSocket::writeToClientAndDisconnect()
     const QByteArray received = client.readAll();
     QCOMPARE(received.size(), qint64(sizeof(buffer) * chunks));
     QCOMPARE(client.state(), QLocalSocket::UnconnectedState);
+#endif
 }
 
 void tst_QLocalSocket::debug()
@@ -1217,7 +1264,11 @@ Q_OBJECT
 public:
     void run() {
         QLocalSocket socket;
+#ifndef Q_OS_VXWORKS
         socket.connectToServer("qlocalsocket_readyread");
+#else
+        socket.connectToServer("/comp/socket/0x1234");
+#endif
 
         if (!socket.waitForConnected(3000))
             exec();
@@ -1248,7 +1299,7 @@ public slots:
 void tst_QLocalSocket::bytesWrittenSignal()
 {
     QLocalServer server;
-    QVERIFY(server.listen("qlocalsocket_readyread"));
+    QVERIFY(server.listen(serverName("qlocalsocket_readyread")));
     WriteThread writeThread;
     QSignalSpy receivedSpy(&writeThread, &WriteThread::bytesWrittenReceived);
     writeThread.start();
@@ -1262,9 +1313,10 @@ void tst_QLocalSocket::bytesWrittenSignal()
 void tst_QLocalSocket::syncDisconnectNotify()
 {
     QLocalServer server;
-    QVERIFY(server.listen("syncDisconnectNotify"));
+    QString localServerName = serverName("syncDisconnectNotify");
+    QVERIFY(server.listen(localServerName));
     QLocalSocket client;
-    client.connectToServer("syncDisconnectNotify");
+    client.connectToServer(localServerName);
     QVERIFY(server.waitForNewConnection());
     QLocalSocket* serverSocket = server.nextPendingConnection();
     QVERIFY(serverSocket);
@@ -1275,10 +1327,11 @@ void tst_QLocalSocket::syncDisconnectNotify()
 void tst_QLocalSocket::asyncDisconnectNotify()
 {
     QLocalServer server;
-    QVERIFY(server.listen("asyncDisconnectNotify"));
+    QString localServerName = serverName("asyncDisconnectNotify");
+    QVERIFY(server.listen(localServerName));
     QLocalSocket client;
     QSignalSpy disconnectedSpy(&client, SIGNAL(disconnected()));
-    client.connectToServer("asyncDisconnectNotify");
+    client.connectToServer(localServerName);
     QVERIFY(server.waitForNewConnection());
     QLocalSocket* serverSocket = server.nextPendingConnection();
     QVERIFY(serverSocket);
@@ -1347,7 +1400,11 @@ void tst_QLocalSocket::verifyListenWithDescriptor()
 
     if (bound) {
         // create the unix socket
+#ifndef Q_OS_VXWORKS
         listenSocket = ::socket(PF_UNIX, SOCK_STREAM, 0);
+#else
+        listenSocket = ::socket(PF_UNIX, SOCK_SEQPACKET, 0);
+#endif
         QVERIFY2(listenSocket != -1, "failed to create test socket");
 
         // Construct the unix address
@@ -1415,8 +1472,11 @@ void tst_QLocalSocket::verifyListenWithDescriptor_data()
     QTest::addColumn<QString>("path");
     QTest::addColumn<bool>("abstract");
     QTest::addColumn<bool>("bound");
-
+#ifndef Q_OS_VXWORKS
     QTest::newRow("normal") << QDir::tempPath() + QLatin1String("/testsocket") << false << true;
+#else
+    QTest::newRow("normal") << QString("/comp/socket/0x2345") << false << true;
+#endif
 #ifdef Q_OS_LINUX
     QTest::newRow("abstract") << QString::fromLatin1("abstractsocketname") << true << true;
     QTest::newRow("abstractwithslash") << QString::fromLatin1("abstractsocketwitha/inthename") << true << true;
