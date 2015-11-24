@@ -13,4 +13,4 @@ RESOURCES += ../testdata.qrc
 
 *-g++*:QMAKE_CXXFLAGS += -W -Wall -Wextra -Wshadow -Wno-long-long -Wnon-virtual-dtor
 
-unix:!mac:!qnx: DEFINES += USE_XDG_DATA_DIRS
+unix:!mac:!qnx:!vxworks: DEFINES += USE_XDG_DATA_DIRS

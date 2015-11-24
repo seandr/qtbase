@@ -60,8 +60,10 @@ static const char *const additionalMimeFiles[] = {
 
 void initializeLang()
 {
+#ifndef Q_OS_VXWORKS // setenv function cannot be used inside constructor at VxWorks
     qputenv("LC_ALL", "");
     qputenv("LANG", "C");
+#endif
     QCoreApplication::setApplicationName("tst_qmimedatabase"); // temporary directory pattern
 }
 
