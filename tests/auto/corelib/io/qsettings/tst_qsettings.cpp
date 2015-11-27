@@ -92,6 +92,8 @@ static inline bool canWriteNativeSystemSettings()
     } else {
         return false;
     }
+#elif defined (Q_OS_VXWORKS)
+    return false;
 #else
     return true;
 #endif
