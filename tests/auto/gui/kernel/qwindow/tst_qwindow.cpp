@@ -523,13 +523,17 @@ void tst_QWindow::positioning()
     window.setWindowState(Qt::WindowFullScreen);
     QTRY_COMPARE(window.lastReceivedWindowState, Qt::WindowFullScreen);
 
+#if !defined(Q_OS_VXWORKS)
     QTRY_VERIFY(window.received(QEvent::Resize) > 0);
+#endif
 
     window.reset();
     window.setWindowState(Qt::WindowNoState);
     QTRY_COMPARE(window.lastReceivedWindowState, Qt::WindowNoState);
 
+#if !defined(Q_OS_VXWORKS)
     QTRY_VERIFY(window.received(QEvent::Resize) > 0);
+#endif
 
     QTRY_COMPARE(originalPos, window.position());
     QTRY_COMPARE(originalFramePos, window.framePosition());
