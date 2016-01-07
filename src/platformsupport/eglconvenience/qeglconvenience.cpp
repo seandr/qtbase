@@ -48,6 +48,12 @@
 
 #include "qeglconvenience_p.h"
 
+#ifdef Q_OS_VXWORKS
+#include <ioLib.h>
+#include <fbdev.h>
+#include <strings.h>
+#endif
+
 #ifndef EGL_OPENGL_ES3_BIT_KHR
 #define EGL_OPENGL_ES3_BIT_KHR 0x0040
 #endif
@@ -616,6 +622,21 @@ qreal q_refreshRateFromFb(int framebufferDevice)
     }
 #endif
 
+#ifdef Q_OS_VXWORKS
+    if (rate == 0) {
+        if (framebufferDevice != -1) {
+            FB_IOCTL_ARG arg;
+            FB_VIDEO_MODE fbModes[FB_MAX_VIDEO_MODES];
+            bzero ((char *) &(fbModes[0]), sizeof(FB_VIDEO_MODE)*FB_MAX_VIDEO_MODES);
+            arg.getVideoModes.pVideoModes = &(fbModes[0]);
+            if (ioctl(framebufferDevice, FB_IOCTL_GET_VIDEO_MODES, &arg) != -1) {
+                rate = arg.getVideoModes.pVideoModes->refresh;
+            } else {
+                qWarning("eglconvenience: Could not query refresh info");
+            }
+        }
+    }
+#endif
     if (rate == 0)
         rate = 60;
 
