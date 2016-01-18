@@ -56,6 +56,8 @@ QEglFSIVxImx6Hooks::QEglFSIVxImx6Hooks()
 
 void QEglFSIVxImx6Hooks::platformInit()
 {
+    QEGLDeviceIntegration::platformInit();
+
     int width, height;
     mNativeDisplay = (EGLNativeDisplayType) fbGetDisplayByIndex(framebufferIndex());
     fbGetDisplayGeometry(mNativeDisplay, &width, &height);
