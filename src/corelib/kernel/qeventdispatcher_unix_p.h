@@ -150,6 +150,7 @@ public:
     QAtomicInt interrupt; // bool
 #if defined(Q_OS_VXWORKS)
     char pipe_name[_POSIX_PATH_MAX];
+    bool forceSelectNoTimeout;
 #endif
 };
 

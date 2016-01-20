@@ -66,6 +66,7 @@
 #  include "qdatetime.h"
 #  include "qdir.h" // to get application name
 #  include <rtpLib.h>
+#  include <sysLib.h>
 #endif
 
 #if (_POSIX_MONOTONIC_CLOCK-0 <= 0) || defined(QT_BOOTSTRAPPED)
@@ -94,6 +95,7 @@ QThreadPipe::QThreadPipe()
     fds[1] = -1;
 #if defined(Q_OS_VXWORKS)
     name[0] = '\0';
+    forceSelectNoTimeout = false;
 #endif
 }
 
@@ -164,6 +166,7 @@ bool QThreadPipe::init()
             thread_pipe[1] = thread_pipe[0];
         }
     }
+    forceSelectNoTimeout = qEnvironmentVariableIntValue("QT_FORCE_SELECT_NOTIMEOUT");
 #else
 #  ifndef QT_NO_EVENTFD
     if ((fds[0] = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC)) >= 0)
@@ -500,6 +503,17 @@ bool QEventDispatcherUNIX::processEvents(QEventLoop::ProcessEventsFlags flags)
 
     d->pollfds.clear();
     d->pollfds.reserve(1 + (include_notifiers ? d->socketNotifiers.size() : 0));
+#ifdef Q_OS_VXWORKS
+        if (d->forceSelectNoTimeout && d->mainThread) {
+            // Tick rate greater than 10ms too much
+            // do not use timeout
+            if (sysClkRateGet() > 10) {
+                // no time to wait
+                tm->tv_sec  = 0l;
+                tm->tv_nsec = 0l;
+            }
+        }
+#endif
 
     if (include_notifiers)
         for (auto it = d->socketNotifiers.cbegin(); it != d->socketNotifiers.cend(); ++it)
