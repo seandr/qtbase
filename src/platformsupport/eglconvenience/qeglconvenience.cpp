@@ -512,6 +512,10 @@ QSizeF q_physicalScreenSizeFromFb(int framebufferDevice, const QSize &screenSize
             screenResolution = screenSize.isEmpty() ? q_screenSizeFromFb(framebufferDevice) : screenSize;
         }
 
+#ifdef Q_OS_VXWORKS
+        w = screenResolution.width();
+        h = screenResolution.height();
+#endif
         size.setWidth(w <= 0 ? screenResolution.width() * Q_MM_PER_INCH / defaultPhysicalDpi : qreal(w));
         size.setHeight(h <= 0 ? screenResolution.height() * Q_MM_PER_INCH / defaultPhysicalDpi : qreal(h));
 

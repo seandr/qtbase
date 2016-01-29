@@ -6,6 +6,11 @@ INCLUDEPATH += $$PWD/../../api
 CONFIG += egl
 DEFINES += LINUX=1 EGL_API_FB=1
 
+vxworks {
+    contains(DEFINES, _FSLVIV): GFX_LIB_PREFIX = gfxFslViv
+    LIBS += -l$${GFX_LIB_PREFIX}GAL
+}
+
 SOURCES += $$PWD/qeglfsvivmain.cpp \
            $$PWD/qeglfsvivintegration.cpp
 
