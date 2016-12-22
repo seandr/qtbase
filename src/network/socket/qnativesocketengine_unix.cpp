@@ -49,6 +49,12 @@
 #include <time.h>
 #include <errno.h>
 #include <fcntl.h>
+
+#ifdef Q_OS_VXWORKS
+// VxWorks lacks if_indextoname
+# define QT_NO_IPV6IFNAME
+#endif
+
 #ifndef QT_NO_IPV6IFNAME
 #include <net/if.h>
 #endif

@@ -127,6 +127,10 @@ QStringList QDeviceDiscoveryStatic::scanConnectedDevices()
                 devices << deviceFile;
         }
     }
+
+    if (m_types & Device_VideoMask) {
+        devices << QString::fromLatin1("/dev/dri/card0");
+    }
 #else
     QDir dir;
     dir.setFilter(QDir::System);
