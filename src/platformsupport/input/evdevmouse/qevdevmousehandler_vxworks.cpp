@@ -122,10 +122,10 @@ void QEvdevMouseHandler::readMouseData()
                 buttons = Qt::LeftButton;
                 break;
             case EV_DEV_PTR_BTN_RIGHT:
-                buttons = Qt::MidButton;
+                buttons = Qt::RightButton;
                 break;
             case EV_DEV_PTR_BTN_MIDDLE:
-                buttons = Qt::RightButton;
+                buttons = Qt::MidButton;
                 break;
             }
             if (ev.value)
