@@ -127,7 +127,11 @@ Q_DECL_CONSTEXPR Q_DECL_CONST_FUNCTION static inline double qt_inf() Q_DECL_NOEX
 }
 
 // Signaling NaN
+#ifdef Q_OS_VXWORKS
+static inline double qt_snan() Q_DECL_NOEXCEPT
+#else
 Q_DECL_CONSTEXPR Q_DECL_CONST_FUNCTION static inline double qt_snan() Q_DECL_NOEXCEPT
+#endif
 {
     Q_STATIC_ASSERT_X(std::numeric_limits<double>::has_signaling_NaN,
                       "platform has no definition for signaling NaN for type double");
@@ -135,7 +139,11 @@ Q_DECL_CONSTEXPR Q_DECL_CONST_FUNCTION static inline double qt_snan() Q_DECL_NOE
 }
 
 // Quiet NaN
+#ifdef Q_OS_VXWORKS
+static inline double qt_qnan() Q_DECL_NOEXCEPT
+#else
 Q_DECL_CONSTEXPR Q_DECL_CONST_FUNCTION static inline double qt_qnan() Q_DECL_NOEXCEPT
+#endif
 {
     Q_STATIC_ASSERT_X(std::numeric_limits<double>::has_quiet_NaN,
                       "platform has no definition for quiet NaN for type double");

@@ -145,27 +145,28 @@ bool QThreadPipe::init()
 
     Qt::HANDLE threadId = QThread::currentThreadId();
 
-    qsnprintf(pipe_name, sizeof(pipe_name), "/pipe/qevloop_%s_%08x_%08x_%d",
+    qsnprintf(name, sizeof(name), "/pipe/qevloop_%s_%08x_%08x_%d",
         binary.data(),
         int(rtpStruct.entrAddr),
         threadId,
         random);
 
     // make sure there is no pipe with this name
-    pipeDevDelete(pipe_name, true);
+    pipeDevDelete(name, true);
+
     // create the pipe
-    if (pipeDevCreate(pipe_name, 128 /*maxMsg*/, 1 /*maxLength*/) != OK) {
-        perror("QEventDispatcherUNIXPrivate(): Unable to create thread pipe device");
-        pipefail = true;
-    } else {
-        if ((thread_pipe[0] = open(pipe_name, O_RDWR, 0)) < 0) {
-            perror("QEventDispatcherUNIXPrivate(): Unable to create thread pipe");
-            pipefail = true;
-        } else {
-            initThreadPipeFD(thread_pipe[0]);
-            thread_pipe[1] = thread_pipe[0];
-        }
+    if (pipeDevCreate(name, 128 /*maxMsg*/, 1 /*maxLength*/) != OK) {
+        qCritical("QThreadPipe: Unable to create thread pipe device %s : %s", name, std::strerror(errno));
+        return false;
     }
+
+    if ((fds[0] = open(name, O_RDWR, 0)) < 0) {
+        qCritical("QThreadPipe: Unable to open pipe device %s : %s", name, std::strerror(errno));
+        return false;
+    }
+
+    initThreadPipeFD(fds[0]);
+    fds[1] = fds[0];
     forceSelectNoTimeout = qEnvironmentVariableIntValue("QT_FORCE_SELECT_NOTIMEOUT");
 #else
 #  ifndef QT_NO_EVENTFD
@@ -504,15 +505,15 @@ bool QEventDispatcherUNIX::processEvents(QEventLoop::ProcessEventsFlags flags)
     d->pollfds.clear();
     d->pollfds.reserve(1 + (include_notifiers ? d->socketNotifiers.size() : 0));
 #ifdef Q_OS_VXWORKS
-        if (d->forceSelectNoTimeout && d->mainThread) {
-            // Tick rate greater than 10ms too much
-            // do not use timeout
-            if (sysClkRateGet() > 10) {
-                // no time to wait
-                tm->tv_sec  = 0l;
-                tm->tv_nsec = 0l;
-            }
+    if (d->threadPipe.forceSelectNoTimeout) {
+        // Tick rate greater than 10ms too much
+        // do not use timeout
+        if (sysClkRateGet() > 10) {
+            // no time to wait
+            tm->tv_sec  = 0l;
+            tm->tv_nsec = 0l;
         }
+    }
 #endif
 
     if (include_notifiers)
