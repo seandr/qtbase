@@ -7326,15 +7326,25 @@ void tst_QObject::checkArgumentsForNarrowing()
     FITS(ScopedEnumBackedByULongLong, ScopedEnumBackedByULongLong);
 
     FITS(ScopedEnumBackedBySChar, signed char);
+#ifndef Q_OS_VXWORKS
     FITS(ScopedEnumBackedByUChar, unsigned char);
+#endif
     FITS(ScopedEnumBackedByShort, short);
+#ifndef Q_OS_VXWORKS
     FITS(ScopedEnumBackedByUShort, unsigned short);
+#endif
     FITS(ScopedEnumBackedByInt, int);
+#ifndef Q_OS_VXWORKS
     FITS(ScopedEnumBackedByUInt, unsigned int);
+#endif
     FITS(ScopedEnumBackedByLong, long);
+#ifndef Q_OS_VXWORKS
     FITS(ScopedEnumBackedByULong, unsigned long);
+#endif
     FITS(ScopedEnumBackedByLongLong, long long);
+#ifndef Q_OS_VXWORKS
     FITS(ScopedEnumBackedByULongLong, unsigned long long);
+#endif
 
     FITS(ScopedEnumBackedBySChar, signed char);
     FITS(ScopedEnumBackedBySChar, short);
@@ -7342,11 +7352,13 @@ void tst_QObject::checkArgumentsForNarrowing()
     FITS(ScopedEnumBackedBySChar, long);
     FITS(ScopedEnumBackedBySChar, long long);
 
+#ifndef Q_OS_VXWORKS
     FITS(ScopedEnumBackedByUChar, unsigned char);
     FITS(ScopedEnumBackedByUChar, unsigned short);
     FITS(ScopedEnumBackedByUChar, unsigned int);
     FITS(ScopedEnumBackedByUChar, unsigned long);
     FITS(ScopedEnumBackedByUChar, unsigned long long);
+#endif
 
     NARROWS_IF(ScopedEnumBackedByShort, char, (sizeof(short) > sizeof(char) || std::is_unsigned<char>::value));
     NARROWS_IF(ScopedEnumBackedByUShort, char, (sizeof(short) > sizeof(char) || std::is_signed<char>::value));
@@ -7390,12 +7402,16 @@ void tst_QObject::checkArgumentsForNarrowing()
     NARROWS_IF(ScopedEnumBackedByULongLong, unsigned short, (sizeof(long long) > sizeof(short)));
 
     NARROWS_IF(ScopedEnumBackedByLong, int, (sizeof(long) > sizeof(int)));
+#ifndef Q_OS_VXWORKS
     NARROWS(ScopedEnumBackedByULong, int);
+#endif
     NARROWS_IF(ScopedEnumBackedByLongLong, int, (sizeof(long long) > sizeof(int)));
     NARROWS(ScopedEnumBackedByULongLong, int);
 
     NARROWS(ScopedEnumBackedByLong, unsigned int);
+#ifndef Q_OS_VXWORKS
     NARROWS_IF(ScopedEnumBackedByULong, unsigned int, (sizeof(long) > sizeof(int)));
+#endif
     NARROWS(ScopedEnumBackedByLongLong, unsigned int);
     NARROWS_IF(ScopedEnumBackedByULongLong, unsigned int, (sizeof(long long) > sizeof(int)));
 
@@ -7442,35 +7458,45 @@ void tst_QObject::checkArgumentsForNarrowing()
     NARROWS(ScopedEnumBackedByLongLong, unsigned long);
     NARROWS(ScopedEnumBackedByLongLong, unsigned long long);
 
+#ifndef Q_OS_VXWORKS
     NARROWS(ScopedEnumBackedByUChar, signed char);
+#endif
     FITS_IF(ScopedEnumBackedByUChar, short, (sizeof(char) < sizeof(short)));
     FITS_IF(ScopedEnumBackedByUChar, int, (sizeof(char) < sizeof(int)));
     FITS_IF(ScopedEnumBackedByUChar, long, (sizeof(char) < sizeof(long)));
     FITS_IF(ScopedEnumBackedByUChar, long long, (sizeof(char) < sizeof(long long)));
 
     NARROWS(ScopedEnumBackedByUShort, signed char);
+#ifndef Q_OS_VXWORKS
     NARROWS(ScopedEnumBackedByUShort, short);
+#endif
     FITS_IF(ScopedEnumBackedByUShort, int, (sizeof(short) < sizeof(int)));
     FITS_IF(ScopedEnumBackedByUShort, long, (sizeof(short) < sizeof(long)));
     FITS_IF(ScopedEnumBackedByUShort, long long, (sizeof(short) < sizeof(long long)));
 
     NARROWS(ScopedEnumBackedByUInt, signed char);
     NARROWS(ScopedEnumBackedByUInt, short);
+#ifndef Q_OS_VXWORKS
     NARROWS(ScopedEnumBackedByUInt, int);
     FITS_IF(ScopedEnumBackedByUInt, long, (sizeof(ScopedEnumBackedByUInt) < sizeof(long)));
+#endif
     FITS(ScopedEnumBackedByUInt, long long);
 
     NARROWS(ScopedEnumBackedByULong, signed char);
     NARROWS(ScopedEnumBackedByULong, short);
+#ifndef Q_OS_VXWORKS
     NARROWS(ScopedEnumBackedByULong, int);
     NARROWS(ScopedEnumBackedByULong, long);
+#endif
     FITS_IF(ScopedEnumBackedByULong, long long, (sizeof(ScopedEnumBackedByULong) < sizeof(long long)));
 
     NARROWS(ScopedEnumBackedByULongLong, signed char);
     NARROWS(ScopedEnumBackedByULongLong, short);
     NARROWS(ScopedEnumBackedByULongLong, int);
     NARROWS(ScopedEnumBackedByULongLong, long);
+#ifndef Q_OS_VXWORKS
     NARROWS(ScopedEnumBackedByULongLong, long long);
+#endif
 
     // other types which should be always unaffected
     FITS(void *, void *);
