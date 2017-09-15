@@ -47,6 +47,11 @@
 #include <sys/resource.h>
 #endif
 
+#ifdef Q_OS_VXWORKS
+#include <ioLib.h>
+typedef size_t rlim_t;
+#endif
+
 QT_BEGIN_NAMESPACE
 namespace QtSharedPointer {
     Q_CORE_EXPORT void internalSafetyCheckCleanCheck();

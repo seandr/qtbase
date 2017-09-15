@@ -32,7 +32,7 @@
 #include <qlockfile.h>
 #include <qtemporarydir.h>
 #include <qsysinfo.h>
-#if defined(Q_OS_UNIX) && !defined(Q_OS_VXWORKS)
+#if defined(Q_OS_UNIX)
 #include <unistd.h>
 #include <sys/time.h>
 #elif defined(Q_OS_WIN) && !defined(Q_OS_WINRT)
@@ -531,7 +531,9 @@ void tst_QLockFile::corruptedLockFile()
 
 void tst_QLockFile::corruptedLockFileInTheFuture()
 {
-#if !defined(Q_OS_UNIX)
+    // TODO: Remove OS check in 5.10; and use QFileInfo::setFileTime
+    // utimes() is deprecated in POSIX and happens to cause a link failure on VxWorks
+#if !defined(Q_OS_UNIX) || defined(Q_OS_VXWORKS)
     QSKIP("This tests needs utimes");
 #else
     // This test is the same as the previous one, but the corruption was so there is a corrupted
