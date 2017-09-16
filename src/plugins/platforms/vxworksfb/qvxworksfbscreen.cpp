@@ -20,11 +20,11 @@
 
 #include "qvxworksfbscreen.h"
 
-#include <QtPlatformSupport/private/qgenericunixfontdatabase_p.h>
-#include <QtPlatformSupport/private/qgenericunixeventdispatcher_p.h>
-#include <QtPlatformSupport/private/qfbbackingstore_p.h>
-#include <QtPlatformSupport/private/qfbwindow_p.h>
-#include <QtPlatformSupport/private/qfbcursor_p.h>
+#include <QtFontDatabaseSupport/private/qgenericunixfontdatabase_p.h>
+#include <QtEventDispatcherSupport/private/qgenericunixeventdispatcher_p.h>
+#include <QtFbSupport/private/qfbbackingstore_p.h>
+#include <QtFbSupport/private/qfbwindow_p.h>
+#include <QtFbSupport/private/qfbcursor_p.h>
 
 #include <QtGui/private/qguiapplication_p.h>
 #include <QtGui/private/qpixmap_raster_p.h>
@@ -237,7 +237,7 @@ QRegion QVxWorksFbScreen::doRedraw()
 
     QVector<QRect> rects = touched.rects();
     for (int i = 0; i < rects.size(); i++) {
-        mCompositePainter->drawImage(rects[i], *mScreenImage, rects[i]);
+        mCompositePainter->drawImage(rects[i], *mFbScreenImage, rects[i]);
     }
     return touched;
 }

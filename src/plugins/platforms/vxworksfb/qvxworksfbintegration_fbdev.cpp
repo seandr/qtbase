@@ -26,11 +26,11 @@
 #include <private/qcore_unix_p.h> // overrides QT_OPEN
 #include <QSocketNotifier>
 
-#include <QtPlatformSupport/private/qgenericunixfontdatabase_p.h>
-#include <QtPlatformSupport/private/qgenericunixeventdispatcher_p.h>
-#include <QtPlatformSupport/private/qfbbackingstore_p.h>
-#include <QtPlatformSupport/private/qfbwindow_p.h>
-#include <QtPlatformSupport/private/qfbcursor_p.h>
+#include <QtFontDatabaseSupport/private/qgenericunixfontdatabase_p.h>
+#include <QtEventDispatcherSupport/private/qgenericunixeventdispatcher_p.h>
+#include <QtFbSupport/private/qfbbackingstore_p.h>
+#include <QtFbSupport/private/qfbwindow_p.h>
+#include <QtFbSupport/private/qfbcursor_p.h>
 
 #include <QtGui/private/qguiapplication_p.h>
 #include <QtGui/private/qpixmap_raster_p.h>
@@ -39,10 +39,10 @@
 
 #include <qpa/qplatforminputcontextfactory_p.h>
 
-#if !defined(QT_NO_EVDEV)
-#include <QtPlatformSupport/private/qevdevmousemanager_p.h>
-#include <QtPlatformSupport/private/qevdevkeyboardmanager_p.h>
-#include <QtPlatformSupport/private/qevdevtouchmanager_p.h>
+#if QT_CONFIG(evdev)
+#include <QtInputSupport/private/qevdevmousemanager_p.h>
+#include <QtInputSupport/private/qevdevkeyboardmanager_p.h>
+#include <QtInputSupport/private/qevdevtouchmanager_p.h>
 #endif
 
 QT_BEGIN_NAMESPACE
@@ -105,7 +105,7 @@ void QVxWorksFbIntegration::initialize()
     else
         qWarning("vxworksfb: Failed to initialize screen");
 
-#ifndef QT_NO_EVDEV
+#if QT_CONFIG(evdev)
     d_ptr->m_inputContext = QPlatformInputContextFactory::create();
     if (!qEnvironmentVariableIntValue("QT_QPA_FB_DISABLE_INPUT"))
         createInputHandlers();
@@ -166,7 +166,7 @@ QPlatformInputContext *QVxWorksFbIntegration::inputContext() const
 
 void QVxWorksFbIntegration::createInputHandlers()
 {
-#if !defined(QT_NO_EVDEV)
+#if QT_CONFIG(evdev)
     new QEvdevKeyboardManager(QLatin1String("EvdevKeyboard"), QString(), this);
     new QEvdevMouseManager(QLatin1String("EvdevMouse"), QString(), this);
     new QEvdevTouchManager(QLatin1String("EvdevTouch"), QString() /* spec */, this);
