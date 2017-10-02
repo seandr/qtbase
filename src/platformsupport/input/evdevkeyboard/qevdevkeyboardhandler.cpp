@@ -54,10 +54,10 @@
 
 #ifdef Q_OS_FREEBSD
 #include <dev/evdev/input.h>
-#elif !defined Q_OS_VXWORKS
-#include <linux/input.h>
-#else
+#elif defined(Q_OS_VXWORKS)
 #include <evdevLib.h>
+#else
+#include <linux/input.h>
 #endif
 
 QT_BEGIN_NAMESPACE
@@ -133,7 +133,7 @@ QEvdevKeyboardHandler *QEvdevKeyboardHandler::create(const QString &device,
 
     QFdContainer fd(qt_safe_open(device.toLocal8Bit().constData(), O_RDONLY | O_NDELAY, 0));
     if (fd.get() >= 0) {
-#ifndef Q_OS_VXWORKS
+#if !defined(Q_OS_VXWORKS)
         ::ioctl(fd.get(), EVIOCGRAB, grab);
         if (repeatDelay > 0 && repeatRate > 0) {
             int kbdrep[2] = { repeatDelay, repeatRate };
@@ -142,7 +142,7 @@ QEvdevKeyboardHandler *QEvdevKeyboardHandler::create(const QString &device,
 
 #else
         UINT32 kbdMode = EV_DEV_KBD_KEYCODE_MODE;
-        if (ERROR == ioctl (fd, EV_DEV_IO_SET_KBD_MODE, (char *)&kbdMode)) {
+        if (ERROR == ioctl (fd.get(), EV_DEV_IO_SET_KBD_MODE, (char *)&kbdMode)) {
             qWarning("Cannot open keyboard input device '%s': %s", qPrintable(device), strerror(errno));
             return 0;
         }
@@ -154,7 +154,7 @@ QEvdevKeyboardHandler *QEvdevKeyboardHandler::create(const QString &device,
     }
 }
 
-#ifndef Q_OS_VXWORKS
+#if !defined(Q_OS_VXWORKS)
 void QEvdevKeyboardHandler::switchLed(int led, bool state)
 {
     qCDebug(qLcEvdevKey) << "switchLed" << led << state;
@@ -171,9 +171,9 @@ void QEvdevKeyboardHandler::switchLed(int led, bool state)
 
 void QEvdevKeyboardHandler::readKeycode()
 {
-#ifdef Q_OS_VXWORKS
+#if defined(Q_OS_VXWORKS)
     EV_DEV_EVENT ev;
-    size_t n = read(m_fd, (char *)(&ev), sizeof(EV_DEV_EVENT));
+    size_t n = read(m_fd.get(), (char *)(&ev), sizeof(EV_DEV_EVENT));
     if (n < sizeof(EV_DEV_EVENT)) return;
     if (ev.type != EV_DEV_KEY) return;
 
@@ -516,7 +516,7 @@ void QEvdevKeyboardHandler::unloadKeymap()
     m_composing = 0;
     m_dead_unicode = 0xffff;
 
-#ifndef Q_OS_VXWORKS
+#if !defined(Q_OS_VXWORKS)
     //Set locks according to keyboard leds
     quint16 ledbits[1];
     memset(ledbits, 0, sizeof(ledbits));

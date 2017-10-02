@@ -51,6 +51,7 @@
 #include <dev/evdev/input.h>
 #elif defined(Q_OS_VXWORKS)
 #include <evdevLib.h>
+#define ABS_X           EV_DEV_PTR_ABS_X
 #else
 #include <linux/input.h>
 #endif
@@ -78,10 +79,12 @@
 #define LONG_BITS (sizeof(long) * 8 )
 #define LONG_FIELD_SIZE(bits) ((bits / LONG_BITS) + 1)
 
+#if !defined(Q_OS_VXWORKS)
 static bool testBit(long bit, const long *field)
 {
     return (field[bit / LONG_BITS] >> bit % LONG_BITS) & 1;
 }
+#endif
 
 QT_BEGIN_NAMESPACE
 
@@ -101,7 +104,7 @@ QDeviceDiscoveryStatic::QDeviceDiscoveryStatic(QDeviceTypes types, QObject *pare
 QStringList QDeviceDiscoveryStatic::scanConnectedDevices()
 {
     QStringList devices;
-#ifdef Q_OS_VXWORKS
+#if defined(Q_OS_VXWORKS)
     QStringList inputDevices;
     UINT32 devCount = 0;
     QString device(QString::fromLatin1("/input/event0"));
@@ -111,7 +114,7 @@ QStringList QDeviceDiscoveryStatic::scanConnectedDevices()
                 qWarning() << "DeviceDiscovery cannot open device" << device;
                 return devices;
         }
-        for (int i=0; i<=devCount; i++)
+        for (UINT32 i=0; i<=devCount; i++)
             inputDevices << QString::fromLatin1("/input/event%1").arg(i);
 
     } else {
@@ -167,7 +170,15 @@ bool QDeviceDiscoveryStatic::checkDeviceType(const QString &device)
 {
     int fd = QT_OPEN(device.toLocal8Bit().constData(), O_RDONLY | O_NDELAY, 0);
     if (Q_UNLIKELY(fd == -1)) {
-        qWarning() << "Device discovery cannot open device" << device;
+#if defined(Q_OS_VXWORKS)
+        // This is changed to debug type message due the nature of scanning
+        // and adding new device for VxWorks by getting dev count from
+        // dev /input/event0 which might be already in use
+        qCDebug(lcDD)
+#else
+        qWarning()
+#endif
+                 << "Device discovery cannot open device" << device;
         return false;
     }
 
@@ -178,33 +189,36 @@ bool QDeviceDiscoveryStatic::checkDeviceType(const QString &device)
         return true;
     }
 
-    long bitsAbs[LONG_FIELD_SIZE(ABS_CNT)];
-#ifdef Q_OS_VXWORKS
+#if defined(Q_OS_VXWORKS)
     UINT32 devCap = 0;
     if (ERROR != ioctl(fd, EV_DEV_IO_GET_CAP, (char *)&devCap)) {
-        if (!ret && (m_types & Device_Keyboard) && (devCap & EV_DEV_KEY)) {
+        if ((m_types & Device_Keyboard) && (devCap & EV_DEV_KEY)) {
             if (!(devCap & EV_DEV_REL) && !(devCap & EV_DEV_ABS)) {
                 qCDebug(lcDD) << "DeviceDiscovery found keyboard at" << device;
-                ret = true;
+                QT_CLOSE(fd);
+                return true;
             }
         }
 
-        if (!ret && (m_types & Device_Mouse)) {
+        if (m_types & Device_Mouse) {
             if ((devCap & EV_DEV_REL) && (devCap & EV_DEV_KEY)) {
-                    qCDebug(lcDD) << "DeviceDiscovery found mouse at" << device;
-                ret = true;
+                qCDebug(lcDD) << "DeviceDiscovery found mouse at" << device;
+                QT_CLOSE(fd);
+                return true;
             }
         }
 
-        if (!ret && (m_types & (Device_Touchpad | Device_Touchscreen))) {
+        if ((m_types & (Device_Touchpad | Device_Touchscreen))) {
             if ((m_types & Device_Touchscreen) && (devCap & EV_DEV_ABS && (devCap & EV_DEV_KEY))) {
                 qCDebug(lcDD) << "DeviceDiscovery found touchscreen at" << device;
-                ret = true;
+                QT_CLOSE(fd);
+                return true;
             }
         }
     }
     QT_CLOSE(fd);
 #else
+    long bitsAbs[LONG_FIELD_SIZE(ABS_CNT)];
     long bitsKey[LONG_FIELD_SIZE(KEY_CNT)];
     long bitsRel[LONG_FIELD_SIZE(REL_CNT)];
     memset(bitsAbs, 0, sizeof(bitsAbs));

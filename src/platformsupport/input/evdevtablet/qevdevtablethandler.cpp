@@ -47,6 +47,23 @@
 #include <qpa/qwindowsysteminterface.h>
 #ifdef Q_OS_FREEBSD
 #include <dev/evdev/input.h>
+#elif defined(Q_OS_VXWORKS)
+#include <qpa/qplatformscreen.h>
+#include <evdevLib.h>
+#define SYN_REPORT      0
+#define EV_SYN          EV_DEV_SYN
+#define EV_KEY          EV_DEV_KEY
+#define EV_REL          EV_DEV_REL
+#define EV_ABS          EV_DEV_ABS
+#define ABS_X           EV_DEV_PTR_ABS_X
+#define ABS_Y           EV_DEV_PTR_ABS_Y
+#define BTN_TOUCH       EV_DEV_PTR_BTN_TOUCH
+#define ABS_MAX         0x3f
+#define ABS_MT_SLOT     EV_DEV_PTR_ABS_MT_SLOT //0x2F
+#define ABS_MT_POSITION_X   EV_DEV_PTR_ABS_MT_POSITION_X //0x35
+#define ABS_MT_POSITION_Y   EV_DEV_PTR_ABS_MT_POSITION_Y //0x36
+#define ABS_MT_TRACKING_ID  EV_DEV_PTR_ABS_MT_TRACKING_ID //0x39
+typedef EV_DEV_EVENT input_event;
 #else
 #include <linux/input.h>
 #endif
@@ -95,12 +112,14 @@ void QEvdevTabletData::processInputEvent(input_event *ev)
         case ABS_Y:
             state.y = ev->value;
             break;
+#if !defined(Q_OS_VXWORKS)
         case ABS_PRESSURE:
             state.p = ev->value;
             break;
         case ABS_DISTANCE:
             state.d = ev->value;
             break;
+#endif
         default:
             break;
         }
@@ -113,12 +132,14 @@ void QEvdevTabletData::processInputEvent(input_event *ev)
         case BTN_TOUCH:
             state.down = ev->value != 0;
             break;
+#if !defined(Q_OS_VXWORKS)
         case BTN_TOOL_PEN:
             state.tool = ev->value ? QTabletEvent::Pen : 0;
             break;
         case BTN_TOOL_RUBBER:
             state.tool = ev->value ? QTabletEvent::Eraser : 0;
             break;
+#endif
         default:
             break;
         }
@@ -180,6 +201,7 @@ QEvdevTabletHandler::QEvdevTabletHandler(const QString &device, const QString &s
         return;
     }
 
+#if !defined(Q_OS_VXWORKS)
     bool grabSuccess = !ioctl(m_fd, EVIOCGRAB, (void *) 1);
     if (grabSuccess)
         ioctl(m_fd, EVIOCGRAB, (void *) 0);
@@ -189,7 +211,7 @@ QEvdevTabletHandler::QEvdevTabletHandler(const QString &device, const QString &s
     d = new QEvdevTabletData(this);
     if (!queryLimits())
         qWarning("evdevtablet: %s: Unset or invalid ABS limits. Behavior will be unspecified.", qPrintable(device));
-
+#endif
     m_notifier = new QSocketNotifier(m_fd, QSocketNotifier::Read, this);
     connect(m_notifier, &QSocketNotifier::activated, this, &QEvdevTabletHandler::readData);
 }
@@ -209,6 +231,7 @@ qint64 QEvdevTabletHandler::deviceId() const
 
 bool QEvdevTabletHandler::queryLimits()
 {
+#if !defined(Q_OS_VXWORKS)
     bool ok = true;
     input_absinfo absInfo;
     memset(&absInfo, 0, sizeof(input_absinfo));
@@ -244,10 +267,14 @@ bool QEvdevTabletHandler::queryLimits()
         qCDebug(qLcEvdevTablet, "evdevtablet: %s: device name: %s", qPrintable(m_device), name);
     }
     return ok;
+#else
+    return false;
+#endif
 }
 
 void QEvdevTabletHandler::readData()
 {
+#if !defined(Q_OS_VXWORKS)
     input_event buffer[32];
     int n = 0;
     for (; ;) {
@@ -277,6 +304,14 @@ void QEvdevTabletHandler::readData()
 
     for (int i = 0; i < n; ++i)
         d->processInputEvent(&buffer[i]);
+#else
+    EV_DEV_EVENT ev;
+    size_t n = read(m_fd, (char *)(&ev), sizeof(EV_DEV_EVENT));
+    if (n < sizeof(EV_DEV_EVENT)) {
+        return;
+    }
+    d->processInputEvent(&ev);
+#endif
 }
 
 
