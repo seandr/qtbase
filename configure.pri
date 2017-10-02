@@ -620,12 +620,14 @@ defineTest(qtConfOutput_prepareOptions) {
             "DEFAULT_ANDROID_NDK_TOOLCHAIN_VERSION = $$ndk_tc_ver"
     }
 
-    vxworks:$$qtConfEvaluate("features.shared") {
-        $${currentConfig}.output.devicePro += \
-            "VXWORKS_BUILD_LIBRARY_TYPE = shared"
-    } else {
-        $${currentConfig}.output.devicePro += \
-            "VXWORKS_BUILD_LIBRARY_TYPE = static"
+    vxworks {
+        $$qtConfEvaluate("features.shared") {
+            $${currentConfig}.output.devicePro += \
+                "VXWORKS_BUILD_LIBRARY_TYPE = shared"
+        } else {
+            $${currentConfig}.output.devicePro += \
+                "VXWORKS_BUILD_LIBRARY_TYPE = static"
+        }
     }
 
     export($${currentConfig}.output.devicePro)
