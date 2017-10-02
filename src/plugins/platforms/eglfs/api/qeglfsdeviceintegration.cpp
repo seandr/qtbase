@@ -63,6 +63,11 @@
 #include <sys/ioctl.h>
 #endif
 
+#if defined(Q_OS_VXWORKS)
+#include <fbdev.h>
+#define FBIO_WAITFORVSYNC  FB_IOCTL_VSYNC
+#endif
+
 #include <private/qfactoryloader_p.h>
 #include <private/qcore_unix_p.h>
 
@@ -128,7 +133,7 @@ static int framebuffer = -1;
 
 QByteArray QEglFSDeviceIntegration::fbDeviceName() const
 {
-#ifdef Q_OS_LINUX
+#if defined Q_OS_LINUX || defined(Q_OS_VXWORKS)
     QByteArray fbDev = qgetenv("QT_QPA_EGLFS_FB");
     if (fbDev.isEmpty())
         fbDev = QByteArrayLiteral("/dev/fb0");
@@ -153,7 +158,7 @@ int QEglFSDeviceIntegration::framebufferIndex() const
 
 void QEglFSDeviceIntegration::platformInit()
 {
-#ifdef Q_OS_LINUX
+#if defined Q_OS_LINUX || defined(Q_OS_VXWORKS)
     QByteArray fbDev = fbDeviceName();
 
     framebuffer = qt_safe_open(fbDev, O_RDONLY);
@@ -171,7 +176,7 @@ void QEglFSDeviceIntegration::platformInit()
 
 void QEglFSDeviceIntegration::platformDestroy()
 {
-#ifdef Q_OS_LINUX
+#if defined Q_OS_LINUX || defined(Q_OS_VXWORKS)
     if (framebuffer != -1)
         close(framebuffer);
 #endif
@@ -326,7 +331,7 @@ void QEglFSDeviceIntegration::waitForVSync(QPlatformSurface *surface) const
 {
     Q_UNUSED(surface);
 
-#if defined(Q_OS_LINUX) && defined(FBIO_WAITFORVSYNC)
+#if (defined(Q_OS_LINUX) || defined(Q_OS_VXWORKS)) && defined(FBIO_WAITFORVSYNC)
     static const bool forceSync = qEnvironmentVariableIntValue("QT_QPA_EGLFS_FORCEVSYNC");
     if (forceSync && framebuffer != -1) {
         int arg = 0;
