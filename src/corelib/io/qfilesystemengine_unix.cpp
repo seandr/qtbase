@@ -1371,6 +1371,7 @@ bool QFileSystemEngine::setPermissions(const QFileSystemEntry &entry, QFile::Per
     mode_t mode = toMode_t(permissions);
 #ifdef QT_NO_FILESYSTEMPERMISSIONS
     bool success = true;
+    Q_UNUSED(entry);
 #else
     bool success = ::chmod(entry.nativeFilePath().constData(), mode) == 0;
 #endif
@@ -1503,21 +1504,21 @@ bool QFileSystemEngine::setCurrentPath(const QFileSystemEntry &path)
 {
     int r;
 #ifdef Q_OS_VXWORKS
-    QString currentPath(path.nativeFilePath().constData());
-    char currentName[PATH_MAX+1];
+    auto currentPath = path.nativeFilePath();
+    char currentName[PATH_MAX + 1];
     if (::getcwd(currentName, PATH_MAX)) {
-        QString currentDir(currentName);
+        const QByteArray currentDir(currentName);
         // check is device prefix missing from the path
-        QString devicePrefix = currentDir.left(currentDir.indexOf('/',1) + 1);
+        const auto devicePrefix = currentDir.left(currentDir.indexOf('/', 1) + 1);
         if (currentPath.left(devicePrefix.length()) != devicePrefix) {
             // prepend device prefix to the path
             if (currentPath.at(0) == '/')
-                currentPath = currentPath.prepend(devicePrefix.left(devicePrefix.length()-1));
+                currentPath = currentPath.prepend(devicePrefix.left(devicePrefix.length() - 1));
             else
                 currentPath = currentPath.prepend(devicePrefix);
         }
     }
-    r = QT_CHDIR(currentPath.toLatin1());
+    r = QT_CHDIR(currentPath.constData());
 #else
     r = QT_CHDIR(path.nativeFilePath().constData());
 #endif
