@@ -47,7 +47,9 @@
 #include <QtCore/private/qcore_unix_p.h>
 #include <QtCore/qvarlengtharray.h>
 
+#if !defined(QT_NO_FILESYSTEMPERMISSIONS)
 #include <pwd.h>
+#endif
 #include <stdlib.h> // for realpath()
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -828,7 +830,7 @@ QString QFileSystemEngine::resolveUserName(uint userId)
     QVarLengthArray<char, 1024> buf(size_max);
 #endif
 
-#if !defined(Q_OS_INTEGRITY) && !defined(Q_OS_WASM)
+#if !defined(Q_OS_INTEGRITY) && !defined(Q_OS_WASM) && !defined(QT_NO_FILESYSTEMPERMISSIONS)
     struct passwd *pw = 0;
 #if QT_CONFIG(thread) && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && !defined(Q_OS_OPENBSD)
     struct passwd entry;
