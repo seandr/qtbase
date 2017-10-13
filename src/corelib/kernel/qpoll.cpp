@@ -118,8 +118,11 @@ static inline int qt_poll_sweep(struct pollfd *fds, nfds_t nfds,
             continue;
 
         if (FD_ISSET(fds[i].fd, read_fds))
+#if !defined(Q_OS_VXWORKS)
             qt_poll_examine_ready_read(fds[i]);
-
+#else
+            fds[i].revents |= QT_POLL_READ_MASK & fds[i].events;
+#endif
         if (FD_ISSET(fds[i].fd, write_fds))
             fds[i].revents |= QT_POLL_WRITE_MASK & fds[i].events;
 
