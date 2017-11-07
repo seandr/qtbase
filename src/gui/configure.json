@@ -1676,7 +1676,7 @@
             "label": "QInputContext",
             "purpose": "Provides complex input methods.",
             "section": "Kernel",
-            "condition": "features.library",
+            "condition": "features.library || config.vxworks",
             "output": [ "publicFeature", "feature" ]
         },
         "highdpiscaling": {
