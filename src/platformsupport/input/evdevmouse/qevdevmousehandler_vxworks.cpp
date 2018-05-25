@@ -67,6 +67,7 @@ QEvdevMouseHandler::QEvdevMouseHandler(const QString &device, int fd, bool abs, 
     : m_device(device), m_fd(fd), m_notify(0), m_x(0), m_y(0), m_prevx(0), m_prevy(0),
       m_abs(abs), m_compression(compression), m_buttons(0), m_prevInvalid(true)
 {
+    Q_UNUSED(jitterLimit)
     setObjectName(QLatin1String("Evdev Mouse Handler"));
 
     // socket notifier for events on the mouse device

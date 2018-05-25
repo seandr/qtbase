@@ -92,11 +92,13 @@ typedef struct __res_state *res_state_ptr;
 
 typedef int (*res_init_proto)(void);
 static res_init_proto local_res_init = 0;
+#if !defined(Q_OS_VXWORKS) || QT_CONFIG(library)
 typedef int (*res_ninit_proto)(res_state_ptr);
 static res_ninit_proto local_res_ninit = 0;
 typedef void (*res_nclose_proto)(res_state_ptr);
 static res_nclose_proto local_res_nclose = 0;
 static res_state_ptr local_res = 0;
+#endif // !Q_OS_VXWORKS
 
 #if QT_CONFIG(library) && !defined(Q_OS_QNX)
 namespace {

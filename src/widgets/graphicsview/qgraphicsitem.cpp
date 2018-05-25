@@ -10321,7 +10321,7 @@ void QGraphicsTextItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
         // User left-pressed on edge of selectable/movable item, use
         // base impl.
         dd->useDefaultImpl = true;
-    } else if (event->buttons() == event->button()
+    } else if (event->buttons() == (Qt::MouseButtons)event->button()
                && dd->control->textInteractionFlags() == Qt::NoTextInteraction) {
         // User pressed first button on non-interactive item.
         dd->useDefaultImpl = true;

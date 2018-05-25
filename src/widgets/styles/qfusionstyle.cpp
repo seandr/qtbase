@@ -2456,7 +2456,7 @@ void QFusionStyle::drawComplexControl(ComplexControl control, const QStyleOption
                         oldMax != scrollBar->maximum ||
                         oldRect != scrollBar->rect ||
                         oldState != scrollBar->state ||
-                        oldActiveControls != scrollBar->activeSubControls) {
+                        (QStyle::SubControls)oldActiveControls != scrollBar->activeSubControls) {
 
                     styleObject->setProperty("_q_stylepos", scrollBar->sliderPosition);
                     styleObject->setProperty("_q_stylemin", scrollBar->minimum);

@@ -840,6 +840,8 @@ QString QFileSystemEngine::resolveUserName(uint userId)
 #endif
     if (pw)
         return QFile::decodeName(QByteArray(pw->pw_name));
+#else
+    Q_UNUSED(userId)
 #endif
     return QString();
 }
@@ -1370,11 +1372,11 @@ bool QFileSystemEngine::setPermissions(const QFileSystemEntry &entry, QFile::Per
     if (Q_UNLIKELY(entry.isEmpty()))
         return emptyFileEntryWarning(), false;
 
-    mode_t mode = toMode_t(permissions);
 #ifdef QT_NO_FILESYSTEMPERMISSIONS
     bool success = true;
     Q_UNUSED(entry);
 #else
+    mode_t mode = toMode_t(permissions);
     bool success = ::chmod(entry.nativeFilePath().constData(), mode) == 0;
 #endif
 

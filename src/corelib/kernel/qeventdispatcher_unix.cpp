@@ -135,7 +135,7 @@ bool QThreadPipe::init()
    // do nothing.
 #elif defined(Q_OS_VXWORKS)
     RTP_DESC rtpStruct;
-    rtpInfoGet(NULL, &rtpStruct);
+    rtpInfoGet((RTP_ID)NULL, &rtpStruct);
 
     qsrand(QDateTime::currentDateTime().toTime_t());
     int random = qrand();

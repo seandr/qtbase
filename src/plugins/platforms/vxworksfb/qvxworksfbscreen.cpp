@@ -96,18 +96,13 @@ static QRect determineGeometry(const FB_IOCTL_ARG &fbinfo, const QRect &userGeom
 
 static QSizeF determinePhysicalSize(const FB_IOCTL_ARG &fbinfo, const QSize &mmSize, const QSize &res)
 {
+    Q_UNUSED(fbinfo)
     int mmWidth = mmSize.width(), mmHeight = mmSize.height();
 
     if (mmWidth <= 0 && mmHeight <= 0) {
-        /*if (fbinfo.getFbInfo.width != 0 && fbinfo.getFbInfo.height != 0
-            && fbinfo.getFbInfo.width != UINT_MAX && fbinfo.getFbInfo.height != UINT_MAX) {
-            mmWidth = fbinfo.getFbInfo.width;
-            mmHeight = fbinfo.getFbInfo.height;
-        } else {*/
-            const int dpi = 72;
-            mmWidth = qRound(res.width() * 25.4 / dpi);
-            mmHeight = qRound(res.height() * 25.4 / dpi);
-        //}
+        const int dpi = 72;
+        mmWidth = qRound(res.width() * 25.4 / dpi);
+        mmHeight = qRound(res.height() * 25.4 / dpi);
     } else if (mmWidth > 0 && mmHeight <= 0) {
         mmHeight = res.height() * mmWidth/res.width();
     } else if (mmHeight > 0 && mmWidth <= 0) {

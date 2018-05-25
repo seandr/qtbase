@@ -593,7 +593,8 @@ static QList<QNetworkInterfacePrivate *> createInterfaces(ifaddrs *rawList)
             iface->flags = convertFlags(ptr->ifa_flags);
         }
     }
-
+#else
+    Q_UNUSED(rawList)
 #endif
     return interfaces;
 }

@@ -141,6 +141,9 @@ QEvdevKeyboardHandler *QEvdevKeyboardHandler::create(const QString &device,
         }
 
 #else
+        Q_UNUSED(repeatDelay)
+        Q_UNUSED(repeatRate)
+        Q_UNUSED(grab)
         UINT32 kbdMode = EV_DEV_KBD_KEYCODE_MODE;
         if (ERROR == ioctl (fd.get(), EV_DEV_IO_SET_KBD_MODE, (char *)&kbdMode)) {
             qWarning("Cannot open keyboard input device '%s': %s", qPrintable(device), strerror(errno));
@@ -180,8 +183,7 @@ void QEvdevKeyboardHandler::readKeycode()
     quint16 code = ev.code;
     qint32 value = ev.value;
 
-    QEvdevKeyboardHandler::KeycodeAction ka;
-    ka = processKeycode(code, value != 0, value == 2);
+    processKeycode(code, value != 0, value == 2);
 #else
     struct ::input_event buffer[32];
     int n = 0;

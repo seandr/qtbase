@@ -1328,7 +1328,7 @@ resolveTable:
     if (!qSafeFromBigEndian(header, endPtr, &format))
         return 0;
 
-    quint32 length;
+    quint32 length(0);
     if (format < 8) {
         quint16 tmp;
         if (!qSafeFromBigEndian(header + 2, endPtr, &tmp))
