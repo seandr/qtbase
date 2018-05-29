@@ -145,7 +145,7 @@ private slots:
     void isDaylightTime() const;
     void daylightTransitions() const;
     void timeZones() const;
-#if defined(Q_OS_UNIX)
+#if defined(Q_OS_UNIX) && !defined(Q_OS_VXWORKS)
     void systemTimeZoneChange() const;
 #endif
 
@@ -3433,7 +3433,7 @@ void tst_QDateTime::timeZones() const
     QCOMPARE(future.offsetFromUtc(), 28800);
 }
 
-#if defined(Q_OS_UNIX)
+#if defined(Q_OS_UNIX) && !defined(Q_OS_VXWORKS)
 // Currently disabled on Windows as adjusting the timezone
 // requires additional privileges that aren't normally
 // enabled for a process. This can be achieved by calling
