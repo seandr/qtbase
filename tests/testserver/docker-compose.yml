@@ -91,8 +91,46 @@ services:
             - apache2:apache2.test-net.qt.local
             - vsftpd:vsftpd.test-net.qt.local
             - ftp-proxy:ftp-proxy.test-net.qt.local
+            - cyrus:cyrus.test-net.qt.local
+            - echo:echo.test-net.qt.local
         volumes:
             - ./common:/common:ro
             - ./danted:/service:ro
         entrypoint: common/startup.sh
         command: service/danted.sh
+
+    cyrus:
+        image: qt-test-server-cyrus:c8d72754abc0e501afd624ce838e4df35505abc9
+        container_name: qt-test-server-cyrus
+        domainname: test-net.qt.local
+        hostname: cyrus
+        volumes:
+            - ./common:/common:ro
+            - ./cyrus:/service:ro
+        entrypoint: common/startup.sh
+        command: service/cyrus.sh
+
+    iptables:
+        image: qt-test-server-iptables:cb7a8bd6d28602085a88c8ced7d67e28e75781e2
+        container_name: qt-test-server-iptables
+        domainname: test-net.qt.local
+        hostname: iptables
+        volumes:
+            - ./common:/common:ro
+            - ./iptables:/service:ro
+        entrypoint: common/startup.sh
+        command: service/iptables.sh
+        cap_add:
+            - NET_ADMIN
+            - NET_RAW
+
+    echo:
+      image: qt-test-server-echo:b29ad409e746a834c1055fd0f7a55fd5056da6ea
+      container_name: qt-test-server-echo
+      domainname: test-net.qt.local
+      hostname: echo
+      volumes:
+          - ./common:/common:ro
+          - ./echo:/service:ro
+      entrypoint: common/startup.sh
+      command: service/echo.sh
