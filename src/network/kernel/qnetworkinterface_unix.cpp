@@ -571,7 +571,6 @@ static QList<QNetworkInterfacePrivate *> createInterfaces(ifaddrs *rawList)
     Q_UNUSED(getMtu)
     QList<QNetworkInterfacePrivate *> interfaces;
 
-#ifndef QT_NO_IPV6IFNAME
     // make sure there's one entry for each interface
     for (ifaddrs *ptr = rawList; ptr; ptr = ptr->ifa_next) {
         // Get the interface index
@@ -593,9 +592,7 @@ static QList<QNetworkInterfacePrivate *> createInterfaces(ifaddrs *rawList)
             iface->flags = convertFlags(ptr->ifa_flags);
         }
     }
-#else
-    Q_UNUSED(rawList)
-#endif
+
     return interfaces;
 }
 

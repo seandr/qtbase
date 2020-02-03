@@ -4054,7 +4054,7 @@ QDebug operator<<(QDebug dbg, const QEvent *e)
             dbg << ", ";
             QtDebugUtils::formatQEnum(dbg, button);
         }
-        if (buttons && (Qt::MouseButtons)button != buttons) {
+        if (buttons && button != buttons) {
             dbg << ", buttons=";
             QtDebugUtils::formatQFlags(dbg, buttons);
         }

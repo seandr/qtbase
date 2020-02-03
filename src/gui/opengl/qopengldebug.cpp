@@ -1185,7 +1185,7 @@ void QOpenGLDebugLoggerPrivate::controlDebugMessages(QOpenGLDebugMessage::Source
     QVarLengthArray<GLenum, 8> glSeverities;
 
     if (ids.count() > 0) {
-        Q_ASSERT(severities == (QOpenGLDebugMessage::Severities)QOpenGLDebugMessage::AnySeverity);
+        Q_ASSERT(severities == QOpenGLDebugMessage::AnySeverity);
 
         // The GL_KHR_debug extension says:
         //
@@ -1198,13 +1198,13 @@ void QOpenGLDebugLoggerPrivate::controlDebugMessages(QOpenGLDebugMessage::Source
         // This means we can't convert AnySource or AnyType into DONT_CARE, but we have to roll
         // them into individual sources/types.
 
-        if (sources == (QOpenGLDebugMessage::Sources)QOpenGLDebugMessage::AnySource) {
+        if (sources == QOpenGLDebugMessage::AnySource) {
             sources = QOpenGLDebugMessage::InvalidSource;
             for (uint i = 1; i <= QOpenGLDebugMessage::LastSource; i = i << 1)
                 sources |= QOpenGLDebugMessage::Source(i);
         }
 
-        if (types == (QOpenGLDebugMessage::Types)QOpenGLDebugMessage::AnyType) {
+        if (types == QOpenGLDebugMessage::AnyType) {
             types = QOpenGLDebugMessage::InvalidType;
             for (uint i = 1; i <= QOpenGLDebugMessage::LastType; i = i << 1)
                 types |= QOpenGLDebugMessage::Type(i);
@@ -1212,7 +1212,7 @@ void QOpenGLDebugLoggerPrivate::controlDebugMessages(QOpenGLDebugMessage::Source
     }
 
 #define CONVERT_TO_GL_DEBUG_MESSAGE_CONTROL_PARAMETERS(type, source, target) \
-    if (source == (QOpenGLDebugMessage::Sources)QOpenGLDebugMessage::Any ## type) { \
+    if (source == QOpenGLDebugMessage::Any ## type) { \
         target << GL_DONT_CARE; \
     } else { \
         for (uint i = 1; i <= QOpenGLDebugMessage::Last ## type; i = i << 1) \

@@ -78,7 +78,6 @@
 
 QT_BEGIN_NAMESPACE
 
-#ifndef QT_NO_IPV6IFNAME
 static QNetworkInterface::InterfaceFlags convertFlags(uint rawFlags)
 {
     QNetworkInterface::InterfaceFlags flags = 0;
@@ -95,7 +94,6 @@ static QNetworkInterface::InterfaceFlags convertFlags(uint rawFlags)
 #endif
     return flags;
 }
-#endif // !QT_NO_IPV6IFNAME
 
 QT_END_NAMESPACE
 
