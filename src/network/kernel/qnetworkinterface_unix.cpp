@@ -55,11 +55,6 @@
 #  define QT_NO_GETIFADDRS
 #endif
 
-#if defined(Q_OS_VXWORKS)
-// VxWorks lacks if_nameindex
-# define QT_NO_IPV6IFNAME
-#endif
-
 #ifndef QT_NO_GETIFADDRS
 # include <ifaddrs.h>
 #endif
