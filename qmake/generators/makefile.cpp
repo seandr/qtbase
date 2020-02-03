@@ -79,17 +79,10 @@ bool MakefileGenerator::canExecute(const QStringList &cmdline, int *a) const
     return false;
 }
 
-static QString stripTrailingSlash(QString str)
-{
-    if (str.endsWith('/'))
-        str.chop(1);
-    return str;
-}
-
 QString MakefileGenerator::mkdir_p_asstring(const QString &dir, bool escape) const
 {
     return "@" + makedir.arg(
-        stripTrailingSlash(escape ? escapeFilePath(Option::fixPathToTargetOS(dir, false, false)) : dir));
+        escape ? escapeFilePath(Option::fixPathToTargetOS(dir, false, false)) : dir);
 }
 
 bool MakefileGenerator::mkdir(const QString &in_path) const
