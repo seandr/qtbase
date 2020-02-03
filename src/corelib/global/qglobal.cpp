@@ -76,7 +76,7 @@
 #  include <qt_windows.h>
 #endif
 
-#if defined(_WRS_KERNEL)
+#if defined(Q_OS_VXWORKS) && defined(_WRS_KERNEL)
 #  include <envLib.h>
 #endif
 
