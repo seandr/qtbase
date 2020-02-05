@@ -65,7 +65,7 @@ QEvdevMouseHandler *QEvdevMouseHandler::create(const QString &device, const QStr
 
 QEvdevMouseHandler::QEvdevMouseHandler(const QString &device, int fd, bool abs, bool compression, int jitterLimit)
     : m_device(device), m_fd(fd), m_notify(0), m_x(0), m_y(0), m_prevx(0), m_prevy(0),
-      m_abs(abs), m_compression(compression), m_buttons(0), m_prevInvalid(true)
+      m_abs(abs), m_compression(compression), m_buttons(0), m_button(Qt::NoButton), m_eventType(QEvent::None), m_prevInvalid(true)
 {
     Q_UNUSED(jitterLimit)
     setObjectName(QLatin1String("Evdev Mouse Handler"));
@@ -96,7 +96,7 @@ void QEvdevMouseHandler::sendMouseEvent()
         m_prevInvalid = false;
     }
 
-    emit handleMouseEvent(x, y, m_abs, m_buttons);
+    emit handleMouseEvent(x, y, m_abs, m_buttons, m_button, m_eventType);
 
     m_prevx = m_x;
     m_prevy = m_y;
@@ -134,6 +134,8 @@ void QEvdevMouseHandler::readMouseData()
                 m_buttons |= buttons;
             else
                 m_buttons &= ~buttons;
+            m_button = buttons;
+            m_eventType = ev.value != 0 ? QEvent::MouseButtonPress : QEvent::MouseButtonRelease;
             btnChanged = true;
             break;
             }
@@ -141,10 +143,12 @@ void QEvdevMouseHandler::readMouseData()
             switch (ev.code) {
             case EV_DEV_PTR_REL_X:
                 m_x += ev.value;
+                m_eventType = QEvent::MouseMove;
                 posChanged = true;
                 break;
             case EV_DEV_PTR_REL_Y:
                 m_y += ev.value;
+                m_eventType = QEvent::MouseMove;
                 posChanged = true;
                 break;
             }
@@ -153,10 +157,12 @@ void QEvdevMouseHandler::readMouseData()
             switch (ev.code) {
             case EV_DEV_PTR_ABS_X:
                 m_x = ev.value;
+                m_eventType = QEvent::MouseMove;
                 posChanged = true;
                 break;
             case EV_DEV_PTR_ABS_Y:
                 m_y = ev.value;
+                m_eventType = QEvent::MouseMove;
                 posChanged = true;
                 break;
             }
