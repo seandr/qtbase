@@ -33,6 +33,10 @@
 
 #include <double-conversion/cached-powers.h>
 
+#ifdef Q_OS_VXWORKS
+using std::ceil;
+#endif
+
 namespace double_conversion {
 
 struct CachedPower {

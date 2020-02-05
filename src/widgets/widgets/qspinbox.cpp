@@ -49,6 +49,10 @@
 #include <cmath>
 #include <float.h>
 
+#ifdef Q_OS_VXWORKS
+using std::floorf;
+#endif
+
 QT_BEGIN_NAMESPACE
 
 //#define QSPINBOX_QSBDEBUG

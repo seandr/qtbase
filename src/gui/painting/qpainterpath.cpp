@@ -61,6 +61,12 @@
 
 #include <limits.h>
 
+#ifdef Q_OS_VXWORKS
+#include <cmath>
+using std::fabs;
+using std::fabsf;
+#endif
+
 #if 0
 #include <performance.h>
 #else

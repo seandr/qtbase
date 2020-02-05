@@ -56,6 +56,10 @@
 #include <cmath>
 #include <limits>
 
+#ifdef Q_OS_VXWORKS
+using std::fabs;
+#endif
+
 #if defined(Q_CC_MSVC)
 #  include <intrin.h>
 #  include <float.h>
