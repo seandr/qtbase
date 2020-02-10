@@ -34,6 +34,13 @@
 #include <QTileRules>
 #include <qmath.h>
 
+#ifdef Q_OS_VXWORKS
+#include <cmath>
+using std::cos;
+using std::sin;
+using std::sqrt;
+#endif
+
 #include <private/qpixmap_raster_p.h>
 
 Q_DECLARE_METATYPE(QPainterPath)
