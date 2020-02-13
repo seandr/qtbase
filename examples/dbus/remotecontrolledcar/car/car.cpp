@@ -134,7 +134,7 @@ void Car::timerEvent(QTimerEvent *event)
 
     const qreal axelDistance = 54;
     qreal wheelsAngleRads = qDegreesToRadians(wheelsAngle);
-    qreal turnDistance = ::cos(wheelsAngleRads) * axelDistance * 2;
+    qreal turnDistance = qCos(wheelsAngleRads) * axelDistance * 2;
     qreal turnRateRads = wheelsAngleRads / turnDistance;  // rough estimate
     qreal turnRate = qRadiansToDegrees(turnRateRads);
     qreal rotation = speed * turnRate;

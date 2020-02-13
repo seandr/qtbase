@@ -96,8 +96,8 @@ public:
         watch.start();
         angle += angleDelta * interval / 1000;
         qreal step = moveDelta * interval / 1000;
-        qreal dx = cos(angle) * step;
-        qreal dy = sin(angle) * step;
+        qreal dx = qCos(angle) * step;
+        qreal dy = qSin(angle) * step;
         QPointF pos = playerPos + 3 * QPointF(dx, dy);
         int xi = static_cast<int>(pos.x());
         int yi = static_cast<int>(pos.y());
@@ -138,8 +138,8 @@ public:
         const QRgb *texsrc = reinterpret_cast<const QRgb*>(src);
 
         // cast all rays here
-        qreal sina = sin(angle);
-        qreal cosa = cos(angle);
+        qreal sina = qSin(angle);
+        qreal cosa = qCos(angle);
         qreal u = cosa - sina;
         qreal v = sina + cosa;
         qreal du = 2 * sina / bufw;

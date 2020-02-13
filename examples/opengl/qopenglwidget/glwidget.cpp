@@ -461,16 +461,16 @@ void GLWidget::createGeometry()
 
     for (int i = 0; i < NumSectors; ++i) {
         qreal angle = i * sectorAngle;
-        qreal x5 = 0.30 * sin(angle);
-        qreal y5 = 0.30 * cos(angle);
-        qreal x6 = 0.20 * sin(angle);
-        qreal y6 = 0.20 * cos(angle);
+        qreal x5 = 0.30 * qSin(angle);
+        qreal y5 = 0.30 * qCos(angle);
+        qreal x6 = 0.20 * qSin(angle);
+        qreal y6 = 0.20 * qCos(angle);
 
         angle += sectorAngle;
-        qreal x7 = 0.20 * sin(angle);
-        qreal y7 = 0.20 * cos(angle);
-        qreal x8 = 0.30 * sin(angle);
-        qreal y8 = 0.30 * cos(angle);
+        qreal x7 = 0.20 * qSin(angle);
+        qreal y7 = 0.20 * qCos(angle);
+        qreal x8 = 0.30 * qSin(angle);
+        qreal y8 = 0.30 * qCos(angle);
 
         quad(x5, y5, x6, y6, x7, y7, x8, y8);
 

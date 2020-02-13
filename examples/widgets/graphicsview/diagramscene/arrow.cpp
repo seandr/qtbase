@@ -131,10 +131,10 @@ void Arrow::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
 
     double angle = std::atan2(-line().dy(), line().dx());
 
-    QPointF arrowP1 = line().p1() + QPointF(sin(angle + M_PI / 3) * arrowSize,
-                                    cos(angle + M_PI / 3) * arrowSize);
-    QPointF arrowP2 = line().p1() + QPointF(sin(angle + M_PI - M_PI / 3) * arrowSize,
-                                    cos(angle + M_PI - M_PI / 3) * arrowSize);
+    QPointF arrowP1 = line().p1() + QPointF(qSin(angle + M_PI / 3) * arrowSize,
+                                    qCos(angle + M_PI / 3) * arrowSize);
+    QPointF arrowP2 = line().p1() + QPointF(qSin(angle + M_PI - M_PI / 3) * arrowSize,
+                                    qCos(angle + M_PI - M_PI / 3) * arrowSize);
 
     arrowHead.clear();
     arrowHead << line().p1() << arrowP1 << arrowP2;

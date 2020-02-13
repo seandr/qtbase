@@ -137,7 +137,7 @@ StickMan::StickMan()
         Node *node2 = m_nodes[n2];
 
         QPointF dist = node1->pos() - node2->pos();
-        m_perfectBoneLengths[i] = sqrt(pow(dist.x(),2) + pow(dist.y(),2));
+        m_perfectBoneLengths[i] = qSqrt(qPow(dist.x(),2) + qPow(dist.y(),2));
     }
 
     startTimer(10);
@@ -200,7 +200,7 @@ void StickMan::stabilize()
         QPointF pos2 = node2->pos();
 
         QPointF dist = pos1 - pos2;
-        qreal length = sqrt(pow(dist.x(),2) + pow(dist.y(),2));
+        qreal length = qSqrt(qPow(dist.x(),2) + qPow(dist.y(),2));
         qreal diff = (length - m_perfectBoneLengths[i]) / length;
 
         QPointF p = dist * (0.5 * diff);
@@ -293,8 +293,8 @@ void StickMan::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidge
 
             QPointF dist = node2->pos() - node1->pos();
 
-            qreal sinAngle = dist.x() / sqrt(pow(dist.x(), 2) + pow(dist.y(), 2));
-            qreal angle = qRadiansToDegrees(asin(sinAngle));
+            qreal sinAngle = dist.x() / qSqrt(qPow(dist.x(), 2) + qPow(dist.y(), 2));
+            qreal angle = qRadiansToDegrees(qAsin(sinAngle));
 
             QPointF headPos = node1->pos();
             painter->translate(headPos);
