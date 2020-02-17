@@ -4,7 +4,8 @@ CONFIG += no_docs_target
 SUBDIRS = \
     corelib \
     embedded \
-    qpa
+    qpa \
+    vxworks
 
 qtHaveModule(dbus): SUBDIRS += dbus
 qtHaveModule(network): SUBDIRS += network
