@@ -168,14 +168,14 @@ void QEvdevMouseHandler::readMouseData()
             }
             break;
         }
-    }
 
-    if (btnChanged) {
-        btnChanged = posChanged = false;
-        sendMouseEvent();
-    } else if (posChanged) {
-        posChanged = false;
-        sendMouseEvent();
+        if (btnChanged) {
+            btnChanged = posChanged = false;
+            sendMouseEvent();
+        } else if (posChanged) {
+            posChanged = false;
+            sendMouseEvent();
+        }
     }
 }
 
