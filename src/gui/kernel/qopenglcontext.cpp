@@ -1021,6 +1021,7 @@ bool QOpenGLContext::makeCurrent(QSurface *surface)
                         || qstrncmp(rendererString, "Adreno (TM) 6xx", 13) == 0 // Adreno 610, 620, 630
                         || qstrncmp(rendererString, "Adreno 6xx", 8) == 0 // Same as above but without the '(TM)'
                         || qstrcmp(rendererString, "GC800 core") == 0
+                        || strstr(rendererString, "GC880") != 0
                         || qstrcmp(rendererString, "GC1000 core") == 0
                         || strstr(rendererString, "GC2000") != 0
                         || qstrcmp(rendererString, "Immersion.16") == 0;
