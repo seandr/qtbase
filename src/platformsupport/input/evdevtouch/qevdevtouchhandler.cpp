@@ -80,6 +80,11 @@ extern "C" {
 }
 #endif
 
+#if defined(Q_OS_VXWORKS)
+#include <taskLib.h>
+#include <cpusetCommon.h>
+#endif
+
 QT_BEGIN_NAMESPACE
 
 Q_LOGGING_CATEGORY(qLcEvdevTouch, "qt.qpa.input")
@@ -865,6 +870,17 @@ QEvdevTouchScreenHandlerThread::QEvdevTouchScreenHandlerThread(const QString &de
     , m_filterWindow(nullptr)
     , m_touchRate(-1)
 {
+#if defined(Q_OS_VXWORKS)
+    bool ok = false;
+    int stackSize = qgetenv("QT_QPA_EVDEV_VXWORKS_TOUCHSCREENHANDLERTHREAD_STACK_SIZE").toInt(&ok);
+    if (ok) {
+        setStackSize(stackSize);
+    }
+    QString threadName = QLatin1String(qgetenv("QT_QPA_EVDEV_VXWORKS_TOUCHSCREENHANDLERTHREAD_NAME"));
+    if (!threadName.isEmpty()) {
+        setObjectName(threadName);
+    }
+#endif
     start();
 }
 
@@ -876,6 +892,23 @@ QEvdevTouchScreenHandlerThread::~QEvdevTouchScreenHandlerThread()
 
 void QEvdevTouchScreenHandlerThread::run()
 {
+#if defined(Q_OS_VXWORKS)
+    bool ok = false;
+    int threadPrio = qEnvironmentVariableIntValue("QT_QPA_EVDEV_VXWORKS_TOUCH_THREAD_PRIORITY", &ok);
+    if (ok) {
+        taskPrioritySet( taskIdSelf(), threadPrio );
+    }
+
+    int core = qEnvironmentVariableIntValue("QT_QPA_EVDEV_VXWORKS_TOUCH_THREAD_AFFINITY", &ok);
+    if (ok) {
+        cpuset_t affinity;
+        CPUSET_ZERO (affinity);
+        CPUSET_SET  (affinity, core);
+        if (taskCpuAffinitySet( taskIdSelf(), affinity) == ERROR) {
+            qWarning() << "Error setting CPU affinity for QEvdevTouchScreenHandlerThread.";
+        }
+    }
+#endif
     m_handler = new QEvdevTouchScreenHandler(m_device, m_spec);
 
     if (m_handler->isFiltered())

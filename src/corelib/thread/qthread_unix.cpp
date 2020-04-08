@@ -719,6 +719,12 @@ void QThread::start(Priority priority)
             return;
         }
     }
+#ifdef defined(Q_OS_VXWORKS)
+    if (Q_LIKELY(objectName().isEmpty()))
+        pthread_attr_setname(&attr, metaObject()->className());
+    else
+        pthread_attr_setname(&attr, objectName().toLocal8Bit());
+#endif
 
 #ifdef Q_OS_INTEGRITY
     if (Q_LIKELY(objectName().isEmpty()))
