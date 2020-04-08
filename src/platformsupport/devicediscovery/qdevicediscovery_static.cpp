@@ -107,14 +107,14 @@ QStringList QDeviceDiscoveryStatic::scanConnectedDevices()
 #if defined(Q_OS_VXWORKS)
     QStringList inputDevices;
     UINT32 devCount = 0;
-    QString device(QString::fromLatin1("/input/event0"));
+    QString device(QString::fromLatin1("/input/event"));
     int fd = QT_OPEN(device.toLocal8Bit().constData(), O_RDONLY | O_NDELAY, 0);
     if (fd >= 0) {
         if (ERROR == ioctl(fd, EV_DEV_IO_GET_DEV_COUNT, (char *)&devCount)) {
                 qWarning() << "DeviceDiscovery cannot open device" << device;
                 return devices;
         }
-        for (UINT32 i=0; i<=devCount; i++)
+        for (UINT32 i=0; i<devCount; i++)
             inputDevices << QString::fromLatin1("/input/event%1").arg(i);
 
     } else {
