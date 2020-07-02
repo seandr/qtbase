@@ -60,7 +60,11 @@
 #endif
 
 #if defined(Q_OS_VXWORKS)
-#  include <pipeDrv.h>
+        #if defined(VXWORKS_USE_POSIX_PIPES)
+          #  include <ioLib.h>
+        #else
+          #  include <pipeDrv.h>
+        #endif
 #  include <selectLib.h>
 #  include <taskLib.h>
 #  include "qdatetime.h"
@@ -107,12 +111,12 @@ QThreadPipe::~QThreadPipe()
     if (fds[1] >= 0)
         close(fds[1]);
 
-#if defined(Q_OS_VXWORKS)
+#if defined(Q_OS_VXWORKS) && !defined(VXWORKS_USE_POSIX_PIPES)
     pipeDevDelete(name, true);
 #endif
 }
 
-#if defined(Q_OS_VXWORKS)
+#if defined(Q_OS_VXWORKS) && !defined(VXWORKS_USE_POSIX_PIPES)
 static void initThreadPipeFD(int fd)
 {
     int ret = fcntl(fd, F_SETFD, FD_CLOEXEC);
@@ -133,7 +137,7 @@ bool QThreadPipe::init()
 {
 #if defined(Q_OS_NACL) || defined(Q_OS_WASM)
    // do nothing.
-#elif defined(Q_OS_VXWORKS)
+#elif defined(Q_OS_VXWORKS) && !defined(VXWORKS_USE_POSIX_PIPES)
     RTP_DESC rtpStruct;
     rtpInfoGet((RTP_ID)NULL, &rtpStruct);
 
@@ -177,6 +181,11 @@ bool QThreadPipe::init()
         perror("QThreadPipe: Unable to create pipe");
         return false;
     }
+#  if defined(Q_OS_VXWORKS)
+    initThreadPipeFD(fds[0]);
+    initThreadPipeFD(fds[1]);
+    forceSelectNoTimeout = qEnvironmentVariableIntValue("QT_FORCE_SELECT_NOTIMEOUT");
+#  endif
 #endif
 
     return true;
@@ -214,7 +223,7 @@ int QThreadPipe::check(const pollfd &pfd)
     if (readyread) {
         // consume the data on the thread pipe so that
         // poll doesn't immediately return next time
-#if defined(Q_OS_VXWORKS)
+#if defined(Q_OS_VXWORKS) && !defined(VXWORKS_USE_POSIX_PIPES)
         ::read(fds[0], c, sizeof(c));
         ::ioctl(fds[0], FIOFLUSH, 0);
 #else
@@ -527,6 +536,15 @@ bool QEventDispatcherUNIX::processEvents(QEventLoop::ProcessEventsFlags flags)
 
     switch (qt_safe_poll(d->pollfds.data(), d->pollfds.size(), tm)) {
     case -1:
+#if defined(Q_OS_VXWORKS) && defined(VXWORKS_USE_POSIX_PIPES)
+#if defined(EDOOM)
+        if (errno == EDOOM)
+        {
+            // we are being deleted, stop here and wait for the thread to go away
+            taskSuspend(0);
+        }
+#endif
+#endif
         perror("qt_safe_poll");
         break;
     case 0:

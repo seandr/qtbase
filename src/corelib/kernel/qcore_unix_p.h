@@ -207,7 +207,7 @@ static inline int qt_safe_open(const char *pathname, int flags, mode_t mode = 07
 #undef QT_OPEN
 #define QT_OPEN         qt_safe_open
 
-#ifdef Q_OS_VXWORKS
+#if defined(Q_OS_VXWORKS) && !defined(VXWORKS_USE_POSIX_PIPES)
     static int vxworks_pipe_counter = 0;
     const int vxworks_pipe_name_len = 32;
 #endif
@@ -223,7 +223,7 @@ static inline int qt_safe_pipe(int pipefd[2], int flags = 0)
     return ::pipe2(pipefd, flags); // pipe2 is documented not to return EINTR
 #else
 
-#ifdef Q_OS_VXWORKS
+#if defined(Q_OS_VXWORKS) && !defined(VXWORKS_USE_POSIX_PIPES)
     char name[vxworks_pipe_name_len];
     snprintf(name, sizeof(name)-1, "/pipe/qtpipe%d", vxworks_pipe_counter++);
     if (pipeDevCreate(name, 10, 128) != OK)
