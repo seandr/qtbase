@@ -116,7 +116,7 @@ QThreadPipe::~QThreadPipe()
 #endif
 }
 
-#if defined(Q_OS_VXWORKS) && !defined(VXWORKS_USE_POSIX_PIPES)
+#if defined(Q_OS_VXWORKS)
 static void initThreadPipeFD(int fd)
 {
     int ret = fcntl(fd, F_SETFD, FD_CLOEXEC);
