@@ -71,7 +71,7 @@
 #include "qlockfile.h"
 #endif
 
-#ifdef Q_OS_VXWORKS
+#ifdef Q_OS_VXWORKS_GNU
 #  include <ioLib.h>
 #endif
 

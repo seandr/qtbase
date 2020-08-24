@@ -60,17 +60,17 @@
 #endif
 
 #if defined(Q_OS_VXWORKS)
-        #if defined(VXWORKS_USE_POSIX_PIPES)
-          #  include <ioLib.h>
-        #else
-          #  include <pipeDrv.h>
-        #endif
-#  include <selectLib.h>
-#  include <taskLib.h>
-#  include "qdatetime.h"
-#  include "qdir.h" // to get application name
-#  include <rtpLib.h>
-#  include <sysLib.h>
+#  if defined(VXWORKS_USE_POSIX_PIPES)
+#    include <ioLib.h>
+#  else
+#    include <pipeDrv.h>
+#    include <selectLib.h>
+#    include <taskLib.h>
+#    include "qdatetime.h"
+#    include "qdir.h" // to get application name
+#    include <rtpLib.h>
+#    include <sysLib.h>
+#  endif
 #endif
 
 #if (_POSIX_MONOTONIC_CLOCK-0 <= 0) || defined(QT_BOOTSTRAPPED)
@@ -513,7 +513,7 @@ bool QEventDispatcherUNIX::processEvents(QEventLoop::ProcessEventsFlags flags)
 
     d->pollfds.clear();
     d->pollfds.reserve(1 + (include_notifiers ? d->socketNotifiers.size() : 0));
-#ifdef Q_OS_VXWORKS
+#if defined(Q_OS_VXWORKS_GNU)
     if (d->threadPipe.forceSelectNoTimeout) {
         // Tick rate greater than 10ms too much
         // do not use timeout
@@ -536,14 +536,14 @@ bool QEventDispatcherUNIX::processEvents(QEventLoop::ProcessEventsFlags flags)
 
     switch (qt_safe_poll(d->pollfds.data(), d->pollfds.size(), tm)) {
     case -1:
-#if defined(Q_OS_VXWORKS) && defined(VXWORKS_USE_POSIX_PIPES)
-#if defined(EDOOM)
+#if defined(Q_VXWORKS_GNU) && defined(VXWORKS_USE_POSIX_PIPES)
+#  if defined(EDOOM)
         if (errno == EDOOM)
         {
             // we are being deleted, stop here and wait for the thread to go away
             taskSuspend(0);
         }
-#endif
+#  endif
 #endif
         perror("qt_safe_poll");
         break;

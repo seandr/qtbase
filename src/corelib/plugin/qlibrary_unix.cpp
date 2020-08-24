@@ -144,7 +144,7 @@ bool QLibraryPrivate::load_sys()
     }
 #if !defined(Q_OS_CYGWIN)
     else {
-#if !defined(Q_OS_VXWORKS)
+#if !defined(Q_OS_VXWORKS_GNU)
         dlFlags |= RTLD_LOCAL;
 #endif
     }

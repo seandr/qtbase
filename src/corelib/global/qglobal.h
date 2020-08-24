@@ -554,10 +554,16 @@ using qsizetype = QIntegerForSizeof<std::size_t>::Signed;
 #  define Q_ALWAYS_INLINE inline
 #endif
 
-#if defined(Q_CC_GNU) && defined(Q_OS_WIN)
+#if (defined(Q_CC_GNU) && defined(Q_OS_WIN)) || defined(Q_OS_VXWORKS_CLANG)
 #  define QT_INIT_METAOBJECT __attribute__((init_priority(101)))
 #else
 #  define QT_INIT_METAOBJECT
+#endif
+
+#if defined(Q_OS_VXWORKS_CLANG)
+#  define QT_INIT_PRIORITY(PRIORITY) __attribute__((init_priority(PRIORITY)))
+#else
+#  define QT_INIT_PRIORITY(PRIORITY)
 #endif
 
 //defines the type for the WNDPROC on windows

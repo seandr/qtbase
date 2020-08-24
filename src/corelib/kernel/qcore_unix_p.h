@@ -66,16 +66,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#ifdef Q_OS_NACL
-#elif !defined (Q_OS_VXWORKS)
-# if !defined(Q_OS_HPUX) || defined(__ia64)
-#  include <sys/select.h>
-# endif
-#  include <sys/time.h>
-#else
-#  include <selectLib.h>
+#if !defined(Q_OS_HPUX) || defined(__ia64)
+# include <sys/select.h>
 #endif
 
+#include <sys/time.h>
 #include <sys/wait.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -84,11 +79,12 @@
 #  include <sys/ipc.h>
 #endif
 
-#if defined(Q_OS_VXWORKS)
+#if defined(Q_OS_VXWORKS_GNU) && !defined(VXWORKS_USE_POSIX_PIPES)
 # include <ioLib.h>
 # include <pipeDrv.h>
 # include <stdio.h>
 # include <sockLib.h>
+# include <selectLib.h>
 #endif
 
 #ifdef QT_NO_NATIVE_POLL
@@ -207,7 +203,7 @@ static inline int qt_safe_open(const char *pathname, int flags, mode_t mode = 07
 #undef QT_OPEN
 #define QT_OPEN         qt_safe_open
 
-#if defined(Q_OS_VXWORKS) && !defined(VXWORKS_USE_POSIX_PIPES)
+#if defined(Q_OS_VXWORKS_GNU) && !defined(VXWORKS_USE_POSIX_PIPES)
     static int vxworks_pipe_counter = 0;
     const int vxworks_pipe_name_len = 32;
 #endif
@@ -223,7 +219,7 @@ static inline int qt_safe_pipe(int pipefd[2], int flags = 0)
     return ::pipe2(pipefd, flags); // pipe2 is documented not to return EINTR
 #else
 
-#if defined(Q_OS_VXWORKS) && !defined(VXWORKS_USE_POSIX_PIPES)
+#if defined(Q_OS_VXWORKS_GNU) && !defined(VXWORKS_USE_POSIX_PIPES)
     char name[vxworks_pipe_name_len];
     snprintf(name, sizeof(name)-1, "/pipe/qtpipe%d", vxworks_pipe_counter++);
     if (pipeDevCreate(name, 10, 128) != OK)

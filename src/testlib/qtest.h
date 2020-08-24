@@ -360,6 +360,20 @@ inline bool qCompare(quint32 const &t1, quint64 const &t2, const char *actual,
 }
 QT_END_NAMESPACE
 
+#ifndef QT_NO_OPENGL
+#  define QTEST_ADD_GPU_BLACKLIST_SUPPORT_DEFS \
+    extern Q_TESTLIB_EXPORT std::set<QByteArray> *(*qgpu_features_ptr)(const QString &); \
+    extern Q_GUI_EXPORT std::set<QByteArray> *qgpu_features(const QString &);
+#  define QTEST_ADD_GPU_BLACKLIST_SUPPORT \
+    qgpu_features_ptr = qgpu_features;
+#  define QTEST_OPENGL_SHAREDCONTEXTS \
+    QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+#else
+#  define QTEST_ADD_GPU_BLACKLIST_SUPPORT_DEFS
+#  define QTEST_ADD_GPU_BLACKLIST_SUPPORT
+#  define QTEST_OPENGL_SHAREDCONTEXTS
+#endif
+
 #ifdef QT_TESTCASE_BUILDDIR
 #  define QTEST_SET_MAIN_SOURCE_PATH  QTest::setMainSourcePath(__FILE__, QT_TESTCASE_BUILDDIR);
 #else
@@ -369,6 +383,7 @@ QT_END_NAMESPACE
 #define QTEST_APPLESS_MAIN(TestObject) \
 int main(int argc, char *argv[]) \
 { \
+    QTEST_OPENGL_SHAREDCONTEXTS \
     TestObject tc; \
     QTEST_SET_MAIN_SOURCE_PATH \
     return QTest::qExec(&tc, argc, argv); \
@@ -376,17 +391,6 @@ int main(int argc, char *argv[]) \
 
 #include <QtTest/qtestsystem.h>
 #include <set>
-
-#ifndef QT_NO_OPENGL
-#  define QTEST_ADD_GPU_BLACKLIST_SUPPORT_DEFS \
-    extern Q_TESTLIB_EXPORT std::set<QByteArray> *(*qgpu_features_ptr)(const QString &); \
-    extern Q_GUI_EXPORT std::set<QByteArray> *qgpu_features(const QString &);
-#  define QTEST_ADD_GPU_BLACKLIST_SUPPORT \
-    qgpu_features_ptr = qgpu_features;
-#else
-#  define QTEST_ADD_GPU_BLACKLIST_SUPPORT_DEFS
-#  define QTEST_ADD_GPU_BLACKLIST_SUPPORT
-#endif
 
 #if defined(QT_NETWORK_LIB)
 #  include <QtTest/qtest_network.h>
@@ -408,6 +412,7 @@ QTEST_ADD_GPU_BLACKLIST_SUPPORT_DEFS \
 QT_END_NAMESPACE \
 int main(int argc, char *argv[]) \
 { \
+    QTEST_OPENGL_SHAREDCONTEXTS \
     QApplication app(argc, argv); \
     app.setAttribute(Qt::AA_Use96Dpi, true); \
     QTEST_DISABLE_KEYPAD_NAVIGATION \
@@ -427,6 +432,7 @@ QTEST_ADD_GPU_BLACKLIST_SUPPORT_DEFS \
 QT_END_NAMESPACE \
 int main(int argc, char *argv[]) \
 { \
+    QTEST_OPENGL_SHAREDCONTEXTS \
     QGuiApplication app(argc, argv); \
     app.setAttribute(Qt::AA_Use96Dpi, true); \
     QTEST_ADD_GPU_BLACKLIST_SUPPORT \

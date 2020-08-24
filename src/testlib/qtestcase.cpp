@@ -117,7 +117,7 @@
 #include <CoreFoundation/CFPreferences.h>
 #endif
 
-#if defined(Q_OS_VXWORKS)
+#if defined(Q_OS_VXWORKS_GNU)
 #include <ioLib.h>
 #endif
 

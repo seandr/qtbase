@@ -259,9 +259,15 @@ isEmpty($${target_prefix}.INCDIRS) {
             # or gold under Linux) will not print any library search path. Need to use another
             # invocation with different options (which in turn doesn't print include search
             # paths, so it can't just be used in place of the above code).
-            # What's more, -print-search-dirs can't be used on clang on Apple because it
+            # What's more, -print-search-dirs can't be used on clang on Apple (and VxWorks) because it
             # won't print all the library paths (only the clang-internal ones).
-            output = $$system("$$cmd_prefix $$QMAKE_LINK $$QMAKE_LFLAGS -print-search-dirs", lines, ec)
+            # VxWorks uses llvm with gnu ld, so QMAKE_LINK is set to gnu ld which doesn't understand
+            # -print-search-dirs option so we need to go thru clang.
+            if (!vxworks) {
+                output = $$system("$$cmd_prefix $$QMAKE_LINK $$QMAKE_LFLAGS -print-search-dirs", lines, ec)
+            } else {
+                output = $$system("$$cmd_prefix $$QMAKE_CXX $$QMAKE_LFLAGS -print-search-dirs", lines, ec)
+            }
             !equals(ec, 0): qtCompilerError($$QMAKE_LINK, $$output)
 
             for (line, output) {
@@ -278,10 +284,11 @@ isEmpty($${target_prefix}.INCDIRS) {
                         QMAKE_DEFAULT_LIBDIRS += $$clean_path($$replace(path, ^=, $$[SYSROOT]))
                 }
             }
+            vxworks: QMAKE_DEFAULT_LIBDIRS += $$QMAKE_LIBDIR
         }
         isEmpty(QMAKE_DEFAULT_LIBDIRS)|isEmpty(QMAKE_DEFAULT_INCDIRS): \
             !integrity: \
-                error("failed to parse default search paths from compiler output")
+                error("failed to parse default search paths from compiler output $${QMAKE_DEFAULT_LIBDIRS}")
         QMAKE_DEFAULT_LIBDIRS = $$unique(QMAKE_DEFAULT_LIBDIRS)
     } else: ghs {
         cmd = $$QMAKE_CXX $$QMAKE_CXXFLAGS -$${LITERAL_HASH} -o /tmp/fake_output /tmp/fake_input.cpp

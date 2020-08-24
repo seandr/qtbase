@@ -49,7 +49,7 @@ QT_BEGIN_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_GCC("-Wmissing-field-initializers")
 
-const QArrayData QArrayData::shared_null[2] = {
+QT_INIT_PRIORITY(200) const QArrayData QArrayData::shared_null[2] = {
     { Q_REFCOUNT_INITIALIZE_STATIC, 0, 0, 0, sizeof(QArrayData) }, // shared null
     /* zero initialized terminator */};
 

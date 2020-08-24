@@ -58,7 +58,7 @@
 #include <sys/file.h>  // flock
 #endif
 
-#if defined(Q_OS_VXWORKS)
+#if defined(Q_OS_VXWORKS_GNU)
 # include <hostLib.h>
 #endif
 

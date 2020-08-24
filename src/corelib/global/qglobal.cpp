@@ -76,14 +76,6 @@
 #  include <qt_windows.h>
 #endif
 
-#if defined(Q_OS_VXWORKS) && defined(_WRS_KERNEL)
-#  include <envLib.h>
-#endif
-
-#if defined(Q_OS_VXWORKS)
-#  include <wrapper/wrapperHostLib.h>
-#endif
-
 #if defined(Q_OS_ANDROID) && !defined(Q_OS_ANDROID_EMBEDDED)
 #include <private/qjni_p.h>
 #endif

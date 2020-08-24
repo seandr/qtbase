@@ -276,7 +276,12 @@ bool QNativeSocketEnginePrivate::createNewSocket(QAbstractSocket::SocketType soc
     int type = (socketType == QAbstractSocket::UdpSocket) ? SOCK_DGRAM : SOCK_STREAM;
 
     int socket = qt_safe_socket(domain, type, protocol, O_NONBLOCK);
-    if (socket < 0 && socketProtocol == QAbstractSocket::AnyIPProtocol && errno == EAFNOSUPPORT) {
+    if (socket < 0 && socketProtocol == QAbstractSocket::AnyIPProtocol && ( errno == EAFNOSUPPORT
+#if defined (Q_OS_VXWORKS_CLANG)
+        || errno == ENOTSUP )) {
+#else
+        )) {
+#endif
         domain = AF_INET;
         socket = qt_safe_socket(domain, type, protocol, O_NONBLOCK);
         socketProtocol = QAbstractSocket::IPv4Protocol;

@@ -563,9 +563,11 @@ defineTest(qtConfResolveLibs) {
             } else: unix {
                 # Under UNIX, we look for actual shared libraries, in addition
                 # to static ones.
-                shexts = $$QMAKE_EXTENSION_SHLIB $$QMAKE_EXTENSIONS_AUX_SHLIB
-                for (ext, shexts) {
-                    lcan += $${QMAKE_PREFIX_SHLIB}$${lib}.$${ext}
+                shared {
+                    shexts = $$QMAKE_EXTENSION_SHLIB $$QMAKE_EXTENSIONS_AUX_SHLIB
+                    for (ext, shexts) {
+                        lcan += $${QMAKE_PREFIX_SHLIB}$${lib}.$${ext}
+                    }
                 }
                 lcan += \
                     $${QMAKE_PREFIX_STATICLIB}$${lib}.$${QMAKE_EXTENSION_STATICLIB}
@@ -667,7 +669,7 @@ defineReplace(qtConfGetTestIncludes) {
 # includes-var, in-paths, test-object-var
 defineTest(qtConfResolvePathIncs) {
     ret = true
-    gcc: 2 = $$qtGccSysrootifiedPaths($$2)
+    gcc:!vxworks: 2 = $$qtGccSysrootifiedPaths($$2)
     for (incdir, 2) {
         !exists($$incdir/.) {
             qtLog("Include path $$val_escape(incdir) is invalid.")

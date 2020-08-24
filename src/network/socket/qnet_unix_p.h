@@ -58,15 +58,14 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#if defined(Q_OS_VXWORKS)
-#  include <sockLib.h>
-#endif
-
 // for inet_addr
 #include <netdb.h>
 #include <arpa/inet.h>
-#if defined(Q_OS_VXWORKS)
+#if defined(Q_OS_VXWORKS_GNU)
 #  include <hostLib.h>
+#  include <sockLib.h>
+#elif defined(Q_OS_VXWORKS_CLANG)
+#  include <ioctl.h>
 #else
 #  include <resolv.h>
 #endif
@@ -98,7 +97,7 @@ static inline int qt_safe_socket(int domain, int type, int protocol, int flags =
 
     // set non-block too?
     if (flags & O_NONBLOCK)
-#if !defined(Q_OS_VXWORKS)
+#if !defined(Q_VXWORKS_GNU)
         ::fcntl(fd, F_SETFL, ::fcntl(fd, F_GETFL) | O_NONBLOCK);
 #else
      {  int on = 1;
@@ -135,7 +134,7 @@ static inline int qt_safe_accept(int s, struct sockaddr *addr, QT_SOCKLEN_T *add
 
     // set non-block too?
     if (flags & O_NONBLOCK)
-#if !defined(Q_OS_VXWORKS)
+#if !defined(Q_OS_VXWORKS_GNU)
         ::fcntl(fd, F_SETFL, ::fcntl(fd, F_GETFL) | O_NONBLOCK);
 #else
      {  int on = 1;
@@ -176,7 +175,7 @@ static inline int qt_safe_connect(int sockfd, const struct sockaddr *addr, QT_SO
 template <typename T>
 static inline int qt_safe_ioctl(int sockfd, unsigned long request, T arg)
 {
-#ifdef Q_OS_VXWORKS
+#ifdef Q_VXWORKS_GNU
     return ::ioctl(sockfd, request, (int) arg);
 #else
     return ::ioctl(sockfd, request, arg);

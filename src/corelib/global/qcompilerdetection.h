@@ -743,7 +743,9 @@
 #      define Q_COMPILER_TEMPLATE_ALIAS
 #    endif
 #    if __has_feature(cxx_thread_local)
-#      if !defined(__FreeBSD__) /* FreeBSD clang fails on __cxa_thread_atexit */
+#      if !defined(__FreeBSD__) && !defined(__vxworks)
+       /* FreeBSD clang fails on __cxa_thread_atexit
+          Vxworks No support for C++11 thread_local */
 #        define Q_COMPILER_THREAD_LOCAL
 #      endif
 #    endif
@@ -795,7 +797,9 @@
 #      define Q_COMPILER_STATIC_ASSERT
 #    endif
 #    if __has_feature(c_thread_local) && __has_include(<threads.h>)
-#      if !defined(__FreeBSD__) /* FreeBSD clang fails on __cxa_thread_atexit */
+#      if !defined(__FreeBSD__) && !defined(__vxworks)
+       /* FreeBSD clang fails on __cxa_thread_atexit
+          Vxworks No support for C++11 thread_local */
 #        define Q_COMPILER_THREAD_LOCAL
 #      endif
 #    endif
@@ -1018,21 +1022,9 @@
 #  endif // !__GLIBCXX__ && !_LIBCPP_VERSION
 # endif // Q_OS_QNX
 # if defined(Q_OS_VXWORKS)
-// with shared libraries, thread_local (__thread) usage crash RTP process
-#undef Q_COMPILER_THREAD_LOCAL
-// Not supported by Dinkumware c++ library
-#  if defined(_HAS_DINKUM_CLIB) && !defined(_HAS_CPP0X)
-// Disable C++11 features that depend on library support
-#    undef Q_COMPILER_RVALUE_REFS
-#    undef Q_COMPILER_REF_QUALIFIERS
-#    undef Q_COMPILER_UNRESTRICTED_UNIONS
-#    undef Q_COMPILER_UNICODE_STRINGS
-#    undef Q_COMPILER_NOEXCEPT
-#  endif
-#  if defined(_HAS_DINKUM_CLIB) && !defined(_HAS_CONSTEXPR)
-// The libcpp is missing constexpr keywords on important functions like std::numeric_limits<>::min()
-// Disable constexpr support on VxWorks even if the compiler supports it
-#    undef Q_COMPILER_CONSTEXPR
+// Supported with gnu 4.8.1 in SR541
+#  if __cplusplus >= 201103L && defined(Q_CC_GNU)
+#    define Q_COMPILER_CONSTEXPR
 #  endif
 # endif // Q_OS_VXWORKS
 # if (defined(Q_CC_CLANG) || defined(Q_CC_INTEL)) && defined(Q_OS_MAC) && defined(__GNUC_LIBSTD__) \

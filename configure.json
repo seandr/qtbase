@@ -1155,7 +1155,7 @@
         },
         "dbus": {
             "label": "Qt D-Bus",
-            "autoDetect": "!config.uikit && !config.android && !config.winrt",
+            "autoDetect": "!config.uikit && !config.android && !config.winrt && !config.vxworks",
             "condition": "features.thread",
             "output": [ "privateFeature", "feature" ]
         },

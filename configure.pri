@@ -621,12 +621,28 @@ defineTest(qtConfOutput_prepareOptions) {
     }
 
     vxworks {
-        $$qtConfEvaluate("features.shared") {
+        $$qtIsFeatureEnabled("shared") {
             $${currentConfig}.output.devicePro += \
                 "VXWORKS_BUILD_LIBRARY_TYPE = shared"
         } else {
             $${currentConfig}.output.devicePro += \
                 "VXWORKS_BUILD_LIBRARY_TYPE = static"
+        }
+        wind_tool = $$getenv(WIND_TOOLCHAINS)
+        wind_llvm  = $$getenv(WIND_LLVM_PATH)
+        wind_gnu  = $$getenv(WIND_GNU_PATH)
+        device = $$eval(config.input.device)
+
+        !isEmpty(device): {
+            contains(device, ".*g\+\+"):contains(wind_gnu, .*gnu-4.*) {
+                $${currentConfig}.output.devicePro += \
+                    "VXWORKS_BUILD_TOOL = gnu"
+            } else: contains(wind_tool, .*llvm.*) {
+                $${currentConfig}.output.devicePro += \
+                    "VXWORKS_BUILD_TOOL = clang"
+            } else {
+                qtConfFatalError("Incorrect device ($${device}) selected for installed VxWorks 7 version.")
+            }
         }
     }
 

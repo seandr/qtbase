@@ -51,27 +51,40 @@ typedef unsigned char u_char;
 
 #include "../posix/qplatformdefs.h"
 
-#undef QT_SOCKLEN_T
-#define QT_SOCKLEN_T            int
-
-#undef QT_OPEN_LARGEFILE
-#define O_LARGEFILE         0
-#define QT_OPEN_LARGEFILE   O_LARGEFILE
-
-#undef QT_LSTAT
-#define QT_LSTAT                ::stat
-
-#undef QT_OFF_T
-#define QT_OFF_T                long
-
-#define QT_MMAP                 ::mmap
-
-#define QT_SNPRINTF             ::snprintf
-#define QT_VSNPRINTF            ::vsnprintf
+// SR541 or older uses gnu gcc 4.8.1
+#if defined (Q_CC_GNU) && __GNUC__ == 4 && __GNUC_MINOR__ == 8
+#  undef QT_LSTAT
+#  define QT_LSTAT                ::stat
 
 //
 // Missing functions + structs
 //
+
+inline int usleep(unsigned int usec)
+{
+    div_t dt = div(usec, 1000000);
+    struct timespec ts = { dt.quot, dt.rem * 1000 };
+
+    return nanosleep(&ts, 0);
+}
+
+inline int symlink(const char *, const char *)
+{
+    errno = EIO;
+    return -1;
+}
+
+inline ssize_t readlink(const char *, char *, size_t)
+{
+    errno = EIO;
+    return -1;
+}
+
+// VxWorks7 doesn't have getpagesize()
+inline int getpagesize()
+{
+    return ::sysconf(_SC_PAGESIZE);
+}
 
 inline uid_t getuid()
 {
@@ -108,32 +121,6 @@ inline struct group *getgrgid(gid_t gid)
     }
 }
 
-inline int usleep(unsigned int usec)
-{
-    div_t dt = div(usec, 1000000);
-    struct timespec ts = { dt.quot, dt.rem * 1000 };
-
-    return nanosleep(&ts, 0);
-}
-
-inline int symlink(const char *, const char *)
-{
-    errno = EIO;
-    return -1;
-}
-
-inline ssize_t readlink(const char *, char *, size_t)
-{
-    errno = EIO;
-    return -1;
-}
-
-// VxWorks7 doesn't have getpagesize()
-inline int getpagesize()
-{
-    return ::sysconf(_SC_PAGESIZE);
-}
-
 // there's no truncate(), but ftruncate() support...
 inline int truncate(const char *path, off_t length)
 {
@@ -153,5 +140,27 @@ inline int rand_r(unsigned int *seed)
 {
     return ((*seed = *seed * 1103515245 + 12345) & RAND_MAX);
 }
+#endif
+
+#undef QT_OPEN_LARGEFILE
+#define O_LARGEFILE         0
+#define QT_OPEN_LARGEFILE   O_LARGEFILE
+
+#define QT_MMAP                 ::mmap
+
+#define QT_SNPRINTF             ::snprintf
+#define QT_VSNPRINTF            ::vsnprintf
+
+//
+// Missing functions + structs
+//
+
+#if defined (Q_CC_CLANG) && (__clang_major__ >= 10)
+/* vxworks exposes these definitions only when _POSIX_C_SOURCE >=200809L but we don't want to set this, as it hides other API */
+#  ifndef UTIME_NOW
+#  define UTIME_NOW       ((1l << 30) - 1l)
+#  define UTIME_OMIT      ((1l << 30) - 2l)
+#  endif
+#endif
 
 #endif /* QPLATFORMDEFS_H */

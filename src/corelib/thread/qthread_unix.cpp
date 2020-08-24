@@ -126,7 +126,7 @@ static pthread_key_t current_thread_data_key;
 
 static void destroy_current_thread_data(void *p)
 {
-#if defined(Q_OS_VXWORKS)
+#if defined(Q_OS_VXWORKS_GNU)
     // Calling setspecific(..., 0) sets the value to 0 for ALL threads.
     // The 'set to 1' workaround adds a bit of an overhead though,
     // since this function is called twice now.
@@ -151,7 +151,7 @@ static void destroy_current_thread_data(void *p)
     // called again (POSIX allows implementations to call destructor
     // functions repeatedly until all values are zero)
     pthread_setspecific(current_thread_data_key,
-#if defined(Q_OS_VXWORKS)
+#if defined(Q_OS_VXWORKS_GNU)
                                                  (void *)1);
 #else
                                                  0);
@@ -609,7 +609,7 @@ static bool calculateUnixPriority(int priority, int *sched_policy, int *sched_pr
 
     int prio_min;
     int prio_max;
-#if defined(Q_OS_VXWORKS) && defined(VXWORKS_DKM)
+#if defined(Q_OS_VXWORKS)
     // for other scheduling policies than SCHED_RR or SCHED_FIFO
     prio_min = SCHED_FIFO_LOW_PRI;
     prio_max = SCHED_FIFO_HIGH_PRI;

@@ -104,6 +104,10 @@ extern "C" NSString *NSTemporaryDirectory();
 #  undef STATX_BASIC_STATS
 #endif
 
+#if defined(Q_OS_VXWORKS_CLANG)
+#include <grp.h>
+#endif
+
 #ifndef STATX_ALL
 struct statx { mode_t stx_mode; };      // dummy
 #endif
@@ -692,7 +696,7 @@ QFileSystemEntry QFileSystemEngine::canonicalName(const QFileSystemEntry &entry,
     if (entry.isRoot())
         return entry;
 
-#if !defined(Q_OS_MAC) && !defined(Q_OS_QNX) && !defined(Q_OS_ANDROID) && !defined(Q_OS_HAIKU) && _POSIX_VERSION < 200809L
+#if !defined(Q_OS_MAC) && !defined(Q_OS_QNX) && !defined(Q_OS_ANDROID) && !defined(Q_OS_HAIKU) && !defined(Q_OS_VXWORKS_CLANG) && _POSIX_VERSION < 200809L
     // realpath(X,0) is not supported
     Q_UNUSED(data);
     return QFileSystemEntry(slowCanonicalized(absoluteName(entry).filePath()));
@@ -725,6 +729,18 @@ QFileSystemEntry QFileSystemEngine::canonicalName(const QFileSystemEntry &entry,
         }
     }
 
+# elif defined(Q_OS_VXWORKS_CLANG)
+    // realpath does not work, but there is GNU extension so use it
+    // bad thing that it will return valid filename even if the file
+    // does not exist, so we need to check if there is error for that
+    // and that file does not really exist.
+    ret = canonicalize_file_name(entry.nativeFilePath().constData());
+    if (errno == ENOENT) {
+        if (!QFile::exists(entry.nativeFilePath())) {
+            free(ret);
+            ret = NULL;
+        }
+    }
 # else
 #  if _POSIX_VERSION >= 200801L
     ret = realpath(entry.nativeFilePath().constData(), (char*)0);
@@ -1507,27 +1523,8 @@ QString QFileSystemEngine::tempPath()
 bool QFileSystemEngine::setCurrentPath(const QFileSystemEntry &path)
 {
     int r;
-#ifdef Q_OS_VXWORKS
-    auto currentPath = path.nativeFilePath();
-    char currentName[PATH_MAX + 1];
-    if (::getcwd(currentName, PATH_MAX)) {
-        const QByteArray currentDir(currentName);
-        // check is device prefix missing from the path
-        const auto devicePrefix = currentDir.left(currentDir.indexOf('/', 1) + 1);
-        if (currentPath.left(devicePrefix.length()) != devicePrefix) {
-            // prepend device prefix to the path
-            if (currentPath.at(0) == '/')
-                currentPath = currentPath.prepend(devicePrefix.left(devicePrefix.length() - 1));
-            else
-                currentPath = currentPath.prepend(devicePrefix);
-        }
-    }
-    r = QT_CHDIR(currentPath.constData());
-#else
     r = QT_CHDIR(path.nativeFilePath().constData());
-#endif
     return r >= 0;
-
 }
 
 QFileSystemEntry QFileSystemEngine::currentPath()
@@ -1542,13 +1539,6 @@ QFileSystemEntry QFileSystemEngine::currentPath()
 #else
     char currentName[PATH_MAX+1];
     if (::getcwd(currentName, PATH_MAX)) {
-#if defined(Q_OS_VXWORKS) && defined(VXWORKS_VXSIM)
-        QByteArray dir(currentName);
-        if (dir.indexOf(':') < dir.indexOf('/'))
-            dir.remove(0, dir.indexOf(':')+1);
-
-        qstrncpy(currentName, dir.constData(), PATH_MAX);
-#endif
         result = QFileSystemEntry(QByteArray(currentName), QFileSystemEntry::FromNativePath());
     }
 # if defined(QT_DEBUG)

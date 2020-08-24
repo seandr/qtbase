@@ -113,7 +113,8 @@
                     "condition": "config.win32 && !features.shared"
                 },
                 { "libs": "-licuin -licuuc -licudt", "condition": "config.win32 && features.shared" },
-                { "libs": "-licui18n -licuuc -licudata", "condition": "!config.win32" }
+                { "libs": "-licui18n -licuuc -licudata", "condition": "!config.win32" },
+                { "libs": "-lsicui18n -lsicuuc -lsicudata", "condition": "!config.win32 && features.static" }
             ],
             "use": [
                 { "lib": "libdl", "condition": "features.dlopen" }
@@ -162,14 +163,18 @@
             "test": {
                 "main": [
                     "dlclose(dlopen(0, 0));",
+                    "#ifndef __vxworks",
                     "dlsym(RTLD_DEFAULT, 0);",
+                    "#else",
+                    "dlsym((void*)RTLD_GLOBAL, 0);",
+                    "#endif",
                     "dlerror();"
                 ]
             },
             "headers": "dlfcn.h",
             "sources": [
                 "",
-                "-ldl"
+                { "libs": "-ldl", "condition": "(!config.vxworks && !config.static)" }
             ]
         },
         "librt": {

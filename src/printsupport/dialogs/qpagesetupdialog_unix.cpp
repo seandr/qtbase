@@ -49,7 +49,9 @@
 
 #include "qpainter.h"
 #include "qprintdialog.h"
+#if QT_CONFIG(textcodec)
 #include "qtextcodec.h"
+#endif
 #include "qdialogbuttonbox.h"
 #include <ui_qpagesetupwidget.h>
 

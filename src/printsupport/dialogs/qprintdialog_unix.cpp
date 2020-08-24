@@ -51,7 +51,9 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qdir.h>
 #include <QtCore/qglobal.h>
+#if QT_CONFIG(textcodec)
 #include <QtCore/qtextcodec.h>
+#endif
 #include <QtGui/qevent.h>
 #if QT_CONFIG(filesystemmodel)
 #include <QtWidgets/qfilesystemmodel.h>

@@ -140,6 +140,7 @@ qtConfig(system-zlib) {
 }
 
 qtConfig(icu) {
+    static: DEFINES += U_STATIC_IMPLEMENTATION
     QMAKE_USE_PRIVATE += icu
 
     SOURCES += tools/qlocale_icu.cpp \
@@ -164,7 +165,7 @@ qtConfig(timezone) {
         SOURCES += tools/qtimezoneprivate_mac.mm
     } else: android:!android-embedded: {
         SOURCES += tools/qtimezoneprivate_android.cpp
-    } else: unix: {
+    } else: unix:!vxworks: {
         SOURCES += tools/qtimezoneprivate_tz.cpp
         qtConfig(icu): SOURCES += tools/qtimezoneprivate_icu.cpp
     } else: qtConfig(icu): {

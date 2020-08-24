@@ -2221,7 +2221,7 @@ static int qt_timezone()
         return -t.tm_gmtoff + (t.tm_isdst ? (long)SECS_PER_HOUR : 0L);
 #elif defined(Q_OS_INTEGRITY)
         return 0;
-#elif defined(Q_OS_VXWORKS)
+#elif defined(Q_OS_VXWORKS_GNU)
         struct timeval tv;
         gettimeofday(&tv, 0);
         time_t ltime = tv.tv_sec;
@@ -2245,7 +2245,7 @@ static QString qt_tzname(QDateTimePrivate::DaylightStatus daylightStatus)
         return QString();
     return QString::fromLocal8Bit(name);
 #else
-#ifdef Q_OS_VXWORKS
+#ifdef Q_OS_VXWORKS_GNU
     const char *tzname[2] = { "std", "dst" };
 #endif
     return QString::fromLocal8Bit(tzname[isDst]);
