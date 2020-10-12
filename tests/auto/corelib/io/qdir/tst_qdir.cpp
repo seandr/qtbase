@@ -526,7 +526,7 @@ void tst_QDir::removeRecursivelyFailure()
     file.write("Hello");
     file.close();
 
-#ifdef Q_OS_UNIX
+#if defined(Q_OS_UNIX) && !defined(Q_OS_VXWORKS)
     QFile dirAsFile(path); // yay, I have to use QFile to change a dir's permissions...
     QVERIFY(dirAsFile.setPermissions(QFile::Permissions(0))); // no permissions
 
@@ -2219,6 +2219,8 @@ void tst_QDir::equalityOperator_data()
     QString pathinroot("/system/..");
 #elif defined(Q_OS_HAIKU)
     QString pathinroot("/boot/..");
+#elif defined(Q_OS_VXWORKS)
+    QString pathinroot("/tmp/..");
 #else
     QString pathinroot("/usr/..");
 #endif

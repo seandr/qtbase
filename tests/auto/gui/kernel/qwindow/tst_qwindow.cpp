@@ -51,6 +51,12 @@ static bool isPlatformWinRT()
     return isWinRT;
 }
 
+static bool isPlatformEglFS()
+{
+    static const bool isEglFS = !QGuiApplication::platformName().compare(QLatin1String("eglfs"), Qt::CaseInsensitive);
+    return isEglFS;
+}
+
 class tst_QWindow: public QObject
 {
     Q_OBJECT
@@ -407,15 +413,15 @@ void tst_QWindow::resizeEventAfterResize()
     // Make sure we get a resizeEvent after calling resize
     window.resize(m_testWindowSize);
 
-    if (isPlatformWinRT())
-        QEXPECT_FAIL("", "Winrt windows are fullscreen by default.", Continue);
+    if (isPlatformWinRT() || isPlatformEglFS())
+        QEXPECT_FAIL("", "Winrt/eglfs windows are fullscreen by default.", Continue);
     QTRY_COMPARE(window.received(QEvent::Resize), 2);
 }
 
 void tst_QWindow::exposeEventOnShrink_QTBUG54040()
 {
-    if (isPlatformWinRT())
-        QSKIP("", "WinRT does not support non-maximized/non-fullscreen top level windows. QTBUG-54528", Continue);
+    if (isPlatformWinRT() || isPlatformEglFS())
+        QSKIP("", "WinRT/eglfs does not support non-maximized/non-fullscreen top level windows. QTBUG-54528", Continue);
     Window window;
     window.setGeometry(QRect(m_availableTopLeft + QPoint(80, 80), m_testWindowSize));
     window.setTitle(QTest::currentTestFunction());
@@ -603,8 +609,8 @@ void tst_QWindow::childWindowPositioning()
 {
     if (isPlatformWayland())
         QSKIP("Wayland: This is flaky (protocol errors for xdg-shell v6). See QTBUG-67648.");
-    else if (isPlatformWinRT())
-        QSKIP("WinRT does not support child windows.");
+    else if (isPlatformWinRT() || isPlatformEglFS())
+        QSKIP("WinRT/eglfs does not support child windows.");
 
     const QPoint topLeftOrigin(0, 0);
 
@@ -1888,7 +1894,7 @@ void tst_QWindow::initialSize()
     w.setTitle(QLatin1String(QTest::currentTestFunction()));
     w.setWidth(m_testWindowSize.width());
     w.showNormal();
-    if (isPlatformWinRT())
+    if (isPlatformWinRT() || isPlatformEglFS())
         QEXPECT_FAIL("", "WinRT shows windows as fullscreen by default.", Continue);
     QTRY_COMPARE(w.width(), m_testWindowSize.width());
     QTRY_VERIFY(w.height() > 0);
@@ -1901,8 +1907,8 @@ void tst_QWindow::initialSize()
     w.showNormal();
 
     const QSize expectedSize = testSize;
-    if (isPlatformWinRT())
-        QEXPECT_FAIL("", "WinRT shows windows as fullscreen by default.", Continue);
+    if (isPlatformWinRT() || isPlatformEglFS())
+        QEXPECT_FAIL("", "WinRT/eglfs shows windows as fullscreen by default.", Continue);
     QTRY_COMPARE(w.size(), expectedSize);
     }
 }
@@ -2081,8 +2087,8 @@ void tst_QWindow::modalWindowPosition()
     window.setModality(Qt::WindowModal);
     window.show();
     QVERIFY(QTest::qWaitForWindowExposed(&window));
-    if (isPlatformWinRT())
-        QEXPECT_FAIL("", "WinRT windows are fullscreen by default.", Continue);
+    if (isPlatformWinRT() || isPlatformEglFS())
+        QEXPECT_FAIL("", "WinRT/eglfs windows are fullscreen by default.", Continue);
     QCOMPARE(window.geometry(), origGeo);
 }
 
@@ -2276,7 +2282,7 @@ void tst_QWindow::spuriousMouseMove()
     const QString &platformName = QGuiApplication::platformName();
     if (platformName == QLatin1String("offscreen") || platformName == QLatin1String("cocoa"))
         QSKIP("No enter events sent");
-    if (isPlatformWayland() || isPlatformWinRT())
+    if (isPlatformWayland() || isPlatformWinRT() || isPlatformEglFS())
         QSKIP("QCursor::setPos() is not supported on this platform");
     const QRect screenGeometry = QGuiApplication::primaryScreen()->geometry();
     const QPoint center = screenGeometry.center();

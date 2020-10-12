@@ -679,6 +679,7 @@ void tst_QGLThreads::painterOnFboInThread()
 
 int main(int argc, char **argv)
 {
+    QTEST_OPENGL_SHAREDCONTEXTS
     QApplication app(argc, argv);
     QTEST_DISABLE_KEYPAD_NAVIGATION \
 

@@ -34,7 +34,7 @@
 #include <sys/resource.h>
 #endif
 
-#ifdef Q_OS_VXWORKS
+#if defined(Q_OS_VXWORKS_GNU)
 #include <ioLib.h>
 typedef size_t rlim_t;
 #endif

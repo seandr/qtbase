@@ -1463,6 +1463,9 @@ void tst_QTextStream::pos3LargeFile()
     if (EmulationDetector::isRunningArmOnX86())
         QSKIP("Running QTextStream::pos() in tight loop is too slow on emulator");
 
+#if defined(Q_OS_VXWORKS)
+    QSKIP("Running QTextStream::pos() in tight loop is too slow on VxWorks");
+#endif
     {
         QFile file(testFileName);
         file.open(QIODevice::WriteOnly | QIODevice::Text);

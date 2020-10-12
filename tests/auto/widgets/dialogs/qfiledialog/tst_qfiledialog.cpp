@@ -1517,6 +1517,12 @@ void tst_QFiledialog::tildeExpansion()
 #endif // QT_BUILD_INTERNAL
 #endif
 
+static bool isPlatformEglFS()
+{
+    static const bool isEglFS = !QGuiApplication::platformName().compare(QLatin1String("eglfs"), Qt::CaseInsensitive);
+    return isEglFS;
+}
+
 class DialogRejecter : public QObject
 {
     Q_OBJECT
@@ -1537,6 +1543,9 @@ public slots:
 
 void tst_QFiledialog::rejectModalDialogs()
 {
+    if (isPlatformEglFS())
+        QSKIP("eglfs does not work with this test.");
+
     // QTBUG-38672 , static functions should return empty Urls
     DialogRejecter dr;
 
@@ -1596,6 +1605,9 @@ public:
 
 void tst_QFiledialog::focusObjectDuringDestruction()
 {
+    if (isPlatformEglFS())
+        QSKIP("eglfs does not work with this test.");
+
     QTRY_VERIFY(QGuiApplication::topLevelWindows().isEmpty());
 
     qtbug57193DialogRejecter dialogRejecter;

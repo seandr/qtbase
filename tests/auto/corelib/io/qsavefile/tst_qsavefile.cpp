@@ -34,7 +34,7 @@
 #include <qdir.h>
 #include <qset.h>
 
-#if defined(Q_OS_UNIX) && !defined(Q_OS_VXWORKS)
+#if defined(Q_OS_UNIX) && !defined(Q_OS_VXWORKS_GNU)
 #include <unistd.h> // for geteuid
 #endif
 
@@ -134,6 +134,9 @@ void tst_QSaveFile::transactionalWrite()
 // to retry saving on failure. Create a read-only file first (Unix only)
 void tst_QSaveFile::retryTransactionalWrite()
 {
+#if defined(QT_NO_FILESYSTEMPERMISSIONS)
+    QSKIP("No file permissions");
+#endif
 #ifndef Q_OS_UNIX
     QSKIP("This test is Unix only");
 #endif
@@ -233,11 +236,13 @@ void tst_QSaveFile::transactionalWriteNoPermissionsOnDir_data()
 
 void tst_QSaveFile::transactionalWriteNoPermissionsOnDir()
 {
+#if defined(QT_NO_FILESYSTEMPERMISSIONS)
+    QSKIP("No file permissions");
+#endif
 #ifdef Q_OS_UNIX
-#if !defined(Q_OS_VXWORKS)
     if (::geteuid() == 0)
         QSKIP("Test is not applicable with root privileges");
-#endif
+
     QFETCH(bool, directWriteFallback);
     QTemporaryDir dir;
     QVERIFY2(dir.isValid(), qPrintable(dir.errorString()));
@@ -292,7 +297,10 @@ void tst_QSaveFile::transactionalWriteNoPermissionsOnDir()
 
 void tst_QSaveFile::transactionalWriteNoPermissionsOnFile()
 {
-#if defined(Q_OS_UNIX) && !defined(Q_OS_VXWORKS)
+#if defined(QT_NO_FILESYSTEMPERMISSIONS)
+    QSKIP("No file permissions");
+#endif
+#if defined(Q_OS_UNIX)
     if (::geteuid() == 0)
         QSKIP("Test is not applicable with root privileges");
 #endif
@@ -342,7 +350,10 @@ void tst_QSaveFile::transactionalWriteCanceled()
 
 void tst_QSaveFile::transactionalWriteErrorRenaming()
 {
-#if defined(Q_OS_UNIX) && !defined(Q_OS_VXWORKS)
+#if defined(QT_NO_FILESYSTEMPERMISSIONS)
+    QSKIP("No file permissions");
+#endif
+#if defined(Q_OS_UNIX)
     if (::geteuid() == 0)
         QSKIP("Test is not applicable with root privileges");
 #endif
@@ -369,6 +380,7 @@ void tst_QSaveFile::transactionalWriteErrorRenaming()
 #endif
 
     // The saving should fail.
+
     QVERIFY(!file.commit());
 #ifdef Q_OS_UNIX
     QVERIFY(!QFile::exists(targetFile)); // renaming failed

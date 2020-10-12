@@ -21,16 +21,15 @@ installed_cmake.depends = cmake
 
 uikit: SUBDIRS  = corelib gui
 
-vxworks:                                    SUBDIRS -= printsupport
 cross_compile:                              SUBDIRS -= tools cmake installed_cmake
 else:!qtConfig(process):                    SUBDIRS -= tools
 winrt|!qtHaveModule(opengl):                SUBDIRS -= opengl
 !qtHaveModule(gui):                         SUBDIRS -= gui
 !qtHaveModule(widgets):                     SUBDIRS -= widgets
-!qtHaveModule(printsupport):                SUBDIRS -= printsupport
+vxworks|!qtHaveModule(printsupport):        SUBDIRS -= printsupport
 !qtHaveModule(concurrent):                  SUBDIRS -= concurrent
 winrt|!qtHaveModule(network):               SUBDIRS -= network
-!qtHaveModule(dbus):                        SUBDIRS -= dbus
+vxworks|!qtHaveModule(dbus):                SUBDIRS -= dbus
 !qtHaveModule(xml):                         SUBDIRS -= xml
 !qtHaveModule(sql):                         SUBDIRS -= sql
 

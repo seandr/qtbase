@@ -526,7 +526,12 @@ void tst_QTemporaryFile::openOnRootDrives()
 
 void tst_QTemporaryFile::stressTest()
 {
+#if defined(Q_OS_VXWORKS)
+    // This is configurable value
+    const int iterations = 300;
+#else
     const int iterations = 1000;
+#endif
 
     QSet<QString> names;
     for (int i = 0; i < iterations; ++i) {

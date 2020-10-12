@@ -144,8 +144,10 @@ private slots:
     void bcp47Name_data();
     void bcp47Name();
 
+#ifndef QT_NO_SYSTEMLOCALE
     void systemLocale_data();
     void systemLocale();
+#endif
 
     // *** ORDER-DEPENDENCY *** (This Is Bad.)
     // Test order is determined by order of declaration here: *all* tests that
@@ -1767,6 +1769,7 @@ void tst_QLocale::formatTimeZone()
     const QString cest(QStringLiteral("CEST"));
 #endif
 
+#if QT_CONFIG(timezone)
     QDateTime dt6(QDate(2013, 1, 1), QTime(0, 0, 0), QTimeZone("Europe/Berlin"));
 #ifdef Q_OS_WIN
     QEXPECT_FAIL("", "QTimeZone windows backend only returns long name", Continue);
@@ -1778,6 +1781,7 @@ void tst_QLocale::formatTimeZone()
     QEXPECT_FAIL("", "QTimeZone windows backend only returns long name", Continue);
 #endif
     QCOMPARE(enUS.toString(dt7, "t"), cest);
+#endif
 
     // Current datetime should return current abbreviation
     QCOMPARE(enUS.toString(QDateTime::currentDateTime(), "t"),
@@ -2946,6 +2950,7 @@ void tst_QLocale::bcp47Name()
     QCOMPARE(QLocale(QLatin1String(QTest::currentDataTag())).bcp47Name(), expect);
 }
 
+#ifndef QT_NO_SYSTEMLOCALE
 class MySystemLocale : public QSystemLocale
 {
 public:
@@ -2993,6 +2998,7 @@ void tst_QLocale::systemLocale()
     QCOMPARE(QLocale(), originalLocale);
     QCOMPARE(QLocale::system(), originalSystemLocale);
 }
+#endif //QT_NO_SYSTEMLOCALE
 
 QTEST_MAIN(tst_QLocale)
 #include "tst_qlocale.moc"

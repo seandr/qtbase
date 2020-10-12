@@ -2110,7 +2110,7 @@ void tst_QRegularExpression::threadSafety_data()
 
     // pcre2 does not support JIT for winrt. As this test row takes a long time without JIT we skip
     // it for winrt as it might time out in COIN.
-#ifndef Q_OS_WINRT
+#if !defined(Q_OS_WINRT) || !defined(Q_OS_VXWORKS)
     {
         QString subject = "ab";
         subject.append(QString(512*1024, QLatin1Char('x')));

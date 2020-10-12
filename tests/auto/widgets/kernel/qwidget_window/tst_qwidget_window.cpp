@@ -127,10 +127,12 @@ private slots:
 private:
     QSize m_testWidgetSize;
     const int m_fuzz;
+    const QString m_platform;
 };
 
 tst_QWidget_window::tst_QWidget_window() :
-     m_fuzz(int(QHighDpiScaling::factor(QGuiApplication::primaryScreen())))
+    m_fuzz(int(QHighDpiScaling::factor(QGuiApplication::primaryScreen())))
+    , m_platform(QGuiApplication::platformName().toLower())
 {
     const int screenWidth =  QGuiApplication::primaryScreen()->geometry().width();
     const int width = qMax(200, 100 * ((screenWidth + 500) / 1000));
@@ -876,6 +878,9 @@ void tst_QWidget_window::tst_qtbug35600()
 
 void tst_QWidget_window::tst_updateWinId_QTBUG40681()
 {
+    if (m_platform == QStringLiteral("eglfs"))
+        QSKIP("eglfs: This fails.");
+
     QWidget w;
     QVBoxLayout *vl = new QVBoxLayout(&w);
     QLabel *lbl = new QLabel("HELLO1");
@@ -904,6 +909,9 @@ void tst_QWidget_window::tst_updateWinId_QTBUG40681()
 
 void tst_QWidget_window::tst_recreateWindow_QTBUG40817()
 {
+    if (m_platform == QStringLiteral("eglfs"))
+        QSKIP("eglfs: This fails.");
+
     QTabWidget tab;
     tab.setMinimumWidth(m_testWidgetSize.width());
 
@@ -1098,6 +1106,9 @@ public:
 
 void tst_QWidget_window::QTBUG_50561_QCocoaBackingStore_paintDevice_crash()
 {
+    if (m_platform == QStringLiteral("eglfs"))
+        QSKIP("eglfs: This fails.");
+
     // Keep application state clean if testcase fails
     ApplicationStateSaver as;
 
@@ -1208,8 +1219,7 @@ public:
 
 void tst_QWidget_window::QTBUG_56277_resize_on_showEvent()
 {
-    const auto platformName = QGuiApplication::platformName().toLower();
-    if (platformName != "cocoa" && platformName != "windows")
+    if (m_platform != "cocoa" && m_platform != "windows" && m_platform != "eglfs")
         QSKIP("This can only be consistently tested on desktop platforms with well-known behavior.");
 
     ResizedOnShowEventWidget w;

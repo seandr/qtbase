@@ -984,6 +984,9 @@ void tst_QFileInfo::permission_data()
 
 void tst_QFileInfo::permission()
 {
+#if defined(QT_NO_FILESYSTEMPERMISSIONS)
+    QSKIP("No file permissions");
+#endif
     QFETCH(QString, file);
     QFETCH(int, perms);
     QFETCH(bool, expected);

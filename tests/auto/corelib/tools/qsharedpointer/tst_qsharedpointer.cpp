@@ -47,7 +47,7 @@
 #include <sys/resource.h>
 #endif
 
-#ifdef Q_OS_VXWORKS
+#if defined(Q_OS_VXWORKS_GNU)
 #include <ioLib.h>
 typedef size_t rlim_t;
 #endif
@@ -1824,6 +1824,7 @@ void tst_QSharedPointer::creatingVariadic()
         QCOMPARE(ptr->i, i);
         QCOMPARE(&ptr->i, &i);
     }
+#ifdef Q_COMPILER_RVALUE_REFS
     {
         NoDefaultConstructorRRef1(1); // control check
         QSharedPointer<NoDefaultConstructorRRef1> ptr = QSharedPointer<NoDefaultConstructorRRef1>::create(1);
@@ -1833,6 +1834,7 @@ void tst_QSharedPointer::creatingVariadic()
         ptr = QSharedPointer<NoDefaultConstructorRRef1>::create(std::move(i));
         QCOMPARE(ptr->i, i);
     }
+#endif
     {
         QString text("Hello, World");
         NoDefaultConstructorRef2(text, 1); // control check

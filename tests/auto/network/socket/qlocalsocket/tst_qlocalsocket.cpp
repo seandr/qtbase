@@ -46,7 +46,7 @@
 #include <QtCore/qt_windows.h>
 #endif
 
-#ifdef Q_OS_VXWORKS
+#ifdef Q_OS_VXWORKS_GNU
 #  include <sockLib.h>
 #endif
 
@@ -1048,7 +1048,7 @@ void tst_QLocalSocket::longPath()
 void tst_QLocalSocket::waitForDisconnect()
 {
 #ifdef Q_OS_VXWORKS
-    QFAIL("TODO: Does not work with VxWorks");
+    QSKIP("TODO: Does not work with VxWorks");
 #else
     QString name = serverName("tst_localsocket");
     LocalServer server;
@@ -1070,7 +1070,7 @@ void tst_QLocalSocket::waitForDisconnect()
 void tst_QLocalSocket::waitForDisconnectByServer()
 {
 #ifdef Q_OS_VXWORKS
-    QFAIL("TODO: Does not work with VxWorks");
+    QSKIP("TODO: Does not work with VxWorks");
 #else
     QString name = serverName("tst_localsocket");
     LocalServer server;
@@ -1218,7 +1218,7 @@ void tst_QLocalSocket::writeToClientAndDisconnect_data()
 void tst_QLocalSocket::writeToClientAndDisconnect()
 {
 #ifdef Q_OS_VXWORKS
-    QFAIL("Does not work with VxWorks");
+    QSKIP("Does not work with VxWorks");
 #else
     QFETCH(int, chunks);
     QLocalServer server;

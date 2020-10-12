@@ -844,6 +844,9 @@ public:
 
 void tst_QGL::graphicsViewClipping()
 {
+#if defined(Q_OS_VXWORKS)
+    QSKIP("Crashes on VXWORKS");
+#endif
     const int size = 64;
     UnclippedWidget *widget = new UnclippedWidget;
     widget->setFixedSize(size, size);
@@ -1411,6 +1414,9 @@ void tst_QGL::glFBOUseInGLWidget()
 
 void tst_QGL::glWidgetReparent()
 {
+#if defined(Q_OS_VXWORKS)
+    QSKIP("Crashes on VXWORKS");
+#endif
     // Try it as a top-level first:
     GLWidget *widget = new GLWidget;
     widget->setObjectName(QStringLiteral("glWidget1"));
@@ -1779,6 +1785,9 @@ protected:
 
 void tst_QGL::replaceClipping()
 {
+#if defined(Q_OS_VXWORKS)
+    QSKIP("Crashes on VXWORKS");
+#endif
     ReplaceClippingGLWidget glw;
     glw.resize(300, 300);
     glw.show();
@@ -1896,6 +1905,9 @@ protected:
 
 void tst_QGL::clipTest()
 {
+#if defined(Q_OS_VXWORKS)
+    QSKIP("Crashes on VXWORKS");
+#endif
     ClipTestGLWidget glw;
     glw.resize(220, 220);
     glw.showNormal();
@@ -1926,6 +1938,9 @@ void tst_QGL::clipTest()
 
 void tst_QGL::destroyFBOAfterContext()
 {
+#if defined(Q_OS_VXWORKS)
+    QSKIP("Crashes on VXWORKS");
+#endif
     if (!QGLFramebufferObject::hasOpenGLFramebufferObjects())
         QSKIP("QGLFramebufferObject not supported on this platform");
 
@@ -2443,6 +2458,9 @@ private:
 
 void tst_QGL::threadImages()
 {
+#if defined(Q_OS_VXWORKS)
+    QSKIP("Crashes on VXWORKS");
+#endif
     ThreadImages::Widget *widget = new ThreadImages::Widget;
     widget->show();
 
@@ -2455,6 +2473,9 @@ void tst_QGL::threadImages()
 
 void tst_QGL::nullRectCrash()
 {
+#if defined(Q_OS_VXWORKS)
+    QSKIP("Crashes on VXWORKS");
+#endif
     if (!QGLFramebufferObject::hasOpenGLFramebufferObjects())
         QSKIP("QGLFramebufferObject not supported on this platform");
 
@@ -2477,6 +2498,9 @@ void tst_QGL::nullRectCrash()
 
 void tst_QGL::extensions()
 {
+#if defined(Q_OS_VXWORKS)
+    QSKIP("Crashes on VXWORKS");
+#endif
     QGLWidget glw;
     glw.makeCurrent();
 

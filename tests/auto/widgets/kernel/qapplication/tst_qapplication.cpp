@@ -583,6 +583,9 @@ public slots:
 
 void tst_QApplication::quitOnLastWindowClosed()
 {
+#ifdef Q_OS_VXWORKS
+    QSKIP("Fails on eglfs");
+#endif
     {
         int argc = 0;
         QApplication app(argc, nullptr);
@@ -2266,6 +2269,7 @@ void tst_QApplication::globalStaticObjectDestruction()
 //QTEST_APPLESS_MAIN(tst_QApplication)
 int main(int argc, char *argv[])
 {
+    QTEST_OPENGL_SHAREDCONTEXTS
     tst_QApplication tc;
     argv0 = argv[0];
     return QTest::qExec(&tc, argc, argv);

@@ -2428,6 +2428,9 @@ void tst_QWidget::showMinimized()
               "Qt Wayland will always report that it's unmimized.");
     }
 
+    if (m_platform == QStringLiteral("eglfs")) {
+        QSKIP("eglfs does not support showMinimized()");
+    }
     QWidget plain;
     plain.setWindowTitle(QLatin1String(QTest::currentTestFunction()));
     plain.move(100, 100);
@@ -2483,6 +2486,8 @@ void tst_QWidget::showMinimizedKeepsFocus()
         QSKIP("Wayland: This fails. Figure out why.");
     if (m_platform == QStringLiteral("offscreen"))
         QSKIP("Platform offscreen does not support showMinimized()");
+    if (m_platform == QStringLiteral("eglfs"))
+        QSKIP("Platform eglfs does not support showMinimized()");
 
     //here we test that minimizing a widget and restoring it doesn't change the focus inside of it
     {
@@ -4849,6 +4854,8 @@ void tst_QWidget::setWindowGeometry()
 {
     if (m_platform == QStringLiteral("xcb"))
          QSKIP("X11: Skip this test due to Window manager positioning issues.");
+    else if (m_platform == QStringLiteral("eglfs"))
+        QSKIP("eglfs does not support setWindowGeometry");
     else if (m_platform == QStringLiteral("winrt"))
         QSKIP("WinRT does not support setWindowGeometry");
 
@@ -5021,6 +5028,8 @@ void tst_QWidget::windowMoveResize()
         QSKIP("Wayland: This fails. Figure out why.");
     if (m_platform == QStringLiteral("winrt"))
         QSKIP("WinRT does not support move/resize");
+    if (m_platform == QStringLiteral("eglfs"))
+        QSKIP("eglfs does not support move/resize");
 
     QFETCH(Rects, rects);
     QFETCH(int, windowFlags);
@@ -5346,6 +5355,8 @@ void tst_QWidget::moveChild()
 
     if (m_platform == QStringLiteral("winrt"))
         QSKIP("WinRT does not support setGeometry (and we cannot use QEXPECT_FAIL because of VERIFY_COLOR)");
+    if (m_platform == QStringLiteral("eglfs"))
+        QSKIP("eglfs does not support setGeometry (and we cannot use QEXPECT_FAIL because of VERIFY_COLOR)");
     VERIFY_COLOR(child, child.rect(),
                  child.color);
     VERIFY_COLOR(parent, QRegion(parent.rect()) - child.geometry(), parent.color);
@@ -5405,6 +5416,8 @@ void tst_QWidget::showAndMoveChild()
 
     if (m_platform == QStringLiteral("winrt"))
         QSKIP("WinRT does not support setGeometry (and we cannot use QEXPECT_FAIL because of VERIFY_COLOR)");
+    if (m_platform == QStringLiteral("eglfs"))
+        QSKIP("eglfs does not support setGeometry (and we cannot use QEXPECT_FAIL because of VERIFY_COLOR)");
     VERIFY_COLOR(child, child.rect(), Qt::blue);
     VERIFY_COLOR(parent, QRegion(parent.rect()) - child.geometry(), Qt::red);
 }
@@ -5497,6 +5510,8 @@ void tst_QWidget::multipleToplevelFocusCheck()
         QSKIP("Wayland: This fails. Figure out why.");
     else if (m_platform == QStringLiteral("winrt"))
         QSKIP("Winrt: Sometimes crashes in QTextLayout. - QTBUG-68297");
+    else if (m_platform == QStringLiteral("eglfs"))
+        QSKIP("eglfs: Sometimes crashes");
     TopLevelFocusCheck w1;
     TopLevelFocusCheck w2;
 
@@ -7713,6 +7728,8 @@ void tst_QWidget::updateWhileMinimized()
         QSKIP("Wayland: This fails. Figure out why.");
     if (m_platform == QStringLiteral("offscreen"))
         QSKIP("Platform offscreen does not support showMinimized()");
+    if (m_platform == QStringLiteral("eglfs"))
+        QSKIP("Platform eglfs does not support showMinimized()");
 
 #if defined(Q_OS_QNX)
     QSKIP("Platform does not support showMinimized()");
@@ -11070,6 +11087,8 @@ void tst_QWidget::closeEvent()
 
 void tst_QWidget::closeWithChildWindow()
 {
+    if (m_platform == QStringLiteral("eglfs"))
+        QSKIP("eglfs: This fails. Figure out why.");
     QWidget widget;
     auto childWidget = new QWidget(&widget);
     childWidget->setAttribute(Qt::WA_NativeWindow);

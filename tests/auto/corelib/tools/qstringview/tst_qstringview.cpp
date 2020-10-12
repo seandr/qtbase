@@ -106,7 +106,7 @@ Q_STATIC_ASSERT(CanConvert<const std::u16string&>::value);
 //
 
 Q_CONSTEXPR bool CanConvertFromWCharT =
-#if defined(Q_OS_WIN) || defined(Q_OS_VXWORKS)
+#if defined(Q_OS_WIN) || defined(Q_OS_VXWORKS_GNU)
         true
 #else
         false

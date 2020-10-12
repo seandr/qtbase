@@ -8,7 +8,7 @@ VERSION = 2
 QT = core
 
 msvc: DEFINES += WIN32_MSVC
-vxworks: QMAKE_LFLAGS_SHLIB += -Wl,-lc -non-static -shared
+vxworks_gnu: QMAKE_LFLAGS_SHLIB += -Wl,-lc -non-static -shared
 
 # Force a copy of the library to have an extension that is non-standard.
 # We want to test if we can load a shared library with *any* filename...

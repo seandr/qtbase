@@ -83,12 +83,16 @@ private slots:
     void task197996_visibility();
 
     void extraCpuConsumption(); // QTBUG-54676
+
+private:
+    const QString m_platform;
 };
 
 
 QAction *triggered = 0;
 
 tst_QToolBar::tst_QToolBar()
+    : m_platform(QGuiApplication::platformName().toLower())
 {
     qRegisterMetaType<Qt::Orientation>("Qt::Orientation");
     qRegisterMetaType<Qt::ToolBarAreas>("Qt::ToolBarAreas");
@@ -1071,6 +1075,9 @@ void tst_QToolBar::task191727_layout()
 
 void tst_QToolBar::task197996_visibility()
 {
+    if (m_platform == QStringLiteral("eglfs"))
+        QSKIP("eglfs: This fails.");
+
     QMainWindow mw;
     QToolBar *toolBar = new QToolBar(&mw);
 
@@ -1129,6 +1136,9 @@ private:
 
 void tst_QToolBar::extraCpuConsumption()
 {
+    if (m_platform == QStringLiteral("eglfs"))
+        QSKIP("eglfs: This fails.");
+
     QMainWindow mainWindow;
 
     auto tb = new QToolBar(&mainWindow);

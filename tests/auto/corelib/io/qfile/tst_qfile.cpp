@@ -68,12 +68,8 @@ QT_END_NAMESPACE
 #elif defined(Q_OS_FREEBSD)
 # include <sys/param.h>
 # include <sys/mount.h>
-#elif defined(Q_OS_VXWORKS)
+#elif defined(Q_OS_VXWORKS_GNU)
 # include <fcntl.h>
-#if defined(_WRS_KERNEL)
-#undef QT_OPEN
-#define QT_OPEN(path, oflag) ::open(path, oflag, 0)
-#endif
 #endif
 
 #ifdef Q_OS_QNX

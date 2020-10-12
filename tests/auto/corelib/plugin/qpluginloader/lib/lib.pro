@@ -8,7 +8,13 @@ winrt:include(../winrt.pri)
 QT = core
 
 msvc: DEFINES += WIN32_MSVC
-vxworks: QMAKE_LFLAGS_SHLIB += -Wl,-lc -non-static -shared
+vxworks {
+    !clang {
+        QMAKE_LFLAGS_SHLIB += -Wl,-lc -non-static -shared
+    } else {
+        QMAKE_LFLAGS_SHLIB += -lc -shared
+    }
+}
 
 # This is testdata for the tst_qpluginloader test.
 target.path = $$[QT_INSTALL_TESTS]/tst_qpluginloader/bin
