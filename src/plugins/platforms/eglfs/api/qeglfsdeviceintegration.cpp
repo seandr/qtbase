@@ -66,6 +66,9 @@
 #if defined(Q_OS_VXWORKS)
 #include <fbdev.h>
 #define FBIO_WAITFORVSYNC  FB_IOCTL_VSYNC
+#   if defined(Q_OS_VXWORKS_GNU)
+#       include <sys/ioctl.h>
+#   endif
 #endif
 
 #include <private/qfactoryloader_p.h>
