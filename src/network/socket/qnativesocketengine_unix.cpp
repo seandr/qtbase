@@ -277,7 +277,7 @@ bool QNativeSocketEnginePrivate::createNewSocket(QAbstractSocket::SocketType soc
 
     int socket = qt_safe_socket(domain, type, protocol, O_NONBLOCK);
     if (socket < 0 && socketProtocol == QAbstractSocket::AnyIPProtocol && ( errno == EAFNOSUPPORT
-#if defined (Q_OS_VXWORKS_CLANG)
+#if defined (Q_OS_VXWORKS_GNU)
         || errno == ENOTSUP )) {
 #else
         )) {
