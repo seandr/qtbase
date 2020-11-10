@@ -518,7 +518,7 @@ void tst_QLocalSocket::sendData_data()
     QTest::addColumn<bool>("canListen");
 
     QTest::newRow("null") << QString() << false;
-    QTest::newRow("tst_localsocket") << "tst_localsocket" << true;
+    QTest::newRow("tst_localsocket") << serverName("tst_localsocket") << true;
 }
 
 void tst_QLocalSocket::sendData()
@@ -636,9 +636,12 @@ void tst_QLocalSocket::readBufferOverflow()
     // wait until the first 128 bytes are ready to read
     QVERIFY(client.waitForReadyRead());
     QCOMPARE(client.read(buffer, readBufferSize), qint64(readBufferSize));
+// VxWorks reads all data in local sockets on one go
+#ifndef Q_OS_VXWORKS
     // wait until the second 128 bytes are ready to read
     QVERIFY(client.waitForReadyRead());
     QCOMPARE(client.read(buffer, readBufferSize), qint64(readBufferSize));
+#endif
     // no more bytes available
     QCOMPARE(client.bytesAvailable(), 0);
 
@@ -694,7 +697,7 @@ static QVariant readCommand(QIODevice *ioDevice, int *readCommandCounter, bool r
 void tst_QLocalSocket::simpleCommandProtocol1()
 {
     QLocalServer server;
-    server.listen(QStringLiteral("simpleProtocol"));
+    server.listen(serverName("simpleProtocol"));
 
     QLocalSocket localSocketWrite;
     localSocketWrite.connectToServer(server.serverName());
@@ -703,7 +706,11 @@ void tst_QLocalSocket::simpleCommandProtocol1()
     QVERIFY(localSocketRead);
 
     int readCounter = 0;
+#ifndef Q_OS_VXWORKS
     for (int i = 0; i < 2000; ++i) {
+#else
+    for (int i = 0; i < 500; ++i) {
+#endif
         const QVariant command(QRect(readCounter, i, 10, 10));
         const qint64 blockSize = writeCommand(command, &localSocketWrite, i);
         while (localSocketWrite.bytesToWrite())
@@ -720,13 +727,15 @@ void tst_QLocalSocket::simpleCommandProtocol1()
 void tst_QLocalSocket::simpleCommandProtocol2()
 {
     QLocalServer server;
-    server.listen(QStringLiteral("simpleProtocol"));
+    server.listen(serverName("simpleProtocol"));
 
     QLocalSocket localSocketWrite;
     localSocketWrite.connectToServer(server.serverName());
     QVERIFY(server.waitForNewConnection());
     QLocalSocket* localSocketRead = server.nextPendingConnection();
     QVERIFY(localSocketRead);
+
+    QSignalSpy spyDisconnected(&localSocketWrite, SIGNAL(disconnected()));
 
     int readCounter = 0;
     qint64 writtenBlockSize = 0;
@@ -764,7 +773,11 @@ void tst_QLocalSocket::simpleCommandProtocol2()
     }
 
     localSocketWrite.abort();
+#ifndef Q_OS_VXWORKS
     QVERIFY(localSocketRead->waitForDisconnected(1000));
+#else
+    QCOMPARE(spyDisconnected.count(), 1);
+#endif
 }
 
 // QLocalSocket/Server can take a name or path, check that it works as expected
@@ -878,13 +891,8 @@ public:
         QString testLine = "test";
         LocalServer server;
         server.setMaxPendingConnections(10);
-#ifndef Q_OS_VXWORKS
-        QVERIFY2(server.listen("qlocalsocket_threadtest"),
+        QVERIFY2(server.listen(serverName("qlocalsocket_threadtest")),
                  server.errorString().toLatin1().constData());
-#else
-        QVERIFY2(server.listen("/comp/socket/0x1234"),
-                 server.errorString().toLatin1().constData());
-#endif
         mutex.lock();
         wc.wakeAll();
         mutex.unlock();
@@ -1097,15 +1105,16 @@ void tst_QLocalSocket::removeServer()
 #else
     // this is a hostile takeover, but recovering from a crash results in the same
     QLocalServer server, server2;
-    QVERIFY(QLocalServer::removeServer("cleanuptest"));
-    QVERIFY(server.listen("cleanuptest"));
+    QString localServerName = serverName("cleanuptest");
+    QVERIFY(QLocalServer::removeServer(localServerName));
+    QVERIFY(server.listen(localServerName));
 #if !defined(Q_OS_WIN)
     // on Windows, there can be several sockets listening on the same pipe
     // on Unix, there can only be one socket instance
-    QVERIFY(! server2.listen("cleanuptest"));
+    QVERIFY(! server2.listen(localServerName));
 #endif
-    QVERIFY(QLocalServer::removeServer("cleanuptest"));
-    QVERIFY(server2.listen("cleanuptest"));
+    QVERIFY(QLocalServer::removeServer(localServerName));
+    QVERIFY(server2.listen(localServerName));
 #endif
 }
 
@@ -1143,15 +1152,15 @@ void tst_QLocalSocket::recycleClientSocket()
                                                   << "\"1023 Megabytes\"?"
                                                   << "They haven't made it to a gig yet.";
     QLocalServer server;
-    const QString serverName = QStringLiteral("recycleClientSocket");
-    QVERIFY(server.listen(serverName));
+    QString localServerName = serverName("recycleClientSocket");
+    QVERIFY(server.listen(localServerName));
     QLocalSocket client;
     QSignalSpy clientReadyReadSpy(&client, SIGNAL(readyRead()));
     QSignalSpy clientErrorSpy(&client, SIGNAL(error(QLocalSocket::LocalSocketError)));
     for (int i = 0; i < lines.count(); ++i) {
         client.abort();
         clientReadyReadSpy.clear();
-        client.connectToServer(serverName);
+        client.connectToServer(localServerName);
         QVERIFY(client.waitForConnected());
         QVERIFY(server.waitForNewConnection());
         QLocalSocket *serverSocket = server.nextPendingConnection();

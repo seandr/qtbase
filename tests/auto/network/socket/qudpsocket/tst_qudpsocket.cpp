@@ -48,7 +48,7 @@
 #include "../../../network-settings.h"
 #include "emulationdetector.h"
 
-#if defined(Q_OS_LINUX)
+#if defined(Q_OS_LINUX) || defined(Q_OS_VXWORKS)
 #define SHOULD_CHECK_SYSCALL_SUPPORT
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -166,11 +166,11 @@ bool tst_QUdpSocket::shouldSkipIpv6TestsForBrokenSetsockopt()
 {
 #ifdef SHOULD_CHECK_SYSCALL_SUPPORT
     // Following parameters for setsockopt are not supported by all QEMU versions:
-    if (ipv6SetsockoptionMissing(SOL_IPV6, IPV6_JOIN_GROUP)
-        || ipv6SetsockoptionMissing(SOL_IPV6, IPV6_MULTICAST_HOPS)
-        || ipv6SetsockoptionMissing(SOL_IPV6, IPV6_MULTICAST_IF)
-        || ipv6SetsockoptionMissing(SOL_IPV6, IPV6_MULTICAST_LOOP)
-        || ipv6SetsockoptionMissing(SOL_IPV6, IPV6_RECVHOPLIMIT)) {
+    if (ipv6SetsockoptionMissing(IPPROTO_IPV6, IPV6_JOIN_GROUP)
+        || ipv6SetsockoptionMissing(IPPROTO_IPV6, IPV6_MULTICAST_HOPS)
+        || ipv6SetsockoptionMissing(IPPROTO_IPV6, IPV6_MULTICAST_IF)
+        || ipv6SetsockoptionMissing(IPPROTO_IPV6, IPV6_MULTICAST_LOOP)
+        || ipv6SetsockoptionMissing(IPPROTO_IPV6, IPV6_RECVHOPLIMIT)) {
         return true;
     }
 #endif //SHOULD_CHECK_SYSCALL_SUPPORT
@@ -1508,7 +1508,7 @@ void tst_QUdpSocket::multicast()
                                   << QByteArray("cdef");
 
     QUdpSocket sender;
-    sender.bind();
+    sender.bind(groupAddress.protocol() == QAbstractSocket::IPv4Protocol ? QHostAddress(QHostAddress::AnyIPv4) : QHostAddress(QHostAddress::AnyIPv6));
     foreach (const QByteArray &datagram, datagrams) {
         QNetworkDatagram dgram(datagram, groupAddress, receiver.localPort());
         dgram.setInterfaceIndex(interfaceForGroup(groupAddress).index());
@@ -1622,7 +1622,7 @@ void tst_QUdpSocket::linkLocalIPv6()
                 if (!addr.scopeId().isEmpty() && addr.isInSubnet(localMask, 64)) {
                     scopes << addr.scopeId();
                     addresses << addr;
-                    qDebug() << addr;
+                    qDebug() << "Found IPv6 link local address" << addr;
                 }
             }
         }

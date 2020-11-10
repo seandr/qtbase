@@ -545,9 +545,16 @@ void tst_QTcpSocket::bind_data()
 #ifdef Q_OS_UNIX
     // try to bind to a privileged ports
     // we should fail if we're not root (unless the ports are in use!)
+#if defined(Q_OS_VXWORKS_CLANG)
+    //VxWorks returns id's for root as 1 instead of common 0, so we hardcode these here...
+    QTest::newRow("127.0.0.1:1") << "127.0.0.1" << 1 << true << "127.0.0.1";
+    if (testIpv6)
+        QTest::newRow("[::]:1") << "::" << 1 << true << "::";
+#else
     QTest::newRow("127.0.0.1:1") << "127.0.0.1" << 1 << !geteuid() << (geteuid() ? QString() : "127.0.0.1");
     if (testIpv6)
         QTest::newRow("[::]:1") << "::" << 1 << !geteuid() << (geteuid() ? QString() : "::");
+#endif
 #endif
 }
 
