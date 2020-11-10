@@ -60,7 +60,7 @@
 #endif
 
 #if defined(Q_OS_VXWORKS)
-#  if defined(VXWORKS_USE_POSIX_PIPES)
+#  if defined(VXWORKS_USE_POSIX_PIPES) || defined(Q_OS_VXWORKS_CLANG)
 #    include <ioLib.h>
 #  else
 #    include <pipeDrv.h>
@@ -111,7 +111,7 @@ QThreadPipe::~QThreadPipe()
     if (fds[1] >= 0)
         close(fds[1]);
 
-#if defined(Q_OS_VXWORKS) && !defined(VXWORKS_USE_POSIX_PIPES)
+#if defined(Q_OS_VXWORKS_GNU) && !defined(VXWORKS_USE_POSIX_PIPES)
     pipeDevDelete(name, true);
 #endif
 }
@@ -137,7 +137,7 @@ bool QThreadPipe::init()
 {
 #if defined(Q_OS_NACL) || defined(Q_OS_WASM)
    // do nothing.
-#elif defined(Q_OS_VXWORKS) && !defined(VXWORKS_USE_POSIX_PIPES)
+#elif defined(Q_OS_VXWORKS_GNU) && !defined(VXWORKS_USE_POSIX_PIPES)
     RTP_DESC rtpStruct;
     rtpInfoGet((RTP_ID)NULL, &rtpStruct);
 
@@ -223,7 +223,7 @@ int QThreadPipe::check(const pollfd &pfd)
     if (readyread) {
         // consume the data on the thread pipe so that
         // poll doesn't immediately return next time
-#if defined(Q_OS_VXWORKS) && !defined(VXWORKS_USE_POSIX_PIPES)
+#if defined(Q_OS_VXWORKS_GNU) && !defined(VXWORKS_USE_POSIX_PIPES)
         ::read(fds[0], c, sizeof(c));
         ::ioctl(fds[0], FIOFLUSH, 0);
 #else
