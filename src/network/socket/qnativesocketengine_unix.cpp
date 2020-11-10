@@ -375,7 +375,7 @@ int QNativeSocketEnginePrivate::option(QNativeSocketEngine::SocketOption opt) co
     }
 
     int n, level;
-    int v = -1;
+    int v = 0;
     QT_SOCKOPTLEN_T len = sizeof(v);
 
     convertToLevelAndOption(opt, socketProtocol, level, n);
@@ -399,7 +399,7 @@ bool QNativeSocketEnginePrivate::setOption(QNativeSocketEngine::SocketOption opt
     switch (opt) {
     case QNativeSocketEngine::NonBlockingSocketOption: {
         // Make the socket nonblocking.
-#if !defined(Q_OS_VXWORKS)
+#if !defined(Q_OS_VXWORKS_GNU)
         int flags = ::fcntl(socketDescriptor, F_GETFL, 0);
         if (flags == -1) {
 #ifdef QNATIVESOCKETENGINE_DEBUG
@@ -461,7 +461,8 @@ bool QNativeSocketEnginePrivate::setOption(QNativeSocketEngine::SocketOption opt
 
     if (n == -1)
         return false;
-    return ::setsockopt(socketDescriptor, level, n, (char *) &v, sizeof(v)) == 0;
+    QT_SOCKOPTLEN_T len = sizeof(v);
+    return ::setsockopt(socketDescriptor, level, n, (char *) &v, len) == 0;
 }
 
 bool QNativeSocketEnginePrivate::nativeConnect(const QHostAddress &addr, quint16 port)
@@ -561,7 +562,13 @@ bool QNativeSocketEnginePrivate::nativeBind(const QHostAddress &address, quint16
 #endif
 
     int bindResult = QT_SOCKET_BIND(socketDescriptor, &aa.a, sockAddrSize);
-    if (bindResult < 0 && errno == EAFNOSUPPORT && address.protocol() == QAbstractSocket::AnyIPProtocol) {
+    if (bindResult < 0 && (errno == EAFNOSUPPORT
+#ifdef Q_OS_VXWORKS
+        || errno == EINVAL)
+#else
+        )
+#endif
+        && address.protocol() == QAbstractSocket::AnyIPProtocol) {
         // retry with v4
         aa.a4.sin_family = AF_INET;
         aa.a4.sin_port = htons(port);
@@ -697,7 +704,7 @@ static bool multicastMembershipHelper(QNativeSocketEnginePrivate *d,
     int level = 0;
     int sockOpt = 0;
     void *sockArg;
-    int sockArgSize;
+    QT_SOCKLEN_T sockArgSize;
 
     ip_mreq mreq4;
     ipv6_mreq mreq6;
@@ -889,6 +896,10 @@ bool QNativeSocketEnginePrivate::nativeHasPendingDatagrams() const
 qint64 QNativeSocketEnginePrivate::nativePendingDatagramSize() const
 {
     ssize_t recvResult = -1;
+#ifdef Q_OS_VXWORKS
+    ssize_t prevRecvResult = -1;
+#endif
+
 #ifdef Q_OS_LINUX
     // Linux can return the actual datagram size if we use MSG_TRUNC
     char c;
@@ -920,6 +931,18 @@ qint64 QNativeSocketEnginePrivate::nativePendingDatagramSize() const
         // this function is still reentrant although it might not look
         // so.
         recvResult = ::recvmsg(socketDescriptor, &msg, MSG_PEEK);
+#ifdef Q_OS_VXWORKS
+        // VxWorks does not know how many bytes there is available on socket
+        // until it fails to read those from buffer... So only way to know
+        // available amount of bytes available, is to read until it fails
+        // and EMSGSIZE error is returned.
+        if (recvResult != -1)
+            prevRecvResult = recvResult;
+        if (recvResult == -1 && (errno == EMSGSIZE || errno == EINTR)) {
+            recvResult = prevRecvResult;
+            break;
+        }
+#endif
         if (recvResult == -1 && errno == EINTR)
             continue;
 
@@ -1186,6 +1209,9 @@ qint64 QNativeSocketEnginePrivate::nativeSendDatagram(const char *data, qint64 l
             sentBytes = -2;
             break;
         case EMSGSIZE:
+#ifdef Q_OS_VXWORKS
+        case ENOMEM:
+#endif
             setError(QAbstractSocket::DatagramTooLargeError, DatagramTooLargeErrorString);
             break;
         case ECONNRESET:

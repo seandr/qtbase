@@ -463,7 +463,11 @@ bool QNativeSocketEngine::initialize(QAbstractSocket::SocketType socketType, QAb
 
     if (socketType == QAbstractSocket::UdpSocket) {
         // Set the broadcasting flag if it's a UDP socket.
-        if (!setOption(BroadcastSocketOption, 1)) {
+        if (!setOption(BroadcastSocketOption, 1)
+#ifdef Q_OS_VXWORKS // IPv6 does not support Broadcast address
+            && protocol == QAbstractSocket::IPv4Protocol
+#endif
+        ) {
             d->setError(QAbstractSocket::UnsupportedSocketOperationError,
                         QNativeSocketEnginePrivate::BroadcastingInitFailedErrorString);
             close();
@@ -539,6 +543,9 @@ bool QNativeSocketEngine::initialize(qintptr socketDescriptor, QAbstractSocket::
 
         // Set the broadcasting flag if it's a UDP socket.
         if (d->socketType == QAbstractSocket::UdpSocket
+#ifdef Q_OS_VXWORKS // IPv6 does not support Broadcast address
+            && d->socketProtocol == QAbstractSocket::IPv4Protocol
+#endif
             && !setOption(BroadcastSocketOption, 1)) {
             d->setError(QAbstractSocket::UnsupportedSocketOperationError,
                 QNativeSocketEnginePrivate::BroadcastingInitFailedErrorString);

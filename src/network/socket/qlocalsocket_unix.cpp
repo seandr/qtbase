@@ -52,7 +52,7 @@
 #include <qdebug.h>
 #include <qelapsedtimer.h>
 
-#ifdef Q_OS_VXWORKS
+#ifdef Q_OS_VXWORKS_GNU
 #  include <selectLib.h>
 #endif
 
