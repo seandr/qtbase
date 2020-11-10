@@ -16,6 +16,9 @@ services:
         container_name: qt-test-server-apache2
         domainname: test-net.qt.local
         hostname: apache2
+        ports:
+            - "80:80"
+            - "443:443"
         volumes:
             - ./common:/common:ro
             - ./apache2:/service:ro
@@ -27,6 +30,10 @@ services:
         container_name: qt-test-server-squid
         domainname: test-net.qt.local
         hostname: squid
+        ports:
+            - "3128:3128"
+            - "3129:3129"
+            - "3130:3130"
         depends_on:
             - apache2
         external_links:
@@ -42,6 +49,9 @@ services:
         container_name: qt-test-server-vsftpd
         domainname: test-net.qt.local
         hostname: vsftpd
+        ports:
+            - "20:20"
+            - "21:21"
         volumes:
             - ./common:/common:ro
             - ./vsftpd:/service:ro
@@ -53,6 +63,8 @@ services:
         container_name: qt-test-server-ftp-proxy
         domainname: test-net.qt.local
         hostname: ftp-proxy
+        ports:
+            - "2121:2121"
         depends_on:
             - vsftpd
         external_links:
@@ -68,6 +80,9 @@ services:
         container_name: qt-test-server-danted
         domainname: test-net.qt.local
         hostname: danted
+        ports:
+            - "1080:1080"
+            - "1081:1081"
         depends_on:
             - apache2
             - vsftpd
