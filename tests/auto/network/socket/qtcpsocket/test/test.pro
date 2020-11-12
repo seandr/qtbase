@@ -16,8 +16,5 @@ win32 {
     DESTDIR = ../
 }
 
-# Only on Linux until cyrus has been added to docker-compose-for-{windows,macOS}.yml and tested
-linux {
-    QT_TEST_SERVER_LIST = danted squid apache2 ftp-proxy vsftpd iptables cyrus
-    include($$dirname(_QMAKE_CONF_)/tests/auto/testserver.pri)
-}
+QT_TEST_SERVER_LIST = danted squid apache2 ftp-proxy vsftpd iptables cyrus
+include($$dirname(_QMAKE_CONF_)/tests/auto/testserver.pri)
