@@ -1245,6 +1245,8 @@ bool QAbstractSocketPrivate::readFromSocket()
         // an EAGAIN/EWOULDBLOCK if the connection is alive (i.e., the remote
         // host has _not_ disappeared).
         bytesToRead = 4096;
+    } else if (bytesToRead < 0) {
+        goto fail;
     }
 
     if (q->isReadable()) {
@@ -1280,6 +1282,7 @@ bool QAbstractSocketPrivate::readFromSocket()
         socketEngine->read(discardBuffer.data(), bytesToRead);
     }
 
+fail:
     if (!socketEngine->isValid()) {
 #if defined(QABSTRACTSOCKET_DEBUG)
         qDebug("QAbstractSocketPrivate::readFromSocket() read failed: %s",
