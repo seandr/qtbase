@@ -1560,7 +1560,7 @@ void tst_QUdpSocket::echo()
         sock.connectToHost(remote, 7);
         QVERIFY(sock.waitForConnected(10000));
     } else {
-        sock.bind();
+        sock.bind(QHostAddress(QHostAddress::AnyIPv4));
     }
     QByteArray out(30, 'x');
     QByteArray in;
