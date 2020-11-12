@@ -77,14 +77,19 @@ public:
     }
 
 #ifdef QT_NETWORK_LIB
-    static QHostAddress serverIP()
+    static QHostAddress getServerIpImpl(const QString &serverName)
     {
-        const QHostInfo info = QHostInfo::fromName(serverName());
+        const QHostInfo info = QHostInfo::fromName(serverName);
         if (info.error()) {
             QTest::qFail(qPrintable(info.errorString()), __FILE__, __LINE__);
             return QHostAddress();
         }
         return info.addresses().constFirst();
+    }
+
+    static QHostAddress serverIP()
+    {
+        return getServerIpImpl(serverName());
     }
 #endif
 
@@ -221,7 +226,7 @@ public:
     }
     static QString imapServerName()
     {
-#ifdef QT_TEST_SERVER_NAME
+#ifdef QT_TEST_SERVER
         return QString("cyrus.") % serverDomainName();
 #else
         return serverName();
@@ -230,7 +235,7 @@ public:
 
     static QString echoServerName()
     {
-#ifdef QT_TEST_SERVER_NAME
+#ifdef QT_TEST_SERVER
         return QString("echo.") % serverDomainName();
 #else
         return serverName();
@@ -239,7 +244,7 @@ public:
 
     static QString firewallServerName()
     {
-#ifdef QT_TEST_SERVER_NAME
+#ifdef QT_TEST_SERVER
         return QString("iptables.") % serverDomainName();
 #else
         return serverName();

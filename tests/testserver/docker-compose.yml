@@ -38,6 +38,10 @@ services:
             - apache2
         external_links:
             - apache2:apache2.test-net.qt.local
+            - vsftpd:vsftpd.test-net.qt.local
+            - ftp-proxy:ftp-proxy.test-net.qt.local
+            - cyrus:cyrus.test-net.qt.local
+            - echo:echo.test-net.qt.local
         volumes:
             - ./common:/common:ro
             - ./squid:/service:ro
@@ -100,10 +104,13 @@ services:
         command: service/danted.sh
 
     cyrus:
-        image: qt-test-server-cyrus:c8d72754abc0e501afd624ce838e4df35505abc9
+        image: qt-test-server-cyrus:33e911c127caafecea3779db5453276b612e554c
         container_name: qt-test-server-cyrus
         domainname: test-net.qt.local
         hostname: cyrus
+        ports:
+            - "143:143"
+            - "993:993"
         volumes:
             - ./common:/common:ro
             - ./cyrus:/service:ro
@@ -111,10 +118,12 @@ services:
         command: service/cyrus.sh
 
     iptables:
-        image: qt-test-server-iptables:cb7a8bd6d28602085a88c8ced7d67e28e75781e2
+        image: qt-test-server-iptables:1dc6e33a8d72911b68727782cc8356efc0f2fd98
         container_name: qt-test-server-iptables
         domainname: test-net.qt.local
         hostname: iptables
+        ports:
+            - "1357:1357"
         volumes:
             - ./common:/common:ro
             - ./iptables:/service:ro
@@ -125,10 +134,14 @@ services:
             - NET_RAW
 
     echo:
-      image: qt-test-server-echo:b29ad409e746a834c1055fd0f7a55fd5056da6ea
+      image: qt-test-server-echo:8f9ef8a0f506a2e55096728f19a240c5a253bba8
       container_name: qt-test-server-echo
       domainname: test-net.qt.local
       hostname: echo
+      ports:
+          - "13:13"
+          - "7:7"
+          - "7:7/udp"
       volumes:
           - ./common:/common:ro
           - ./echo:/service:ro
