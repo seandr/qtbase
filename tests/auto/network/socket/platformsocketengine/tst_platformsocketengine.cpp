@@ -40,7 +40,7 @@
 #include <sys/socket.h>
 #endif
 
-#ifdef Q_OS_VXWORKS
+#ifdef Q_OS_VXWORKS_GNU
 #include <sockLib.h>
 #endif
 
@@ -281,7 +281,7 @@ void tst_PlatformSocketEngine::broadcastTest()
     PLATFORMSOCKETENGINE broadcastSocket;
 
     // Initialize a regular Udp socket
-    QVERIFY(broadcastSocket.initialize(QAbstractSocket::UdpSocket, QAbstractSocket::AnyIPProtocol));
+    QVERIFY(broadcastSocket.initialize(QAbstractSocket::UdpSocket, QAbstractSocket::IPv4Protocol));
 
     // Bind to any port on all interfaces
     QVERIFY(broadcastSocket.bind(QHostAddress::Any, 0));
@@ -528,11 +528,19 @@ void tst_PlatformSocketEngine::tooManySockets()
 //---------------------------------------------------------------------------
 void tst_PlatformSocketEngine::bind()
 {
+    bool isRoot = false;
+#ifndef Q_OS_VXWORKS_CLANG
+    isRoot = (geteuid() ? true : false);
+#else
+    // VxWorks returns id's for root as 1 instead of common 0, so we hardcode value
+    isRoot = true;
+#endif
+
 #if !defined Q_OS_WIN
     PLATFORMSOCKETENGINE binder;
     QVERIFY(binder.initialize(QAbstractSocket::TcpSocket, QAbstractSocket::IPv4Protocol));
-    QVERIFY(!binder.bind(QHostAddress::AnyIPv4, 82));
-    QCOMPARE(binder.error(), QAbstractSocket::SocketAccessError);
+    QCOMPARE(binder.bind(QHostAddress::AnyIPv4, 82), isRoot);
+    QCOMPARE(binder.error(), (isRoot ? QAbstractSocket::UnknownSocketError : QAbstractSocket::SocketAccessError));
 #endif
 
     PLATFORMSOCKETENGINE binder2;
