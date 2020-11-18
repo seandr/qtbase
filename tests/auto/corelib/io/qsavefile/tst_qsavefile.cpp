@@ -36,6 +36,8 @@
 
 #if defined(Q_OS_UNIX) && !defined(Q_OS_VXWORKS_GNU)
 #include <unistd.h> // for geteuid
+#elif defined(Q_OS_VXWORKS_GNU)
+#include <qplatformdefs.h>
 #endif
 
 #if defined(Q_OS_WIN)
