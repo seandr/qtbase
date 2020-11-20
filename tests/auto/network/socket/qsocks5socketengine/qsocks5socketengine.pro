@@ -14,3 +14,5 @@ requires(qtConfig(private_tests))
 
 QT_TEST_SERVER_LIST = danted apache2 cyrus
 include($$dirname(_QMAKE_CONF_)/tests/auto/testserver.pri)
+
+vxworks: LIBS += $$QMAKE_LIBS_NETWORK

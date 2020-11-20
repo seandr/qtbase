@@ -12,3 +12,5 @@ QT = core-private network-private testlib
 
 QT_TEST_SERVER_LIST = cyrus
 include($$dirname(_QMAKE_CONF_)/tests/auto/testserver.pri)
+
+vxworks: LIBS += $$QMAKE_LIBS_NETWORK

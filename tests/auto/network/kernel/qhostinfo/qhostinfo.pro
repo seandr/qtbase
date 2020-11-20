@@ -9,3 +9,5 @@ QT = core-private network-private testlib
 win32:LIBS += -lws2_32
 
 winrt: WINRT_MANIFEST.capabilities += internetClientServer
+
+vxworks: LIBS += $$QMAKE_LIBS_NETWORK
