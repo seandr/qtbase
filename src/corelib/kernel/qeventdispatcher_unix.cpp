@@ -62,6 +62,7 @@
 #if defined(Q_OS_VXWORKS)
 #  if defined(VXWORKS_USE_POSIX_PIPES) || defined(Q_OS_VXWORKS_CLANG)
 #    include <ioLib.h>
+#    include <sysLib.h>
 #  else
 #    include <pipeDrv.h>
 #    include <selectLib.h>
@@ -513,7 +514,7 @@ bool QEventDispatcherUNIX::processEvents(QEventLoop::ProcessEventsFlags flags)
 
     d->pollfds.clear();
     d->pollfds.reserve(1 + (include_notifiers ? d->socketNotifiers.size() : 0));
-#if defined(Q_OS_VXWORKS_GNU)
+#if defined(Q_OS_VXWORKS)
     if (d->threadPipe.forceSelectNoTimeout) {
         // Tick rate greater than 10ms too much
         // do not use timeout
