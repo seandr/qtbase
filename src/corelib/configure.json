@@ -542,6 +542,18 @@
                 ],
                 "qmake": "DEFINES += QDSP_P_H=$$shell_quote(\\\"@PWD@/tools/qdoublescanprint_p.h\\\")"
             }
+        },
+        "gnu_canonicalize_file_name": {
+            "label": "GNU canonicalize_file_name()",
+            "type": "compile",
+            "test": {
+                "include": "stdlib.h",
+                "main": [
+                    "char buf[32];",
+                    "canonicalize_file_name(buf);"
+                ],
+                "qmake": "vxworks_clang:LIBS += -lunix"
+            }
         }
     },
 
@@ -760,6 +772,11 @@
                 { "type": "define", "name": "QT_THREADSAFE_CLOEXEC", "value": 1 }
             ]
         },
+        "gnu_canonicalize_file_name": {
+            "label": "GNU canonicalize_file_name()",
+            "condition": "tests.gnu_canonicalize_file_name && config.vxworks",
+            "output": [ "privateFeature" ]
+         },
         "properties": {
             "label": "Properties",
             "purpose": "Supports scripting Qt-based applications.",

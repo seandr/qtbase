@@ -729,15 +729,22 @@ QFileSystemEntry QFileSystemEngine::canonicalName(const QFileSystemEntry &entry,
         }
     }
 
-# elif defined(Q_OS_VXWORKS_CLANG)
+// We have configure test to check existence of gnu_canonicalize_file_name so we now that
+// we need to use it instead of realpath. When realpath is fixed, the canonicalize_file_name
+// will be removed at the same time so then this codepath for VxWorks will switch to us
+// realpath instead and in the future code related to gnu_canonicalize_file_name can be
+// removed (when we assume everyone(!) is using VxWorks version that has working realpath
+# elif defined(Q_OS_VXWORKS_CLANG) && QT_CONFIG(gnu_canonicalize_file_name)
     // realpath does not work, but there is GNU extension so use it
     // bad thing that it will return valid filename even if the file
     // does not exist, so we need to check if there is error for that
     // and that file does not really exist.
     ret = canonicalize_file_name(entry.nativeFilePath().constData());
-    if (errno == ENOENT) {
+    if (errno == ENOENT || errno == ENOTDIR) {
         if (!QFile::exists(entry.nativeFilePath())) {
+            const int savedErrno = errno; // errno is checked below, and free() might change it
             free(ret);
+            errno = savedErrno;
             ret = NULL;
         }
     }
