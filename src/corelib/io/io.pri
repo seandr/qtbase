@@ -173,7 +173,7 @@ win32 {
                 io/qlockfile_unix.cpp \
                 io/qfilesystemiterator_unix.cpp
 
-        !integrity:!uikit:!rtems {
+        !vxworks:!integrity:!uikit:!rtems {
             SOURCES += io/forkfd_qt.cpp
             HEADERS += \
                      ../3rdparty/forkfd/forkfd.h
@@ -200,6 +200,10 @@ win32 {
                 io/qstandardpaths_haiku.cpp \
                 io/qstorageinfo_unix.cpp
             LIBS += -lbe
+        } else:vxworks {
+            SOURCES += \
+                io/qstandardpaths_unix.cpp \
+                io/qstorageinfo_stub.cpp
         } else {
             SOURCES += \
                 io/qstandardpaths_unix.cpp \

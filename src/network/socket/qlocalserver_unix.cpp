@@ -105,7 +105,11 @@ bool QLocalServerPrivate::listen(const QString &requestedServerName)
     }
 
     // create the unix socket
+#ifndef Q_OS_VXWORKS
     listenSocket = qt_safe_socket(PF_UNIX, SOCK_STREAM, 0);
+#else
+    listenSocket = qt_safe_socket(PF_UNIX, SOCK_SEQPACKET, 0);
+#endif
     if (-1 == listenSocket) {
         setError(QLatin1String("QLocalServer::listen"));
         closeServer();

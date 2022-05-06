@@ -132,15 +132,15 @@ void GLWidget::makeObject()
         const double sectorAngle = 2 * M_PI / NumSectors;
         for (int i = 0; i < NumSectors; ++i) {
             double angle = i * sectorAngle;
-            GLdouble x5 = 0.30 * sin(angle);
+            GLdouble x5 = 0.30 * qSin(angle);
             GLdouble y5 = 0.30 * cos(angle);
-            GLdouble x6 = 0.20 * sin(angle);
+            GLdouble x6 = 0.20 * qSin(angle);
             GLdouble y6 = 0.20 * cos(angle);
 
             angle += sectorAngle;
-            GLdouble x7 = 0.20 * sin(angle);
+            GLdouble x7 = 0.20 * qSin(angle);
             GLdouble y7 = 0.20 * cos(angle);
-            GLdouble x8 = 0.30 * sin(angle);
+            GLdouble x8 = 0.30 * qSin(angle);
             GLdouble y8 = 0.30 * cos(angle);
 
             qglColor(qtGreen);

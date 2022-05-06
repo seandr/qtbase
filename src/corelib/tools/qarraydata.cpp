@@ -149,7 +149,7 @@ qCalculateGrowingBlockSize(size_t elementCount, size_t elementSize, size_t heade
 
 // End of qtools_p.h implementation
 
-const QArrayData QArrayData::shared_null[2] = {
+QT_INIT_PRIORITY(200) const QArrayData QArrayData::shared_null[2] = {
     { Q_REFCOUNT_INITIALIZE_STATIC, 0, 0, 0, sizeof(QArrayData) }, // shared null
     { { Q_BASIC_ATOMIC_INITIALIZER(0) }, 0, 0, 0, 0 } /* zero initialized terminator */
 };

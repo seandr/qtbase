@@ -43,7 +43,7 @@
 #  endif
 #endif
 
-#ifdef Q_OS_ANDROID
+#if defined(Q_OS_ANDROID) || defined(Q_OS_VXWORKS)
 #  include <netinet/in.h>
 #endif
 

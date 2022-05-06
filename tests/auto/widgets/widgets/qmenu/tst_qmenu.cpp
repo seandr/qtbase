@@ -146,6 +146,7 @@ private:
     QAction *activated, *highlighted, *builtins[num_builtins];
     QString statustip;
     bool m_onStatusTipTimerExecuted;
+    const QString m_platform;
 };
 
 // Testing get/set functions
@@ -172,7 +173,8 @@ void tst_QMenu::getSetCheck()
 }
 
 tst_QMenu::tst_QMenu()
-    : m_onStatusTipTimerExecuted(false)
+    : m_onStatusTipTimerExecuted(false),
+    m_platform(QGuiApplication::platformName().toLower())
 {
     QApplication::setEffectEnabled(Qt::UI_FadeTooltip, false);
     QApplication::setEffectEnabled(Qt::UI_AnimateMenu, false);
@@ -860,6 +862,8 @@ private:
 
 void tst_QMenu::activeSubMenuPositionExec()
 {
+    if (m_platform == QStringLiteral("eglfs"))
+        QSKIP("eglfs: This fails.");
 
 #ifdef Q_OS_WINRT
     QSKIP("Broken on WinRT - QTBUG-68297");

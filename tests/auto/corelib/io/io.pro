@@ -75,3 +75,7 @@ android: SUBDIRS -= \
     qprocess \
     qdir \
     qresourceengine
+
+vxworks: SUBDIRS -= \
+    qstorageinfo \
+    largefile

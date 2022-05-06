@@ -312,7 +312,10 @@ bool QLocalServer::isListening() const
 
     Usually you would just pass in a name like "foo", but on Unix this
     could also be a path such as "/tmp/foo" and on Windows this could
-    be a pipe path such as "\\\\.\\pipe\\foo"
+    be a pipe path such as "\\\\.\\pipe\\foo". For VxWorks following
+    path must be always use "/comp/socket/0xNumber", where "0xNumber"
+    is a string representation of a 16-bit number in hexadecimal
+    format. Example "/comp/socket/0x00AA".
 
     \note On Unix if the server crashes without closing listen will fail
     with AddressInUseError.  To create a new server the file should be removed.

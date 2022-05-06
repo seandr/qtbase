@@ -7,4 +7,4 @@ QT += gui-private testlib
 
 requires(qtConfig(private_tests))
 
-unix:!darwin:!haiku:!integrity: LIBS += -lm
+unix:!darwin:!haiku:!integrity:!vxworks: LIBS += -lm

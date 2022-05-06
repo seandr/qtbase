@@ -684,10 +684,10 @@ void tst_QHttpSocketEngine::passwordAuth()
     QVERIFY(socketDevice.waitForRead());
 
     // Read the greeting
-    qint64 available = socketDevice.bytesAvailable();
+    qint64 available = int(socketDevice.bytesAvailable());
     QVERIFY(available > 0);
     QByteArray array;
-    array.resize(available);
+    array.resize(int(available));
     QVERIFY(socketDevice.read(array.data(), array.size()) == available);
 
     // Check that the greeting is what we expect it to be
@@ -702,9 +702,9 @@ void tst_QHttpSocketEngine::passwordAuth()
     // Wait for the response
     QVERIFY(socketDevice.waitForRead());
 
-    available = socketDevice.bytesAvailable();
+    available = int(socketDevice.bytesAvailable());
     QVERIFY(available > 0);
-    array.resize(available);
+    array.resize(int(available));
     QVERIFY(socketDevice.read(array.data(), array.size()) == available);
 
     // Check that the greeting is what we expect it to be

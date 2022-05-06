@@ -2225,44 +2225,6 @@ void tst_qmakelib::addTestFunctions(const QString &qindir)
             << ""
             << true;
 
-    QTest::newRow("versionAtLeast(): true")
-            << "VAR = 1.2.3\nversionAtLeast(VAR, 1.2.3): OK = 1"
-            << "OK = 1"
-            << ""
-            << true;
-
-    QTest::newRow("versionAtLeast(): false")
-            << "VAR = 1.2.2\nversionAtLeast(VAR, 1.2.3): OK = 1"
-            << "OK = UNDEF"
-            << ""
-            << true;
-
-    QTest::newRow("versionAtLeast(): bad number of arguments")
-            << "versionAtLeast(1): OK = 1\nversionAtLeast(1, 2, 3): OK = 1"
-            << "OK = UNDEF"
-            << "##:1: versionAtLeast(var, version) requires two arguments.\n"
-               "##:2: versionAtLeast(var, version) requires two arguments."
-            << true;
-
-    QTest::newRow("versionAtMost(): true")
-            << "VAR = 1.2.3\nversionAtMost(VAR, 1.2.3): OK = 1"
-            << "OK = 1"
-            << ""
-            << true;
-
-    QTest::newRow("versionAtMost(): false")
-            << "VAR = 1.2.3\nversionAtMost(VAR, 1.2.2): OK = 1"
-            << "OK = UNDEF"
-            << ""
-            << true;
-
-    QTest::newRow("versionAtMost(): bad number of arguments")
-            << "versionAtMost(1): OK = 1\nversionAtMost(1, 2, 3): OK = 1"
-            << "OK = UNDEF"
-            << "##:1: versionAtMost(var, version) requires two arguments.\n"
-               "##:2: versionAtMost(var, version) requires two arguments."
-            << true;
-
     QTest::newRow("clear(): top-level")
             << "VAR = there\nclear(VAR): OK = 1"
             << "OK = 1\nVAR ="

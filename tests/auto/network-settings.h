@@ -42,6 +42,11 @@
 #include <unistd.h>
 #endif
 
+#ifdef Q_OS_VXWORKS
+#  include <sockLib.h>
+const struct in6_addr in6addr_loopback = IN6ADDR_LOOPBACK_INIT;
+#endif
+
 class QtNetworkSettings
 {
 public:
@@ -237,7 +242,7 @@ public:
     }
     static QString imapServerName()
     {
-#ifdef QT_TEST_SERVER_NAME
+#ifdef QT_TEST_SERVER
         return QString("cyrus.") % serverDomainName();
 #else
         return serverName();
@@ -246,7 +251,7 @@ public:
 
     static QString echoServerName()
     {
-#ifdef QT_TEST_SERVER_NAME
+#ifdef QT_TEST_SERVER
         return QString("echo.") % serverDomainName();
 #else
         return serverName();
@@ -255,7 +260,7 @@ public:
 
     static QString firewallServerName()
     {
-#ifdef QT_TEST_SERVER_NAME
+#ifdef QT_TEST_SERVER
         return QString("iptables.") % serverDomainName();
 #else
         return serverName();

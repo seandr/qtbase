@@ -411,6 +411,13 @@ typename std::enable_if<!HasInitMain<T>::value, void>::type callInitMain()
 } // namespace QTest
 QT_END_NAMESPACE
 
+#ifndef QT_NO_OPENGL
+#  define QTEST_OPENGL_SHAREDCONTEXTS \
+    QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+#else
+#  define QTEST_OPENGL_SHAREDCONTEXTS
+#endif
+
 #ifdef QT_TESTCASE_BUILDDIR
 #  define QTEST_SET_MAIN_SOURCE_PATH  QTest::setMainSourcePath(__FILE__, QT_TESTCASE_BUILDDIR);
 #else
@@ -441,12 +448,14 @@ struct QtCoverageScanner
 int main(int argc, char *argv[]) \
 { \
     TESTLIB_SELFCOVERAGE_START(TestObject) \
+    QTEST_OPENGL_SHAREDCONTEXTS \
     TestObject tc; \
     QTEST_SET_MAIN_SOURCE_PATH \
     return QTest::qExec(&tc, argc, argv); \
 }
 
 #include <QtTest/qtestsystem.h>
+
 
 // Two backwards-compatibility defines for an obsolete feature:
 #define QTEST_ADD_GPU_BLACKLIST_SUPPORT_DEFS
@@ -468,6 +477,7 @@ int main(int argc, char *argv[]) \
 #endif
 
 #define QTEST_MAIN_IMPL(TestObject) \
+    QTEST_OPENGL_SHAREDCONTEXTS \
     TESTLIB_SELFCOVERAGE_START(#TestObject) \
     QT_PREPEND_NAMESPACE(QTest::Internal::callInitMain)<TestObject>(); \
     QApplication app(argc, argv); \
@@ -482,6 +492,7 @@ int main(int argc, char *argv[]) \
 #include <QtTest/qtest_gui.h>
 
 #define QTEST_MAIN_IMPL(TestObject) \
+    QTEST_OPENGL_SHAREDCONTEXTS \
     TESTLIB_SELFCOVERAGE_START(#TestObject) \
     QT_PREPEND_NAMESPACE(QTest::Internal::callInitMain)<TestObject>(); \
     QGuiApplication app(argc, argv); \

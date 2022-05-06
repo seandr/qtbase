@@ -34,8 +34,10 @@
 #include <qdir.h>
 #include <qset.h>
 
-#if defined(Q_OS_UNIX) && !defined(Q_OS_VXWORKS)
+#if defined(Q_OS_UNIX) && !defined(Q_OS_VXWORKS_GNU)
 #include <unistd.h> // for geteuid
+#elif defined(Q_OS_VXWORKS_GNU)
+#include <qplatformdefs.h>
 #endif
 
 #if defined(Q_OS_WIN)
@@ -134,6 +136,9 @@ void tst_QSaveFile::transactionalWrite()
 // to retry saving on failure. Create a read-only file first (Unix only)
 void tst_QSaveFile::retryTransactionalWrite()
 {
+#if defined(QT_NO_FILESYSTEMPERMISSIONS)
+    QSKIP("No file permissions");
+#endif
 #ifndef Q_OS_UNIX
     QSKIP("This test is Unix only");
 #else
@@ -237,11 +242,13 @@ void tst_QSaveFile::transactionalWriteNoPermissionsOnDir_data()
 
 void tst_QSaveFile::transactionalWriteNoPermissionsOnDir()
 {
+#if defined(QT_NO_FILESYSTEMPERMISSIONS)
+    QSKIP("No file permissions");
+#endif
 #ifdef Q_OS_UNIX
-#if !defined(Q_OS_VXWORKS)
     if (::geteuid() == 0)
         QSKIP("Test is not applicable with root privileges");
-#endif
+
     QFETCH(bool, directWriteFallback);
     QTemporaryDir dir;
     QVERIFY2(dir.isValid(), qPrintable(dir.errorString()));
@@ -296,7 +303,10 @@ void tst_QSaveFile::transactionalWriteNoPermissionsOnDir()
 
 void tst_QSaveFile::transactionalWriteNoPermissionsOnFile()
 {
-#if defined(Q_OS_UNIX) && !defined(Q_OS_VXWORKS)
+#if defined(QT_NO_FILESYSTEMPERMISSIONS)
+    QSKIP("No file permissions");
+#endif
+#if defined(Q_OS_UNIX)
     if (::geteuid() == 0)
         QSKIP("Test is not applicable with root privileges");
 #endif
@@ -346,7 +356,10 @@ void tst_QSaveFile::transactionalWriteCanceled()
 
 void tst_QSaveFile::transactionalWriteErrorRenaming()
 {
-#if defined(Q_OS_UNIX) && !defined(Q_OS_VXWORKS)
+#if defined(QT_NO_FILESYSTEMPERMISSIONS)
+    QSKIP("No file permissions");
+#endif
+#if defined(Q_OS_UNIX)
     if (::geteuid() == 0)
         QSKIP("Test is not applicable with root privileges");
 #endif
@@ -373,6 +386,7 @@ void tst_QSaveFile::transactionalWriteErrorRenaming()
 #endif
 
     // The saving should fail.
+
     QVERIFY(!file.commit());
 #ifdef Q_OS_UNIX
     QVERIFY(!QFile::exists(targetFile)); // renaming failed
@@ -382,6 +396,10 @@ void tst_QSaveFile::transactionalWriteErrorRenaming()
 
 void tst_QSaveFile::symlink()
 {
+#ifdef QT_NO_FILESYSTEMSYMBOLICLINKS
+    QSKIP("No symbolic link support");
+#endif
+
 #ifdef Q_OS_UNIX
     QByteArray someData = "some data";
     QTemporaryDir dir;
@@ -505,6 +523,7 @@ void tst_QSaveFile::directory()
         QVERIFY(!sf.open(QIODevice::WriteOnly));
     }
 
+#ifndef QT_NO_FILESYSTEMSYMBOLICLINKS
 #ifdef Q_OS_UNIX
     //link to a directory
     const QString linkToDir = dir.path() + QLatin1String("/linkToDir");
@@ -514,6 +533,7 @@ void tst_QSaveFile::directory()
         QFile sf(linkToDir);
         QVERIFY(!sf.open(QIODevice::WriteOnly));
     }
+#endif
 #endif
 }
 

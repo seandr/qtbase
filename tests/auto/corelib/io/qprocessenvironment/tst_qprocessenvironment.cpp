@@ -257,7 +257,11 @@ void tst_QProcessEnvironment::systemEnvironment()
 
     // all other system have environments
     if (path.isEmpty())
+#ifndef Q_OS_VXWORKS
         QFAIL("Could not find the PATH environment variable -- please correct the test environment");
+#else
+        QSKIP("PATH environment variable not used on VxWorks");
+#endif
 
     QVERIFY(system.contains("PATH"));
     QCOMPARE(system.value("PATH"), QString::fromLocal8Bit(path));

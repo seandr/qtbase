@@ -54,6 +54,23 @@
 
 #ifdef Q_OS_FREEBSD
 #include <dev/evdev/input.h>
+#elif defined(Q_OS_VXWORKS)
+#include <qpa/qplatformscreen.h>
+#include <evdevLib.h>
+#define SYN_REPORT      0
+#define EV_SYN          EV_DEV_SYN
+#define EV_KEY          EV_DEV_KEY
+#define EV_REL          EV_DEV_REL
+#define EV_ABS          EV_DEV_ABS
+#define ABS_X           EV_DEV_PTR_ABS_X
+#define ABS_Y           EV_DEV_PTR_ABS_Y
+#define BTN_TOUCH       EV_DEV_PTR_BTN_TOUCH
+#define ABS_MAX         0x3f
+#define ABS_MT_SLOT     EV_DEV_PTR_ABS_MT_SLOT //0x2F
+#define ABS_MT_POSITION_X   EV_DEV_PTR_ABS_MT_POSITION_X //0x35
+#define ABS_MT_POSITION_Y   EV_DEV_PTR_ABS_MT_POSITION_Y //0x36
+#define ABS_MT_TRACKING_ID  EV_DEV_PTR_ABS_MT_TRACKING_ID //0x39
+typedef EV_DEV_EVENT input_event;
 #else
 #include <linux/input.h>
 #endif
@@ -72,6 +89,11 @@
 extern "C" {
 #include <mtdev.h>
 }
+#endif
+
+#if defined(Q_OS_VXWORKS)
+#include <taskLib.h>
+#include <cpusetCommon.h>
 #endif
 
 QT_BEGIN_NAMESPACE
@@ -267,11 +289,25 @@ QEvdevTouchScreenHandler::QEvdevTouchScreenHandler(const QString &device, const 
     d->m_typeB = true;
 #else
     const char *mtdevStr = "";
+#if !defined(Q_OS_VXWORKS)
     long absbits[NUM_LONGS(ABS_CNT)];
     if (ioctl(m_fd, EVIOCGBIT(EV_ABS, sizeof(absbits)), absbits) >= 0) {
         d->m_typeB = testBit(ABS_MT_SLOT, absbits);
         d->m_singleTouch = !testBit(ABS_MT_POSITION_X, absbits);
     }
+#endif
+#endif
+
+#if defined(Q_OS_VXWORKS)
+    UINT32  devCap = 0;
+
+    if (ioctl(m_fd, EV_DEV_IO_GET_CAP, (char *)&devCap) != ERROR) {
+        if (devCap & EV_DEV_ABS_MT)
+            d->m_typeB = true;
+    }
+
+    if (!d->m_typeB)
+        d->m_singleTouch = true;
 #endif
 
     d->deviceNode = device;
@@ -284,9 +320,10 @@ QEvdevTouchScreenHandler::QEvdevTouchScreenHandler(const QString &device, const 
     if (d->m_filtered)
         qCDebug(qLcEvdevTouch, " - prediction=%d", d->m_prediction);
 
+    bool has_x_range = false, has_y_range = false;
+#if !defined(Q_OS_VXWORKS)
     input_absinfo absInfo;
     memset(&absInfo, 0, sizeof(input_absinfo));
-    bool has_x_range = false, has_y_range = false;
 
     if (ioctl(m_fd, EVIOCGABS((d->m_singleTouch ? ABS_X : ABS_MT_POSITION_X)), &absInfo) >= 0) {
         qCDebug(qLcEvdevTouch, "evdevtouch: %ls: min X: %d max X: %d", qUtf16Printable(device),
@@ -303,10 +340,31 @@ QEvdevTouchScreenHandler::QEvdevTouchScreenHandler(const QString &device, const 
         d->hw_range_y_max = absInfo.maximum;
         has_y_range = true;
     }
+#else
+    EV_DEV_DEVICE_AXIS_VAL axisVal[2];
+    axisVal[0].axisIndex = 0;
+    axisVal[1].axisIndex = 1;
 
+    if (ioctl(m_fd, EV_DEV_IO_GET_AXIS_VAL, (char *)&axisVal[0]) != ERROR) {
+        qCDebug(qLcEvdevTouch, "evdevtouch: %s: min X: %d max X: %d", qPrintable(device),
+                axisVal[0].minVal, axisVal[0].maxVal);
+        d->hw_range_x_min = axisVal[0].minVal;
+        d->hw_range_x_max = axisVal[0].maxVal;
+        has_x_range = true;
+    }
+
+    if (ioctl(m_fd, EV_DEV_IO_GET_AXIS_VAL, (char *)&axisVal[1]) != ERROR) {
+        qCDebug(qLcEvdevTouch, "evdevtouch: %s: min Y: %d max Y: %d", qPrintable(device),
+                axisVal[1].minVal, axisVal[1].maxVal);
+        d->hw_range_y_min = axisVal[1].minVal;
+        d->hw_range_y_max = axisVal[1].maxVal;
+        has_y_range = true;
+    }
+#endif
     if (!has_x_range || !has_y_range)
         qWarning("evdevtouch: %ls: Invalid ABS limits, behavior unspecified", qUtf16Printable(device));
 
+#if !defined(Q_OS_VXWORKS)
     if (ioctl(m_fd, EVIOCGABS(ABS_PRESSURE), &absInfo) >= 0) {
         qCDebug(qLcEvdevTouch, "evdevtouch: %ls: min pressure: %d max pressure: %d", qUtf16Printable(device),
                 absInfo.minimum, absInfo.maximum);
@@ -321,6 +379,7 @@ QEvdevTouchScreenHandler::QEvdevTouchScreenHandler(const QString &device, const 
         d->hw_name = QString::fromLocal8Bit(name);
         qCDebug(qLcEvdevTouch, "evdevtouch: %ls: device name: %s", qUtf16Printable(device), name);
     }
+#endif
 
     // Fix up the coordinate ranges for am335x in case the kernel driver does not have them fixed.
     if (d->hw_name == QLatin1String("ti-tsc")) {
@@ -336,11 +395,13 @@ QEvdevTouchScreenHandler::QEvdevTouchScreenHandler(const QString &device, const 
                 d->hw_range_x_min, d->hw_range_x_max, d->hw_range_y_min, d->hw_range_y_max);
     }
 
+#if !defined(Q_OS_VXWORKS)
     bool grabSuccess = !ioctl(m_fd, EVIOCGRAB, (void *) 1);
     if (grabSuccess)
         ioctl(m_fd, EVIOCGRAB, (void *) 0);
     else
         qWarning("evdevtouch: The device is grabbed by another process. No events will be read.");
+#endif
 
     if (rotationAngle)
         d->m_rotate = QTransform::fromTranslate(0.5, 0.5).rotate(rotationAngle).translate(-0.5, -0.5);
@@ -391,8 +452,9 @@ QTouchDevice *QEvdevTouchScreenHandler::touchDevice() const
 
 void QEvdevTouchScreenHandler::readData()
 {
-    ::input_event buffer[32];
     int events = 0;
+#if !defined(Q_OS_VXWORKS)
+    ::input_event buffer[32];
 
 #if QT_CONFIG(mtdev)
     forever {
@@ -429,6 +491,15 @@ void QEvdevTouchScreenHandler::readData()
     for (int i = 0; i < n; ++i)
         d->processInputEvent(&buffer[i]);
 #endif
+#else
+    EV_DEV_EVENT ev;
+    size_t n = read(m_fd, (char *)(&ev), sizeof(EV_DEV_EVENT));
+    if (n < sizeof(EV_DEV_EVENT)) {
+        events = n;
+        goto err;
+    }
+    d->processInputEvent(&ev);
+#endif // Q_OS_VXWORKS
     return;
 
 err:
@@ -535,8 +606,12 @@ void QEvdevTouchScreenData::processInputEvent(input_event *data)
                 if (m_currentData.trackingId == -1) {
                     m_contacts[m_currentSlot].state = Qt::TouchPointReleased;
                 } else {
-                    m_contacts[m_currentSlot].state = Qt::TouchPointPressed;
-                    m_contacts[m_currentSlot].trackingId = m_currentData.trackingId;
+                    if (m_contacts.contains(m_currentData.trackingId)) {
+                        m_contacts[m_currentSlot].state = Qt::TouchPointMoved;
+                    } else {
+                        m_contacts[m_currentSlot].state = Qt::TouchPointPressed;
+                        m_contacts[m_currentSlot].trackingId = m_currentData.trackingId;
+                    }
                 }
             }
         } else if (data->code == ABS_MT_TOUCH_MAJOR) {
@@ -545,6 +620,7 @@ void QEvdevTouchScreenData::processInputEvent(input_event *data)
                 m_currentData.state = Qt::TouchPointReleased;
             if (m_typeB)
                 m_contacts[m_currentSlot].maj = m_currentData.maj;
+#if !defined(Q_OS_VXWORKS)
         } else if (data->code == ABS_PRESSURE || data->code == ABS_MT_PRESSURE) {
             if (Q_UNLIKELY(qLcEvents().isDebugEnabled()))
                 qCDebug(qLcEvents, "EV_ABS code 0x%x: pressure %d; bounding to [%d,%d]",
@@ -552,6 +628,7 @@ void QEvdevTouchScreenData::processInputEvent(input_event *data)
             m_currentData.pressure = qBound(hw_pressure_min, data->value, hw_pressure_max);
             if (m_typeB || m_singleTouch)
                 m_contacts[m_currentSlot].pressure = m_currentData.pressure;
+#endif
         } else if (data->code == ABS_MT_SLOT) {
             m_currentSlot = data->value;
         }
@@ -651,10 +728,7 @@ void QEvdevTouchScreenData::processInputEvent(input_event *data)
                 continue;
 
             if (contact.state == Qt::TouchPointReleased) {
-                if (m_typeB)
-                    contact.state = static_cast<Qt::TouchPointState>(0);
-                else
-                    m_contacts.erase(it);
+                m_contacts.erase(it);
             } else {
                 contact.state = Qt::TouchPointStationary;
             }
@@ -809,6 +883,17 @@ QEvdevTouchScreenHandlerThread::QEvdevTouchScreenHandlerThread(const QString &de
     , m_filterWindow(nullptr)
     , m_touchRate(-1)
 {
+#if defined(Q_OS_VXWORKS)
+    bool ok = false;
+    int stackSize = qgetenv("QT_QPA_EVDEV_VXWORKS_TOUCHSCREENHANDLERTHREAD_STACK_SIZE").toInt(&ok);
+    if (ok) {
+        setStackSize(stackSize);
+    }
+    QString threadName = QLatin1String(qgetenv("QT_QPA_EVDEV_VXWORKS_TOUCHSCREENHANDLERTHREAD_NAME"));
+    if (!threadName.isEmpty()) {
+        setObjectName(threadName);
+    }
+#endif
     start();
 }
 
@@ -820,6 +905,23 @@ QEvdevTouchScreenHandlerThread::~QEvdevTouchScreenHandlerThread()
 
 void QEvdevTouchScreenHandlerThread::run()
 {
+#if defined(Q_OS_VXWORKS)
+    bool ok = false;
+    int threadPrio = qEnvironmentVariableIntValue("QT_QPA_EVDEV_VXWORKS_TOUCH_THREAD_PRIORITY", &ok);
+    if (ok) {
+        taskPrioritySet( taskIdSelf(), threadPrio );
+    }
+
+    int core = qEnvironmentVariableIntValue("QT_QPA_EVDEV_VXWORKS_TOUCH_THREAD_AFFINITY", &ok);
+    if (ok) {
+        cpuset_t affinity;
+        CPUSET_ZERO (affinity);
+        CPUSET_SET  (affinity, core);
+        if (taskCpuAffinitySet( taskIdSelf(), affinity) == ERROR) {
+            qWarning() << "Error setting CPU affinity for QEvdevTouchScreenHandlerThread.";
+        }
+    }
+#endif
     m_handler = new QEvdevTouchScreenHandler(m_device, m_spec);
 
     if (m_handler->isFiltered())

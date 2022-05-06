@@ -42,6 +42,12 @@
 
 #include <QtCore/private/qbytearray_p.h>
 
+#ifdef Q_OS_VXWORKS
+#include <cmath>
+using std::floor;
+using std::ldexp;
+#endif
+
 class tst_QCborStreamReader : public QObject
 {
     Q_OBJECT

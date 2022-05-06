@@ -52,7 +52,9 @@
 # include <QtCore/qstandardpaths.h>
 #endif // QT_BOOTSTRAPPED
 
+#if !defined(QT_NO_FILESYSTEMPERMISSIONS)
 #include <pwd.h>
+#endif
 #include <stdlib.h> // for realpath()
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -105,6 +107,10 @@ extern "C" NSString *NSTemporaryDirectory();
 // come with sandboxes that kill applications that make system calls outside a
 // whitelist and several Android vendors can't be bothered to update the list.
 #  undef STATX_BASIC_STATS
+#endif
+
+#if defined(Q_OS_VXWORKS_CLANG)
+#include <grp.h>
 #endif
 
 #ifndef STATX_ALL
@@ -684,7 +690,7 @@ QFileSystemEntry QFileSystemEngine::canonicalName(const QFileSystemEntry &entry,
 {
     Q_CHECK_FILE_NAME(entry, entry);
 
-#if !defined(Q_OS_MAC) && !defined(Q_OS_QNX) && !defined(Q_OS_ANDROID) && !defined(Q_OS_HAIKU) && _POSIX_VERSION < 200809L
+#if !defined(Q_OS_MACOS) && !defined(Q_OS_QNX) && !defined(Q_OS_ANDROID) && !defined(Q_OS_HAIKU) && !defined(Q_OS_VXWORKS_CLANG) && _POSIX_VERSION < 200809L
     // realpath(X,0) is not supported
     Q_UNUSED(data);
     return QFileSystemEntry(slowCanonicalized(absoluteName(entry).filePath()));
@@ -704,6 +710,18 @@ QFileSystemEntry QFileSystemEngine::canonicalName(const QFileSystemEntry &entry,
     }
     if (resolved_name && realpath(entry.nativeFilePath().constData(), resolved_name) == nullptr)
         resolved_name = nullptr;
+
+// We have configure test to check existence of gnu_canonicalize_file_name so we now that
+// we need to use it instead of realpath. When realpath is fixed, the canonicalize_file_name
+// will be removed at the same time so then this codepath for VxWorks will switch to us
+// realpath instead and in the future code related to gnu_canonicalize_file_name can be
+// removed (when we assume everyone(!) is using VxWorks version that has working realpath
+# elif defined(Q_OS_VXWORKS_CLANG) && QT_CONFIG(gnu_canonicalize_file_name)
+    // realpath does not work, but there is GNU extension so use it
+    // bad thing that it will return valid filename even if the file
+    // does not exist, so we need to check if there is error for that
+    // and that file does not really exist.
+    resolved_name = canonicalize_file_name(entry.nativeFilePath().constData());
 # else
 #  if _POSIX_VERSION >= 200801L // ask realpath to allocate memory
     resolved_name = realpath(entry.nativeFilePath().constData(), nullptr);
@@ -805,9 +823,9 @@ QString QFileSystemEngine::resolveUserName(uint userId)
     QVarLengthArray<char, 1024> buf(size_max);
 #endif
 
-#if !defined(Q_OS_INTEGRITY) && !defined(Q_OS_WASM)
+#if !defined(Q_OS_INTEGRITY) && !defined(Q_OS_WASM) && !defined(QT_NO_FILESYSTEMPERMISSIONS)
     struct passwd *pw = nullptr;
-#if QT_CONFIG(thread) && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && !defined(Q_OS_OPENBSD) && !defined(Q_OS_VXWORKS)
+#if QT_CONFIG(thread) && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && !defined(Q_OS_OPENBSD)
     struct passwd entry;
     getpwuid_r(userId, &entry, buf.data(), buf.size(), &pw);
 #else
@@ -996,12 +1014,16 @@ bool QFileSystemEngine::fillMetaData(const QFileSystemEntry &entry, QFileSystemM
         auto checkAccess = [&](QFileSystemMetaData::MetaDataFlag flag, int mode) {
             if (entryErrno != 0 || (what & flag) == 0)
                 return;
+#ifndef QT_NO_FILESYSTEMPERMISSIONS
             if (QT_ACCESS(nativeFilePath, mode) == 0) {
                 // access ok (and file exists)
                 data.entryFlags |= flag | QFileSystemMetaData::ExistsAttribute;
             } else if (errno != EACCES && errno != EROFS) {
                 entryErrno = errno;
             }
+#else
+            data.entryFlags |= flag;
+#endif
         };
 
         checkAccess(QFileSystemMetaData::UserReadPermission, R_OK);
@@ -1558,8 +1580,14 @@ bool QFileSystemEngine::setPermissions(const QFileSystemEntry &entry, QFile::Per
 {
     Q_CHECK_FILE_NAME(entry, false);
 
+#ifdef QT_NO_FILESYSTEMPERMISSIONS
+    bool success = true;
+    Q_UNUSED(entry);
+#else
     mode_t mode = toMode_t(permissions);
     bool success = ::chmod(entry.nativeFilePath().constData(), mode) == 0;
+#endif
+
     if (success && data) {
         data->entryFlags &= ~QFileSystemMetaData::Permissions;
         data->entryFlags |= QFileSystemMetaData::MetaDataFlag(uint(permissions));
@@ -1703,13 +1731,6 @@ QFileSystemEntry QFileSystemEngine::currentPath()
 #else
     char currentName[PATH_MAX+1];
     if (::getcwd(currentName, PATH_MAX)) {
-#if defined(Q_OS_VXWORKS) && defined(VXWORKS_VXSIM)
-        QByteArray dir(currentName);
-        if (dir.indexOf(':') < dir.indexOf('/'))
-            dir.remove(0, dir.indexOf(':')+1);
-
-        qstrncpy(currentName, dir.constData(), PATH_MAX);
-#endif
         result = QFileSystemEntry(QByteArray(currentName), QFileSystemEntry::FromNativePath());
     }
 # if defined(QT_DEBUG)

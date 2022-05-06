@@ -116,6 +116,13 @@ static pthread_key_t current_thread_data_key;
 
 static void destroy_current_thread_data(void *p)
 {
+#if defined(Q_OS_VXWORKS_GNU)
+    // Calling setspecific(..., 0) sets the value to 0 for ALL threads.
+    // The 'set to 1' workaround adds a bit of an overhead though,
+    // since this function is called twice now.
+    if (p == (void *)1)
+        return;
+#endif
     QThreadData *data = static_cast<QThreadData *>(p);
     // thread_local variables are set to zero before calling this destructor function,
     // if they are internally using pthread-specific data management,
@@ -587,7 +594,7 @@ static bool calculateUnixPriority(int priority, int *sched_policy, int *sched_pr
 
     int prio_min;
     int prio_max;
-#if defined(Q_OS_VXWORKS) && defined(VXWORKS_DKM)
+#if defined(Q_OS_VXWORKS)
     // for other scheduling policies than SCHED_RR or SCHED_FIFO
     prio_min = SCHED_FIFO_LOW_PRI;
     prio_max = SCHED_FIFO_HIGH_PRI;
@@ -696,6 +703,14 @@ void QThread::start(Priority priority)
             return;
         }
     }
+#if defined(Q_OS_VXWORKS)
+    if (Q_LIKELY(objectName().isEmpty()))
+        d->name = metaObject()->className();
+    else
+        d->name = objectName().toLocal8Bit().data();
+
+    pthread_attr_setname(&attr, &d->name[0]);
+#endif
 
 #ifdef Q_OS_INTEGRITY
     if (Q_LIKELY(objectName().isEmpty()))

@@ -52,7 +52,7 @@
 #include <qdebug.h>
 #include <qelapsedtimer.h>
 
-#ifdef Q_OS_VXWORKS
+#ifdef Q_OS_VXWORKS_GNU
 #  include <selectLib.h>
 #endif
 
@@ -243,7 +243,11 @@ void QLocalSocket::connectToServer(OpenMode openMode)
     }
 
     // create the socket
+#ifndef Q_OS_VXWORKS
     if (-1 == (d->connectingSocket = qt_safe_socket(PF_UNIX, SOCK_STREAM, 0, O_NONBLOCK))) {
+#else
+    if (-1 == (d->connectingSocket = qt_safe_socket(PF_UNIX, SOCK_SEQPACKET, 0,  O_NONBLOCK))) {
+#endif
         d->setErrorAndEmit(UnsupportedSocketOperationError,
                            QLatin1String("QLocalSocket::connectToServer"));
         return;

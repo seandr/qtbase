@@ -10,6 +10,9 @@ services:
             service: ${SHARED_SERVICE}
         container_name: qt-test-server-apache2
         hostname: ${HOST_NAME:-apache2}
+        ports:
+            - "80:80"
+            - "443:443"
         build:
             context: .
             args:
@@ -27,6 +30,10 @@ services:
             service: ${SHARED_SERVICE}
         container_name: qt-test-server-squid
         hostname: ${HOST_NAME:-squid}
+        ports:
+            - "3128:3128"
+            - "3129:3129"
+            - "3130:3130"
         depends_on:
             - apache2
         build:
@@ -44,6 +51,9 @@ services:
             service: ${SHARED_SERVICE}
         container_name: qt-test-server-vsftpd
         hostname: ${HOST_NAME:-vsftpd}
+        ports:
+            - "20:20"
+            - "21:21"
         build:
             context: .
             args:
@@ -59,6 +69,8 @@ services:
             service: ${SHARED_SERVICE}
         container_name: qt-test-server-ftp-proxy
         hostname: ${HOST_NAME:-ftp-proxy}
+        ports:
+            - "2121:2121"
         depends_on:
             - vsftpd
         build:
@@ -76,6 +88,9 @@ services:
             service: ${SHARED_SERVICE}
         container_name: qt-test-server-danted
         hostname: ${HOST_NAME:-danted}
+        ports:
+            - "1080:1080"
+            - "1081:1081"
         depends_on:
             - apache2
             - vsftpd

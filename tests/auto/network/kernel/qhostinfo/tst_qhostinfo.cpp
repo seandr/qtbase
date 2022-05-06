@@ -405,6 +405,7 @@ void tst_QHostInfo::lookupConnectToLambda()
     QCOMPARE(tmp.join(' '), expected.join(' '));
 }
 
+#ifndef Q_OS_VXWORKS
 static QStringList reverseLookupHelper(const QString &ip)
 {
     QStringList results;
@@ -466,6 +467,7 @@ static QStringList reverseLookupHelper(const QString &ip)
     }
     return results;
 }
+#endif
 
 void tst_QHostInfo::reverseLookup_data()
 {
@@ -474,10 +476,12 @@ void tst_QHostInfo::reverseLookup_data()
     QTest::addColumn<int>("err");
     QTest::addColumn<bool>("ipv6");
 
+#ifndef Q_OS_VXWORKS
     QTest::newRow("dns.google") << QString("8.8.8.8") << reverseLookupHelper("8.8.8.8") << 0 << false;
     QTest::newRow("one.one.one.one") << QString("1.1.1.1") << reverseLookupHelper("1.1.1.1") << 0 << false;
     QTest::newRow("dns.google IPv6") << QString("2001:4860:4860::8888") << reverseLookupHelper("2001:4860:4860::8888") << 0 << true;
     QTest::newRow("cloudflare IPv6") << QString("2606:4700:4700::1111") << reverseLookupHelper("2606:4700:4700::1111") << 0 << true;
+#endif
     QTest::newRow("bogus-name IPv6") << QString("1::2::3::4") << QStringList() << 1 << true;
 }
 

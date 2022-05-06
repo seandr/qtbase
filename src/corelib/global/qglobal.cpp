@@ -80,10 +80,6 @@
 #  include <qt_windows.h>
 #endif
 
-#if defined(Q_OS_VXWORKS) && defined(_WRS_KERNEL)
-#  include <envLib.h>
-#endif
-
 #if defined(Q_OS_ANDROID) && !defined(Q_OS_ANDROID_EMBEDDED)
 #include <private/qjni_p.h>
 #endif
@@ -2799,8 +2795,18 @@ QString QSysInfo::kernelVersion()
             + QLatin1Char('.') + QString::number(osver.microVersion());
 #else
     struct utsname u;
-    if (uname(&u) == 0)
+    if (uname(&u) == 0) {
+#ifdef Q_OS_VXWORKS
+        QRegExp rx(QLatin1String("\\d+(\\.\\d+)+"));
+        QString versionString = QString::fromLatin1(u.kernelversion);
+        if (rx.indexIn(versionString) != -1)
+            return rx.cap();
+        else
+            return QString();
+#else
         return QString::fromLatin1(u.release);
+#endif
+    }
     return QString();
 #endif
 }
@@ -2873,6 +2879,9 @@ QString QSysInfo::productType()
 #elif defined(Q_OS_DARWIN)
     return QStringLiteral("darwin");
 
+#elif defined(Q_OS_VXWORKS)
+    return QStringLiteral("vxworks");
+
 #elif defined(USE_ETC_OS_RELEASE) // Q_OS_UNIX
     QUnixOSVersion unixOsVersion;
     findUnixOsVersion(unixOsVersion);
@@ -2933,6 +2942,10 @@ QString QSysInfo::productVersion()
     }
     // fall through
 
+#elif defined(Q_OS_VXWORKS)
+    struct utsname u;
+    if (uname(&u) == 0)
+        return QString::fromLatin1(u.release);
 #elif defined(USE_ETC_OS_RELEASE) // Q_OS_UNIX
     QUnixOSVersion unixOsVersion;
     findUnixOsVersion(unixOsVersion);

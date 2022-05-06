@@ -5,7 +5,7 @@ qtConfig(xkbcommon) {
     SUBDIRS += compose
 
     qtHaveModule(dbus) {
-        !macos:!win32:SUBDIRS += ibus
+        !vxworks:!macos:!win32:SUBDIRS += ibus
     }
 }
 

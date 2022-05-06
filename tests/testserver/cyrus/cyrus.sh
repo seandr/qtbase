@@ -31,6 +31,7 @@
 
 set -ex
 
+mkdir -m 007 -p /home/qt-test-server/ssl-certs/private/
 echo "tls_cert_file: /home/qt-test-server/ssl-certs/qt-test-server-cert.pem" >> /etc/imapd.conf
 echo "tls_key_file: /home/qt-test-server/ssl-certs/private/qt-test-server-key.pem" >> /etc/imapd.conf
 chmod +3 /home/qt-test-server/ssl-certs/private/

@@ -135,7 +135,6 @@ private slots:
     void offsetFromUtc();
     void setOffsetFromUtc();
     void toOffsetFromUtc();
-
     void zoneAtTime_data();
     void zoneAtTime();
     void timeZoneAbbreviation();
@@ -152,8 +151,10 @@ private slots:
     void isDaylightTime() const;
     void daylightTransitions() const;
     void timeZones() const;
+#if !defined(Q_OS_VXWORKS)
     void systemTimeZoneChange_data() const;
     void systemTimeZoneChange() const;
+#endif
 
     void invalid_data() const;
     void invalid() const;
@@ -3723,6 +3724,7 @@ void tst_QDateTime::timeZones() const
 #endif
 }
 
+#if !defined(Q_OS_VXWORKS)
 void tst_QDateTime::systemTimeZoneChange_data() const
 {
 #ifdef Q_OS_WINRT
@@ -3782,6 +3784,7 @@ void tst_QDateTime::systemTimeZoneChange() const
     QCOMPARE(tzDate, QDateTime(date, early, aest));
 #endif
 }
+#endif
 
 void tst_QDateTime::invalid_data() const
 {

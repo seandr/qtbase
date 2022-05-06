@@ -66,7 +66,7 @@ QPointF tileForCoordinate(qreal lat, qreal lng, int zoom)
     qreal radianLat = qDegreesToRadians(lat);
     qreal zn = static_cast<qreal>(1 << zoom);
     qreal tx = (lng + 180.0) / 360.0;
-    qreal ty = 0.5 - log(tan(radianLat) + 1.0 / cos(radianLat)) / M_PI / 2.0;
+    qreal ty = 0.5 - log(tan(radianLat) + 1.0 / qCos(radianLat)) / M_PI / 2.0;
     return QPointF(tx * zn, ty * zn);
 }
 

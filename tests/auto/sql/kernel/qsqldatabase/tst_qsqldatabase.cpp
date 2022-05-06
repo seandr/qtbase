@@ -39,6 +39,10 @@
 #include <qdatetime.h>
 #include <qdebug.h>
 
+#ifdef Q_OS_VXWORKS
+#include <hostLib.h>
+#endif
+
 #include "tst_databases.h"
 
 Q_DECLARE_METATYPE(QSqlDriver::NotificationSource)

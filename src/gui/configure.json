@@ -944,6 +944,12 @@
                 "head": [
                     "#if defined(__FreeBSD__)",
                     "#  include <dev/evdev/input.h>",
+                    "#elif defined(__vxworks)",
+                    "#  include <evdevLib.h>",
+                    "#  define ABS_PRESSURE 0",
+                    "#  define ABS_X        EV_DEV_PTR_ABS_X",
+                    "#  define REL_X        EV_DEV_PTR_REL_X",
+                    "#  define SYN_REPORT   0",
                     "#else",
                     "#  include <linux/input.h>",
                     "#  include <linux/kd.h>",
@@ -956,7 +962,11 @@
                     "};"
                 ],
                 "main": [
+                    "#if defined(__vxworks)",
+                    "EV_DEV_EVENT buf;",
+                    "#else",
                     "input_event buf[32];",
+                    "#endif",
                     "(void) buf;"
                 ]
             }
@@ -1686,7 +1696,7 @@
             "label": "QInputContext",
             "purpose": "Provides complex input methods.",
             "section": "Kernel",
-            "condition": "features.library",
+            "condition": "features.library || config.vxworks",
             "output": [ "publicFeature", "feature" ]
         },
         "highdpiscaling": {
