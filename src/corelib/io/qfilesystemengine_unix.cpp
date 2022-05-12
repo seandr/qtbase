@@ -1224,7 +1224,7 @@ bool QFileSystemEngine::createLink(const QFileSystemEntry &source, const QFileSy
     return false;
 }
 
-#ifndef Q_OS_DARWIN
+#if !defined(Q_OS_DARWIN) && !defined(Q_OS_VXWORKS)
 /*
     Implementing as per https://specifications.freedesktop.org/trash-spec/trashspec-1.0.html
 */
@@ -1437,7 +1437,7 @@ bool QFileSystemEngine::moveFileToTrash(const QFileSystemEntry &source,
     return true;
 #endif // QT_BOOTSTRAPPED
 }
-#endif // Q_OS_DARWIN
+#endif // Q_OS_DARWIN && Q_OS_VXWORKS
 
 //static
 bool QFileSystemEngine::copyFile(const QFileSystemEntry &source, const QFileSystemEntry &target, QSystemError &error)
