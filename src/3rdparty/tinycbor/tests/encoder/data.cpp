@@ -24,6 +24,11 @@
 
 #include <QtTest>
 
+#ifdef Q_OS_VXWORKS
+#include <cmath>
+using std::ldexp;
+#endif
+
 static float myNaNf()
 {
     uint32_t v = 0x7fc00000;

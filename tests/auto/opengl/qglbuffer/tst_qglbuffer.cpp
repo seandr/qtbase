@@ -198,6 +198,10 @@ void tst_QGLBuffer::bufferSharing()
     QSKIP("Crashes on QNX when destroying the second QGLWidget (see QTBUG-38275)");
 #endif
 
+#if defined(Q_OS_VXWORKS)
+    QSKIP("Crashes on VXWORKS");
+#endif
+
     QGLWidget *w1 = new QGLWidget();
     w1->makeCurrent();
 

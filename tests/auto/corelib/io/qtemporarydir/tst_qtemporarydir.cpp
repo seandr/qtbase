@@ -289,7 +289,9 @@ void tst_QTemporaryDir::autoRemove()
 void tst_QTemporaryDir::nonWritableCurrentDir()
 {
 #ifdef Q_OS_UNIX
-
+#if defined(QT_NO_FILESYSTEMPERMISSIONS)
+    QSKIP("No file permissions");
+#endif
 #  if defined(Q_OS_ANDROID) && !defined(Q_OS_ANDROID_EMBEDDED)
     const char nonWritableDir[] = "/data";
 #  else
@@ -354,7 +356,12 @@ void tst_QTemporaryDir::openOnRootDrives()
 
 void tst_QTemporaryDir::stressTest()
 {
+#if defined(Q_OS_VXWORKS)
+    // This is configurable value
+    const int iterations = 300;
+#else
     const int iterations = 1000;
+#endif
     QTemporaryDir rootDir;
     QVERIFY(rootDir.isValid());
 

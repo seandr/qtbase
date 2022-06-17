@@ -59,14 +59,19 @@
 #  include <sys/eventfd.h>
 #endif
 
-// VxWorks doesn't correctly set the _POSIX_... options
 #if defined(Q_OS_VXWORKS)
-#  if defined(_POSIX_MONOTONIC_CLOCK) && (_POSIX_MONOTONIC_CLOCK <= 0)
-#    undef _POSIX_MONOTONIC_CLOCK
-#    define _POSIX_MONOTONIC_CLOCK 1
+#  if defined(VXWORKS_USE_POSIX_PIPES) || defined(Q_OS_VXWORKS_CLANG)
+#    include <ioLib.h>
+#    include <sysLib.h>
+#  else
+#    include <pipeDrv.h>
+#    include <selectLib.h>
+#    include <taskLib.h>
+#    include "qdatetime.h"
+#    include "qdir.h" // to get application name
+#    include <rtpLib.h>
+#    include <sysLib.h>
 #  endif
-#  include <pipeDrv.h>
-#  include <sys/time.h>
 #endif
 
 #if (_POSIX_MONOTONIC_CLOCK-0 <= 0) || defined(QT_BOOTSTRAPPED)
@@ -95,6 +100,7 @@ QThreadPipe::QThreadPipe()
     fds[1] = -1;
 #if defined(Q_OS_VXWORKS)
     name[0] = '\0';
+    forceSelectNoTimeout = false;
 #endif
 }
 
@@ -106,7 +112,7 @@ QThreadPipe::~QThreadPipe()
     if (fds[1] >= 0)
         close(fds[1]);
 
-#if defined(Q_OS_VXWORKS)
+#if defined(Q_OS_VXWORKS_GNU) && !defined(VXWORKS_USE_POSIX_PIPES)
     pipeDevDelete(name, true);
 #endif
 }
@@ -132,25 +138,41 @@ bool QThreadPipe::init()
 {
 #if defined(Q_OS_NACL) || defined(Q_OS_WASM)
    // do nothing.
-#elif defined(Q_OS_VXWORKS)
-    qsnprintf(name, sizeof(name), "/pipe/qt_%08x", int(taskIdSelf()));
+#elif defined(Q_OS_VXWORKS_GNU) && !defined(VXWORKS_USE_POSIX_PIPES)
+    RTP_DESC rtpStruct;
+    rtpInfoGet((RTP_ID)NULL, &rtpStruct);
+
+    qsrand(QDateTime::currentDateTime().toTime_t());
+    int random = qrand();
+
+    QString path(rtpStruct.pathName);
+    QByteArray binary(path.mid(path.lastIndexOf(QDir::separator())+1, path.size()).toLatin1());
+
+    Qt::HANDLE threadId = QThread::currentThreadId();
+
+    qsnprintf(name, sizeof(name), "/pipe/qevloop_%s_%08x_%08x_%d",
+        binary.data(),
+        int(rtpStruct.entrAddr),
+        threadId,
+        random);
 
     // make sure there is no pipe with this name
     pipeDevDelete(name, true);
 
     // create the pipe
     if (pipeDevCreate(name, 128 /*maxMsg*/, 1 /*maxLength*/) != OK) {
-        perror("QThreadPipe: Unable to create thread pipe device %s", name);
+        qCritical("QThreadPipe: Unable to create thread pipe device %s : %s", name, std::strerror(errno));
         return false;
     }
 
     if ((fds[0] = open(name, O_RDWR, 0)) < 0) {
-        perror("QThreadPipe: Unable to open pipe device %s", name);
+        qCritical("QThreadPipe: Unable to open pipe device %s : %s", name, std::strerror(errno));
         return false;
     }
 
     initThreadPipeFD(fds[0]);
     fds[1] = fds[0];
+    forceSelectNoTimeout = qEnvironmentVariableIntValue("QT_FORCE_SELECT_NOTIMEOUT");
 #else
 #  ifndef QT_NO_EVENTFD
     if ((fds[0] = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC)) >= 0)
@@ -160,6 +182,11 @@ bool QThreadPipe::init()
         perror("QThreadPipe: Unable to create pipe");
         return false;
     }
+#  if defined(Q_OS_VXWORKS)
+    initThreadPipeFD(fds[0]);
+    initThreadPipeFD(fds[1]);
+    forceSelectNoTimeout = qEnvironmentVariableIntValue("QT_FORCE_SELECT_NOTIMEOUT");
+#  endif
 #endif
 
     return true;
@@ -197,7 +224,7 @@ int QThreadPipe::check(const pollfd &pfd)
     if (readyread) {
         // consume the data on the thread pipe so that
         // poll doesn't immediately return next time
-#if defined(Q_OS_VXWORKS)
+#if defined(Q_OS_VXWORKS_GNU) && !defined(VXWORKS_USE_POSIX_PIPES)
         ::read(fds[0], c, sizeof(c));
         ::ioctl(fds[0], FIOFLUSH, 0);
 #else
@@ -489,6 +516,17 @@ bool QEventDispatcherUNIX::processEvents(QEventLoop::ProcessEventsFlags flags)
 
     d->pollfds.clear();
     d->pollfds.reserve(1 + (include_notifiers ? d->socketNotifiers.size() : 0));
+#if defined(Q_OS_VXWORKS)
+    if (d->threadPipe.forceSelectNoTimeout) {
+        // Tick rate greater than 10ms too much
+        // do not use timeout
+        if (sysClkRateGet() > 10) {
+            // no time to wait
+            tm->tv_sec  = 0l;
+            tm->tv_nsec = 0l;
+        }
+    }
+#endif
 
     if (include_notifiers)
         for (auto it = d->socketNotifiers.cbegin(); it != d->socketNotifiers.cend(); ++it)
@@ -501,6 +539,15 @@ bool QEventDispatcherUNIX::processEvents(QEventLoop::ProcessEventsFlags flags)
 
     switch (qt_safe_poll(d->pollfds.data(), d->pollfds.size(), tm)) {
     case -1:
+#if defined(Q_VXWORKS_GNU) && defined(VXWORKS_USE_POSIX_PIPES)
+#  if defined(EDOOM)
+        if (errno == EDOOM)
+        {
+            // we are being deleted, stop here and wait for the thread to go away
+            taskSuspend(0);
+        }
+#  endif
+#endif
         perror("qt_safe_poll");
         break;
     case 0:

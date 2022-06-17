@@ -1550,6 +1550,12 @@ void tst_QFiledialog::tildeExpansion()
 #endif // QT_BUILD_INTERNAL
 #endif
 
+static bool isPlatformEglFS()
+{
+    static const bool isEglFS = !QGuiApplication::platformName().compare(QLatin1String("eglfs"), Qt::CaseInsensitive);
+    return isEglFS;
+}
+
 class DialogRejecter : public QObject
 {
     Q_OBJECT
@@ -1570,6 +1576,8 @@ public slots:
 
 void tst_QFiledialog::rejectModalDialogs()
 {
+    if (isPlatformEglFS())
+        QSKIP("eglfs does not work with this test.");
     if (QGuiApplication::platformName().startsWith(QLatin1String("wayland"), Qt::CaseInsensitive))
         QSKIP("Wayland: This freezes. Figure out why.");
 
@@ -1632,6 +1640,8 @@ public:
 
 void tst_QFiledialog::focusObjectDuringDestruction()
 {
+    if (isPlatformEglFS())
+        QSKIP("eglfs does not work with this test.");
     if (QGuiApplication::platformName().startsWith(QLatin1String("wayland"), Qt::CaseInsensitive))
         QSKIP("Wayland: This freezes. Figure out why.");
 

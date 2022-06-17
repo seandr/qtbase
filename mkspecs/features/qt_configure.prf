@@ -603,7 +603,7 @@ defineReplace(qtConfGetTestIncludes) {
 # includes-var, in-paths, test-object-var
 defineTest(qtConfResolvePathIncs) {
     ret = true
-    gcc: \
+    gcc:!vxworks: \
         local_paths = $$qtGccSysrootifiedPaths($$2)
     else: \
         local_paths = $$2

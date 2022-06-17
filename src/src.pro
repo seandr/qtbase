@@ -76,9 +76,11 @@ src_xml.subdir = $$PWD/xml
 src_xml.target = sub-xml
 src_xml.depends = src_corelib
 
-src_dbus.subdir = $$PWD/dbus
-src_dbus.target = sub-dbus
-src_dbus.depends = src_corelib
+qtConfig(dbus) {
+    src_dbus.subdir = $$PWD/dbus
+    src_dbus.target = sub-dbus
+    src_dbus.depends = src_corelib
+}
 force_dbus_bootstrap: src_dbus.depends += src_tools_bootstrap_dbus  # avoid syncqt race
 
 src_concurrent.subdir = $$PWD/concurrent

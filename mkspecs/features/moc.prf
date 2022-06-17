@@ -24,6 +24,10 @@ win32:count(MOC_INCLUDEPATH, 40, >) {
     write_file($$absolute_path($$WIN_INCLUDETEMP, $$OUT_PWD), WIN_INCLUDETEMP_CONT)|error()
 }
 
+vxworks {
+    QMAKE_MOC_OPTIONS += -DREAD=READ -DWRITE=WRITE
+}
+
 # QNX's compiler sets "gcc" config, but does not support the -dM option;
 # UIKit builds are always multi-arch due to simulator_and_device (unless
 # -sdk is used) so this feature cannot possibly work.

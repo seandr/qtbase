@@ -144,8 +144,10 @@ private slots:
     void bcp47Name_data();
     void bcp47Name();
 
+#ifndef QT_NO_SYSTEMLOCALE
     void systemLocale_data();
     void systemLocale();
+#endif
 
     void IndianNumberGrouping();
 
@@ -3003,6 +3005,7 @@ void tst_QLocale::bcp47Name()
     QCOMPARE(QLocale(QLatin1String(QTest::currentDataTag())).bcp47Name(), expect);
 }
 
+#ifndef QT_NO_SYSTEMLOCALE
 class MySystemLocale : public QSystemLocale
 {
 public:
@@ -3068,6 +3071,7 @@ void tst_QLocale::systemLocale()
     QCOMPARE(QLocale(), originalLocale);
     QCOMPARE(QLocale::system(), originalSystemLocale);
 }
+#endif //QT_NO_SYSTEMLOCALE
 
 void tst_QLocale::IndianNumberGrouping()
 {

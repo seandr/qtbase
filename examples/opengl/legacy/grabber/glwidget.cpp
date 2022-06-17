@@ -210,20 +210,20 @@ GLuint GLWidget::makeGear(const GLfloat *reflectance, GLdouble innerRadius,
         glBegin(GL_QUAD_STRIP);
         for (int j = 0; j <= toothCount; ++j) {
             GLdouble angle = j * toothAngle;
-            glVertex3d(r0 * cos(angle), r0 * sin(angle), sign * z);
-            glVertex3d(r1 * cos(angle), r1 * sin(angle), sign * z);
-            glVertex3d(r0 * cos(angle), r0 * sin(angle), sign * z);
-            glVertex3d(r1 * cos(angle + 3 * delta), r1 * sin(angle + 3 * delta), sign * z);
+            glVertex3d(r0 * qCos(angle), r0 * qSin(angle), sign * z);
+            glVertex3d(r1 * qCos(angle), r1 * qSin(angle), sign * z);
+            glVertex3d(r0 * qCos(angle), r0 * qSin(angle), sign * z);
+            glVertex3d(r1 * qCos(angle + 3 * delta), r1 * qSin(angle + 3 * delta), sign * z);
         }
         glEnd();
 
         glBegin(GL_QUADS);
         for (int j = 0; j < toothCount; ++j) {
             GLdouble angle = j * toothAngle;
-            glVertex3d(r1 * cos(angle), r1 * sin(angle), sign * z);
-            glVertex3d(r2 * cos(angle + delta), r2 * sin(angle + delta), sign * z);
-            glVertex3d(r2 * cos(angle + 2 * delta), r2 * sin(angle + 2 * delta), sign * z);
-            glVertex3d(r1 * cos(angle + 3 * delta), r1 * sin(angle + 3 * delta), sign * z);
+            glVertex3d(r1 * qCos(angle), r1 * qSin(angle), sign * z);
+            glVertex3d(r2 * qCos(angle + delta), r2 * qSin(angle + delta), sign * z);
+            glVertex3d(r2 * qCos(angle + 2 * delta), r2 * qSin(angle + 2 * delta), sign * z);
+            glVertex3d(r1 * qCos(angle + 3 * delta), r1 * qSin(angle + 3 * delta), sign * z);
         }
         glEnd();
     }
@@ -237,14 +237,14 @@ GLuint GLWidget::makeGear(const GLfloat *reflectance, GLdouble innerRadius,
             if (j == 1)
                 qSwap(s1, s2);
 
-            glNormal3d(cos(angle), sin(angle), 0.0);
-            glVertex3d(s1 * cos(angle), s1 * sin(angle), +z);
-            glVertex3d(s1 * cos(angle), s1 * sin(angle), -z);
+            glNormal3d(cos(angle), qSin(angle), 0.0);
+            glVertex3d(s1 * qCos(angle), s1 * qSin(angle), +z);
+            glVertex3d(s1 * qCos(angle), s1 * qSin(angle), -z);
 
-            glNormal3d(s2 * sin(angle + delta) - s1 * sin(angle),
-                       s1 * cos(angle) - s2 * cos(angle + delta), 0.0);
-            glVertex3d(s2 * cos(angle + delta), s2 * sin(angle + delta), +z);
-            glVertex3d(s2 * cos(angle + delta), s2 * sin(angle + delta), -z);
+            glNormal3d(s2 * qSin(angle + delta) - s1 * qSin(angle),
+                       s1 * qCos(angle) - s2 * qCos(angle + delta), 0.0);
+            glVertex3d(s2 * qCos(angle + delta), s2 * qSin(angle + delta), +z);
+            glVertex3d(s2 * qCos(angle + delta), s2 * qSin(angle + delta), -z);
         }
     }
     glVertex3d(r1, 0.0, +z);
@@ -257,8 +257,8 @@ GLuint GLWidget::makeGear(const GLfloat *reflectance, GLdouble innerRadius,
     for (int i = 0; i <= toothCount; ++i) {
         GLdouble angle = i * toothAngle;
         glNormal3d(-cos(angle), -sin(angle), 0.0);
-        glVertex3d(r0 * cos(angle), r0 * sin(angle), +z);
-        glVertex3d(r0 * cos(angle), r0 * sin(angle), -z);
+        glVertex3d(r0 * qCos(angle), r0 * qSin(angle), +z);
+        glVertex3d(r0 * qCos(angle), r0 * qSin(angle), -z);
     }
     glEnd();
 

@@ -121,6 +121,10 @@
 #include <CoreFoundation/CFPreferences.h>
 #endif
 
+#if defined(Q_OS_VXWORKS_GNU)
+#include <ioLib.h>
+#endif
+
 #include <vector>
 
 QT_BEGIN_NAMESPACE

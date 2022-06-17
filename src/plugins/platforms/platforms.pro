@@ -42,6 +42,8 @@ freebsd {
     SUBDIRS += bsdfb
 }
 
+vxworks: SUBDIRS += vxworksfb
+
 haiku {
     SUBDIRS += haiku
 }

@@ -6,3 +6,5 @@ SOURCES = tst_qsocketnotifier.cpp
 requires(qtConfig(private_tests))
 
 include(../../../network/socket/platformsocketengine/platformsocketengine.pri)
+
+vxworks: LIBS += $$QMAKE_LIBS_NETWORK

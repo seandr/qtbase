@@ -58,6 +58,7 @@ void QEglFSVivIntegration::platformInit()
 
     int width, height;
 
+#ifndef Q_OS_VXWORKS
     bool multiBufferNotEnabledYet = qEnvironmentVariableIsEmpty("FB_MULTI_BUFFER");
     bool multiBuffer = qEnvironmentVariableIsEmpty("QT_EGLFS_IMX6_NO_FB_MULTI_BUFFER");
     if (multiBufferNotEnabledYet && multiBuffer) {
@@ -65,6 +66,7 @@ void QEglFSVivIntegration::platformInit()
                    << "If this is not desired, you can override this via: export QT_EGLFS_IMX6_NO_FB_MULTI_BUFFER=1";
         qputenv("FB_MULTI_BUFFER", "2");
     }
+#endif
 
 #ifdef Q_OS_INTEGRITY
     VivanteInit();

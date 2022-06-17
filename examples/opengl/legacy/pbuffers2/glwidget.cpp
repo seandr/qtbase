@@ -318,7 +318,7 @@ void GLWidget::timerEvent(QTimerEvent *)
     for (int i = 0; i < width; ++i) {
         for (int j = 0; j < width; ++j) {
             const float s = hypot(j - dx, i - dy);
-            const double raw = AMP * sin(2 * M_PI * W * (wt + s / v));
+            const double raw = AMP * qSin(2 * M_PI * W * (wt + s / v));
             if (s != 0)
                 wave[i * width + j] = raw / (0.2 * (s + 2));
             else

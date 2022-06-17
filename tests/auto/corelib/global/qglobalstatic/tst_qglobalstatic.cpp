@@ -34,6 +34,11 @@
 #include <sys/resource.h>
 #endif
 
+#if defined(Q_OS_VXWORKS_GNU)
+#include <ioLib.h>
+typedef size_t rlim_t;
+#endif
+
 class tst_QGlobalStatic : public QObject
 {
     Q_OBJECT

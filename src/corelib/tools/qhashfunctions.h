@@ -107,7 +107,8 @@ Q_CORE_EXPORT Q_DECL_PURE_FUNCTION uint qt_hash(QStringView key, uint chained = 
 
 Q_DECL_CONST_FUNCTION inline uint qHash(std::nullptr_t, uint seed = 0) noexcept
 {
-    return qHash(reinterpret_cast<quintptr>(nullptr), seed);
+    const void *ptr = nullptr; // work-around for MSVC's reinterpret_cast bug
+    return qHash(reinterpret_cast<quintptr>(ptr), seed);
 }
 
 template <class T> inline uint qHash(const T *key, uint seed = 0) noexcept

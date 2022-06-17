@@ -407,7 +407,7 @@ void tst_qstandardpaths::testFindExecutable_data()
             << QString() << logo << logoPath;
     }
 # endif // Q_OS_WINRT
-#else
+#elif !defined(Q_OS_VXWORKS)
     const QFileInfo shFi = findSh();
     Q_ASSERT(shFi.exists());
     const QString shPath = shFi.absoluteFilePath();

@@ -18,8 +18,5 @@ win32:debug_and_release {
 
 TARGET = tst_qudpsocket
 
-# Only on Linux until 'echo' has been added to docker-compose-for-{windows,macOS}.yml and tested
-linux {
-    CONFIG += unsupported/testserver
-    QT_TEST_SERVER_LIST = danted echo
-}
+CONFIG += unsupported/testserver
+QT_TEST_SERVER_LIST = danted echo

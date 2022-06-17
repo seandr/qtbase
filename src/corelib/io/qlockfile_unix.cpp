@@ -54,7 +54,7 @@
 #include "private/qabstractfileengine_p.h"
 #include "private/qtemporaryfile_p.h"
 
-#if !defined(Q_OS_INTEGRITY)
+#if !defined(Q_OS_INTEGRITY) && !defined(Q_OS_VXWORKS)
 #include <sys/file.h>  // flock
 #endif
 
@@ -62,6 +62,10 @@
 // flock() does not work in these OSes and produce warnings when we try to use
 #  undef LOCK_EX
 #  undef LOCK_NB
+#endif
+
+#if defined(Q_OS_VXWORKS_GNU)
+# include <hostLib.h>
 #endif
 
 #include <sys/types.h> // kill

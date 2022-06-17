@@ -630,11 +630,17 @@ using qsizetype = QIntegerForSizeof<std::size_t>::Signed;
 #  define Q_ALWAYS_INLINE inline
 #endif
 
-#if defined(Q_CC_GNU) && defined(Q_OS_WIN) && !defined(QT_NO_DATA_RELOCATION)
+#if (defined(Q_CC_GNU) && defined(Q_OS_WIN) && !defined(QT_NO_DATA_RELOCATION)) || defined(Q_OS_VXWORKS_CLANG)
 // ### Qt6: you can remove me
 #  define QT_INIT_METAOBJECT __attribute__((init_priority(101)))
 #else
 #  define QT_INIT_METAOBJECT
+#endif
+
+#if defined(Q_OS_VXWORKS_CLANG)
+#  define QT_INIT_PRIORITY(PRIORITY) __attribute__((init_priority(PRIORITY)))
+#else
+#  define QT_INIT_PRIORITY(PRIORITY)
 #endif
 
 //defines the type for the WNDPROC on windows
@@ -766,6 +772,12 @@ private:
 */
 
 class QDataStream;
+
+#if defined(Q_OS_VXWORKS)
+#  define QT_NO_FILESYSTEMPERMISSIONS
+#  define QT_NO_FILESYSTEMSYMBOLICLINKS
+#  define QT_NO_EGLFSMULTIPLEWINDOW
+#endif
 
 inline void qt_noop(void) {}
 

@@ -32,6 +32,10 @@
 #include <double-conversion/bignum.h>
 #include <double-conversion/ieee.h>
 
+#ifdef Q_OS_VXWORKS
+using std::ceil;
+#endif
+
 namespace double_conversion {
 
 static int NormalizedExponent(uint64_t significand, int exponent) {

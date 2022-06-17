@@ -175,8 +175,16 @@
 #  define Q_OS_INTEGRITY
 #elif defined(__rtems__)
 #  define Q_OS_RTEMS
-#elif defined(VXWORKS) /* there is no "real" VxWorks define - this has to be set in the mkspec! */
+#elif defined(__vxworks)
 #  define Q_OS_VXWORKS
+#  // SR541 and older versions use gnu
+#  if defined (__GNUC__) && __GNUC__ == 4 && __GNUC_MINOR__ == 8
+#    define Q_OS_VXWORKS_GNU
+#  endif
+#  // SR6XX and older versions use clang and support for this is only from SR650 onwards
+#  if defined (__clang__) && __clang_major__ >= 10
+#    define Q_OS_VXWORKS_CLANG
+#  endif
 #elif defined(__HAIKU__)
 #  define Q_OS_HAIKU
 #elif defined(__MAKEDEPEND__)

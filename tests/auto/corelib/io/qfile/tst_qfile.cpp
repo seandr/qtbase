@@ -68,12 +68,8 @@ QT_END_NAMESPACE
 #elif defined(Q_OS_FREEBSD)
 # include <sys/param.h>
 # include <sys/mount.h>
-#elif defined(Q_OS_VXWORKS)
+#elif defined(Q_OS_VXWORKS_GNU)
 # include <fcntl.h>
-#if defined(_WRS_KERNEL)
-#undef QT_OPEN
-#define QT_OPEN(path, oflag) ::open(path, oflag, 0)
-#endif
 #endif
 
 #ifdef Q_OS_QNX
@@ -628,6 +624,15 @@ void tst_QFile::open()
     QFile f( filename );
 
     QFETCH( bool, ok );
+
+#ifdef QT_NO_FILESYSTEMPERMISSIONS
+    if (strcmp(QTest::currentDataTag(), "exist_writeOnly") == 0 ||
+        strcmp(QTest::currentDataTag(), "exist_append") == 0 ||
+        strcmp(QTest::currentDataTag(), "readonlyfile") == 0 ||
+        strcmp(QTest::currentDataTag(), "noreadfile") == 0) {
+        QSKIP("No file permissions");
+    }
+#endif
 
 #if defined(Q_OS_UNIX) && !defined(Q_OS_VXWORKS)
     if (::getuid() == 0)
@@ -1341,6 +1346,12 @@ void tst_QFile::permissions()
         fc.close();
     }
 
+#ifdef QT_NO_FILESYSTEMPERMISSIONS
+        if (strcmp(QTest::currentDataTag(), "data0") == 0) {
+            QSKIP("No file permissions");
+        }
+#endif
+
     QFile f(file);
     QFile::Permissions memberResult = f.permissions() & perms;
     QFile::Permissions staticResult = QFile::permissions(file) & perms;
@@ -1537,6 +1548,10 @@ static QString getWorkingDirectoryForLink(const QString &linkFileName)
 #ifndef Q_OS_WINRT
 void tst_QFile::link()
 {
+#ifdef QT_NO_FILESYSTEMSYMBOLICLINKS
+    QSKIP("No symbolic link support");
+#endif
+
     QFile::remove("myLink.lnk");
 
     QFileInfo info1(m_testSourceFile);
@@ -1563,6 +1578,10 @@ void tst_QFile::link()
 
 void tst_QFile::linkToDir()
 {
+#ifdef QT_NO_FILESYSTEMSYMBOLICLINKS
+    QSKIP("No symbolic link support");
+#endif
+
     QFile::remove("myLinkToDir.lnk");
     QDir dir;
     dir.mkdir("myDir");
@@ -1581,6 +1600,10 @@ void tst_QFile::linkToDir()
 
 void tst_QFile::absolutePathLinkToRelativePath()
 {
+#ifdef QT_NO_FILESYSTEMSYMBOLICLINKS
+    QSKIP("No symbolic link support");
+#endif
+
     QFile::remove("myDir/test.txt");
     QFile::remove("myDir/myLink.lnk");
     QDir dir;
@@ -1599,6 +1622,10 @@ void tst_QFile::absolutePathLinkToRelativePath()
 
 void tst_QFile::readBrokenLink()
 {
+#ifdef QT_NO_FILESYSTEMSYMBOLICLINKS
+    QSKIP("No symbolic link support");
+#endif
+
     QFile::remove("myLink2.lnk");
     QFileInfo info1("file12");
     QVERIFY(QFile::link("file12", "myLink2.lnk"));

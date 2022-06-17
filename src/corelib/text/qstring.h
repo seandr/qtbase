@@ -1559,7 +1559,7 @@ inline std::wstring QString::toStdWString() const
 {
     std::wstring str;
     str.resize(length());
-#if __cplusplus >= 201703L
+#if __cplusplus >= 201703L && !defined(Q_OS_VXWORKS)
     str.resize(toWCharArray(str.data()));
 #else
     if (length())

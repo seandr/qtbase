@@ -4,7 +4,8 @@ CONFIG += no_docs_target
 SUBDIRS = \
     corelib \
     embedded \
-    qpa
+    qpa \
+    vxworks
 
 !contains(TEMPLATE, "vc.*") {    # QTBUG-91033
     qtHaveModule(dbus): SUBDIRS += dbus

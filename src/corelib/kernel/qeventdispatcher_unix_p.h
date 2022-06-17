@@ -91,8 +91,9 @@ struct QThreadPipe
     QAtomicInt wakeUps;
 
 #if defined(Q_OS_VXWORKS)
-    static const int len_name = 20;
+    static const int len_name = _POSIX_PATH_MAX; // 20
     char name[len_name];
+    bool forceSelectNoTimeout;
 #endif
 };
 

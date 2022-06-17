@@ -32,7 +32,7 @@
 #include <qlockfile.h>
 #include <qtemporarydir.h>
 #include <qsysinfo.h>
-#if defined(Q_OS_UNIX) && !defined(Q_OS_VXWORKS)
+#if defined(Q_OS_UNIX)
 #include <unistd.h>
 #include <sys/time.h>
 #elif defined(Q_OS_WIN) && !defined(Q_OS_WINRT)
@@ -80,9 +80,6 @@ void tst_QLockFile::initTestCase()
 {
 #if defined(Q_OS_ANDROID) && !defined(Q_OS_ANDROID_EMBEDDED)
     QSKIP("This test requires deploying and running external console applications");
-#elif !QT_CONFIG(process)
-    QSKIP("This test requires QProcess support");
-#else
     QVERIFY2(dir.isValid(), qPrintable(dir.errorString()));
     // chdir to our testdata path and execute helper apps relative to that.
     QString testdata_dir = QFileInfo(QFINDTESTDATA("qlockfiletesthelper")).absolutePath();
@@ -218,7 +215,9 @@ void tst_QLockFile::waitForLock_data()
     QTest::newRow("wait_forever_succeeds") << ++tn << 500 << true << -1   << true;
     QTest::newRow("wait_longer_succeeds")  << ++tn << 500 << true << 1000 << true;
     QTest::newRow("wait_zero_fails")       << ++tn << 500 << false << 0    << false;
+#if !defined(Q_OS_VXWORKS)
     QTest::newRow("wait_not_enough_fails") << ++tn << 500 << false << 100  << false;
+#endif
 }
 
 void tst_QLockFile::waitForLock()
@@ -531,7 +530,9 @@ void tst_QLockFile::corruptedLockFile()
 
 void tst_QLockFile::corruptedLockFileInTheFuture()
 {
-#if !defined(Q_OS_UNIX)
+    // TODO: Remove OS check in 5.10; and use QFileInfo::setFileTime
+    // utimes() is deprecated in POSIX and happens to cause a link failure on VxWorks
+#if !defined(Q_OS_UNIX) || defined(Q_OS_VXWORKS)
     QSKIP("This tests needs utimes");
 #else
     // This test is the same as the previous one, but the corruption was so there is a corrupted

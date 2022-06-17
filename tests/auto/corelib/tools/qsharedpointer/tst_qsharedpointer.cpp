@@ -50,6 +50,11 @@
 #include <sys/resource.h>
 #endif
 
+#if defined(Q_OS_VXWORKS_GNU)
+#include <ioLib.h>
+typedef size_t rlim_t;
+#endif
+
 QT_BEGIN_NAMESPACE
 namespace QtSharedPointer {
     Q_CORE_EXPORT void internalSafetyCheckCleanCheck();
@@ -1994,11 +1999,13 @@ void tst_QSharedPointer::creatingVariadic()
         QCOMPARE(ptr->i, i);
         QCOMPARE(&ptr->i, &i);
     }
+#ifdef Q_COMPILER_RVALUE_REFS
     {
         NoDefaultConstructorRRef1(std::move(i)); // control check
         QSharedPointer<NoDefaultConstructorRRef1> ptr = QSharedPointer<NoDefaultConstructorRRef1>::create(std::move(i));
         QCOMPARE(ptr->i, i);
     }
+#endif
     {
         NoDefaultConstructorRRef2(std::unique_ptr<int>(new int(1))); // control check
         QSharedPointer<NoDefaultConstructorRRef2> ptr = QSharedPointer<NoDefaultConstructorRRef2>::create(std::unique_ptr<int>(new int(1)));

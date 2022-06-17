@@ -56,7 +56,7 @@
 #include <algorithm>
 #include <errno.h>
 #include <limits.h>
-#ifndef Q_OS_INTEGRITY
+#if !defined(Q_OS_INTEGRITY) && !defined(Q_OS_VXWORKS)
 #include <sys/param.h> // to use MAXSYMLINKS constant
 #endif
 #include <unistd.h>    // to use _SC_SYMLOOP_MAX constant

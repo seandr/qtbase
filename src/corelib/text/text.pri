@@ -61,6 +61,7 @@ else:win32 {
 }
 
 qtConfig(icu) {
+    static: DEFINES += U_STATIC_IMPLEMENTATION
     QMAKE_USE_PRIVATE += icu
 
     SOURCES += text/qlocale_icu.cpp \

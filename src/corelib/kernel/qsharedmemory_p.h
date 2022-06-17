@@ -78,7 +78,7 @@ QT_END_NAMESPACE
 # include "private/qobject_p.h"
 #endif
 
-#if !defined(Q_OS_WIN) && !defined(Q_OS_ANDROID) && !defined(Q_OS_INTEGRITY) && !defined(Q_OS_RTEMS)
+#if !defined(Q_OS_WIN) && !defined(Q_OS_ANDROID) && !defined(Q_OS_INTEGRITY) && !defined(Q_OS_RTEMS) && !defined(Q_OS_VXWORKS)
 #  include <sys/sem.h>
 #endif
 

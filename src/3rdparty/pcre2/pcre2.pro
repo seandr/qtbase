@@ -20,7 +20,7 @@ qtConfig(intelcet) {
 }
 
 # platform/compiler specific definitions
-uikit|qnx|winrt: DEFINES += PCRE2_DISABLE_JIT
+uikit|qnx|winrt|vxworks: DEFINES += PCRE2_DISABLE_JIT
 win32:contains(QT_ARCH, "arm"): DEFINES += PCRE2_DISABLE_JIT
 win32:contains(QT_ARCH, "arm64"): DEFINES += PCRE2_DISABLE_JIT
 macos:contains(QT_ARCHS, "arm64"): QMAKE_CFLAGS += -Xarch_arm64 -DPCRE2_DISABLE_JIT

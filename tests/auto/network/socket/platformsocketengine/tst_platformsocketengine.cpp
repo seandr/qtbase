@@ -40,7 +40,7 @@
 #include <sys/socket.h>
 #endif
 
-#ifdef Q_OS_VXWORKS
+#ifdef Q_OS_VXWORKS_GNU
 #include <sockLib.h>
 #endif
 
@@ -282,7 +282,7 @@ void tst_PlatformSocketEngine::broadcastTest()
     PLATFORMSOCKETENGINE broadcastSocket;
 
     // Initialize a regular Udp socket
-    QVERIFY(broadcastSocket.initialize(QAbstractSocket::UdpSocket, QAbstractSocket::AnyIPProtocol));
+    QVERIFY(broadcastSocket.initialize(QAbstractSocket::UdpSocket, QAbstractSocket::IPv4Protocol));
 
     // Bind to any port on all interfaces
     QVERIFY(broadcastSocket.bind(QHostAddress::Any, 0));
@@ -530,10 +530,19 @@ void tst_PlatformSocketEngine::tooManySockets()
 void tst_PlatformSocketEngine::bind()
 {
     PLATFORMSOCKETENGINE binder;
+#ifndef Q_OS_VXWORKS_CLANG
+    bool isRoot = false;
+    isRoot = (geteuid() ? true : false);
+
+    QVERIFY(binder.initialize(QAbstractSocket::TcpSocket, QAbstractSocket::IPv4Protocol));
+    QCOMPARE(binder.bind(QHostAddress::AnyIPv4, 82), isRoot);
+    QCOMPARE(binder.error(), (isRoot ? QAbstractSocket::UnknownSocketError : QAbstractSocket::SocketAccessError));
+#else
     QVERIFY(binder.initialize(QAbstractSocket::TcpSocket, QAbstractSocket::IPv4Protocol));
     QCOMPARE(binder.bind(QHostAddress::AnyIPv4, 82), QtNetworkSettings::canBindToLowPorts());
     if (!QtNetworkSettings::canBindToLowPorts())
         QCOMPARE(binder.error(), QAbstractSocket::SocketAccessError);
+#endif
 
     PLATFORMSOCKETENGINE binder2;
     QVERIFY(binder2.initialize(QAbstractSocket::TcpSocket, QAbstractSocket::IPv4Protocol));

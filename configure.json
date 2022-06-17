@@ -230,14 +230,18 @@
             "test": {
                 "main": [
                     "dlclose(dlopen(0, 0));",
+                    "#ifndef __vxworks",
                     "dlsym(RTLD_DEFAULT, 0);",
+                    "#else",
+                    "dlsym((void*)RTLD_GLOBAL, 0);",
+                    "#endif",
                     "dlerror();"
                 ]
             },
             "headers": "dlfcn.h",
             "sources": [
                 "",
-                "-ldl"
+                { "libs": "-ldl", "condition": "(!config.vxworks && !config.static)" }
             ]
         }
     },
@@ -1342,7 +1346,7 @@
         },
         "dbus": {
             "label": "Qt D-Bus",
-            "autoDetect": "!config.uikit && !config.android && !config.winrt",
+            "autoDetect": "!config.uikit && !config.android && !config.winrt && !config.vxworks",
             "condition": "features.thread",
             "output": [ "privateFeature", "feature" ]
         },

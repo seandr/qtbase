@@ -558,17 +558,24 @@ void tst_QTcpSocket::bind_data()
 
     // try to bind to a privileged ports
     // we should fail if we're not root (unless the ports are in use!)
-#ifdef Q_OS_DARWIN
+#if defined(Q_OS_VXWORKS_CLANG)
+    //VxWorks returns id's for root as 1 instead of common 0, so we hardcode these here...
+    QTest::newRow("127.0.0.1:1") << "127.0.0.1" << 1 << true << "127.0.0.1";
+    if (testIpv6)
+        QTest::newRow("[::]:1") << "::" << 1 << true << "::";
+#else
+# ifdef Q_OS_DARWIN
     // Alas, some quirk (starting from macOS 10.14): bind with port number 1
     // fails with IPv4 (not IPv6 though, see below).
     QTest::newRow("127.0.0.1:1") << "127.0.0.1" << 1 << false << QString();
-#else
+# else
     QTest::newRow("127.0.0.1:1") << "127.0.0.1" << 1 << QtNetworkSettings::canBindToLowPorts()
                                  << (QtNetworkSettings::canBindToLowPorts() ? "127.0.0.1" : QString());
-#endif // Q_OS_DARWIN
+# endif // Q_OS_DARWIN
     if (testIpv6)
         QTest::newRow("[::]:1") << "::" << 1 << QtNetworkSettings::canBindToLowPorts()
                                 << (QtNetworkSettings::canBindToLowPorts() ? "::" : QString());
+#endif // Q_OS_VXWORKS_CLANG
 }
 
 void tst_QTcpSocket::bind()

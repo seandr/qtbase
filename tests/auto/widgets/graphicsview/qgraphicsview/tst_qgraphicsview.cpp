@@ -2880,6 +2880,9 @@ public:
 
 void tst_QGraphicsView::scrollBarRanges()
 {
+ #ifdef Q_OS_VXWORKS
+    QSKIP("TODO: Does not work with VxWorks");
+ #endif
     QFETCH(QByteArray, style);
     QFETCH(QSize, viewportSize);
     QFETCH(QRectF, sceneRect);

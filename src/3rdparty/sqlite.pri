@@ -15,6 +15,7 @@ qtConfig(dlopen) {
     DEFINES += SQLITE_OMIT_LOAD_EXTENSION
 }
 integrity: QMAKE_CFLAGS += -include qplatformdefs.h
+vxworks: DEFINES += HAVE_UTIME
 INCLUDEPATH +=  $$PWD/sqlite
 SOURCES +=      $$PWD/sqlite/sqlite3.c
 

@@ -51,7 +51,9 @@
 #  include <QThread>
 #endif
 
-#include <sys/times.h>
+#if !defined(Q_OS_VXWORKS)
+# include <sys/times.h>
+#endif
 
 QT_BEGIN_NAMESPACE
 

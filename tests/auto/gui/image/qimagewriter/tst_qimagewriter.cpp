@@ -197,6 +197,9 @@ void tst_QImageWriter::writeImage()
         if (::geteuid() == 0)
             skip = true;
 #endif
+#ifdef QT_NO_FILESYSTEMPERMISSIONS
+        skip = true;
+#endif
         if (!skip) {
             // Shouldn't be able to write to read-only file
             QFile sourceFile(writePrefix + "gen-" + fileName);

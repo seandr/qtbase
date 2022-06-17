@@ -149,9 +149,9 @@ void Mouse::timerEvent(QTimerEvent *)
             // Rotate right
             angle += (angle < Pi / 2) ? 0.25 : -0.25;
         }
-    } else if (::sin(angle) < 0) {
+    } else if (qSin(angle) < 0) {
         angle += 0.25;
-    } else if (::sin(angle) > 0) {
+    } else if (qSin(angle) > 0) {
         angle -= 0.25;
 //! [5] //! [6]
     }
@@ -196,10 +196,10 @@ void Mouse::timerEvent(QTimerEvent *)
 //! [11]
     speed += (-50 + QRandomGenerator::global()->bounded(100)) / 100.0;
 
-    qreal dx = ::sin(angle) * 10;
+    qreal dx = qSin(angle) * 10;
     mouseEyeDirection = (qAbs(dx / 5) < 1) ? 0 : dx / 5;
 
     setTransform(QTransform().rotate(dx), true);
-    setPos(mapToParent(0, -(3 + sin(speed) * 3)));
+    setPos(mapToParent(0, -(3 + qSin(speed) * 3)));
 }
 //! [11]

@@ -5167,7 +5167,7 @@
         \li dep_existing_only
         \li Every dependency that is a result of .depend_command is checked for
             existence. Non-existing dependencies are ignored.
-            This value was introduced in Qt 5.13.2.
+            This value was introduced in Qt 5.12.6.
     \row
         \li dep_lines
         \li The output from the .depend_command is interpreted to be one file

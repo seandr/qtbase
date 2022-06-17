@@ -55,7 +55,7 @@ qtConfig(timezone) {
         SOURCES += time/qtimezoneprivate_mac.mm
     } else: android:!android-embedded: {
         SOURCES += time/qtimezoneprivate_android.cpp
-    } else: unix: {
+    } else: unix:!vxworks: {
         SOURCES += time/qtimezoneprivate_tz.cpp
         qtConfig(icu): SOURCES += time/qtimezoneprivate_icu.cpp
     } else: qtConfig(icu): {
