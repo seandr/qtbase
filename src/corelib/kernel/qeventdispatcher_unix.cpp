@@ -63,6 +63,7 @@
 #  if defined(VXWORKS_USE_POSIX_PIPES) || defined(Q_OS_VXWORKS_CLANG)
 #    include <ioLib.h>
 #    include <sysLib.h>
+#    include <taskLib.h>
 #  else
 #    include <pipeDrv.h>
 #    include <selectLib.h>
@@ -539,7 +540,7 @@ bool QEventDispatcherUNIX::processEvents(QEventLoop::ProcessEventsFlags flags)
 
     switch (qt_safe_poll(d->pollfds.data(), d->pollfds.size(), tm)) {
     case -1:
-#if defined(Q_VXWORKS_GNU) && defined(VXWORKS_USE_POSIX_PIPES)
+#if defined(VXWORKS_USE_POSIX_PIPES) || defined(Q_OS_VXWORKS_CLANG)
 #  if defined(EDOOM)
         if (errno == EDOOM)
         {
