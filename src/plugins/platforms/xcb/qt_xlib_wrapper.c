@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2021 The Qt Company Ltd.
-** Copyright (C) 2016 Pelagicore AG
+** Copyright (C) 2022 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the plugins of the Qt Toolkit.
@@ -36,27 +35,10 @@
 **
 **
 **
-****************************************************************************/
+******************************************************************************/
 
-#ifndef QEGLFSKMSDEVICE_H
-#define QEGLFSKMSDEVICE_H
+#include "qt_xlib_wrapper.h"
 
-#include "private/qeglfsglobal_p.h"
-#include <QtKmsSupport/private/qkmsdevice_p.h>
+#include <X11/Xlib.h>
 
-QT_BEGIN_NAMESPACE
-
-class Q_EGLFS_EXPORT QEglFSKmsDevice : public QKmsDevice
-{
-public:
-    QEglFSKmsDevice(QKmsScreenConfig *screenConfig, const QString &path);
-
-    void registerScreen(QPlatformScreen *screen,
-                        bool isPrimary,
-                        const QPoint &virtualPos,
-                        const QList<QPlatformScreen *> &virtualSiblings) override;
-};
-
-QT_END_NAMESPACE
-
-#endif // QEGLFSKMSDEVICE_H
+void qt_XFlush(Display *dpy) { XFlush(dpy); }
