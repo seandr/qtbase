@@ -73,6 +73,7 @@ protected:
     enum TARG_MODE { TARG_UNIX_MODE, TARG_MAC_MODE, TARG_WIN_MODE } target_mode;
 
     ProStringList createObjectList(const ProStringList &sources);
+    ProStringList cleanupStartEndGroup(const ProStringList &list);
 
     //makefile style generator functions
     void writeObj(QTextStream &, const char *src);

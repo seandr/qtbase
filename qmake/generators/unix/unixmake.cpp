@@ -544,6 +544,8 @@ UnixMakefileGenerator::findLibraries(bool linkPrl, bool mergeLflags)
                 }
                 ++archIterator;
             }
+
+            l = cleanupStartEndGroup(l);
         }
     }
     return false;

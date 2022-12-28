@@ -1562,6 +1562,22 @@ MakefileGenerator::createObjectList(const ProStringList &sources)
     return ret;
 }
 
+ProStringList
+MakefileGenerator::cleanupStartEndGroup(const ProStringList &list)
+{
+    ProStringList ret;
+    for (int lit = 0; lit < list.size(); ++lit) {
+        ProString opt = list.at(lit);
+        if (lit+1 < list.size() &&
+                opt == "--start-group" && list.at(lit+1) == "--end-group") {
+            ++lit;
+        } else {
+            ret.append(opt);
+        }
+    }
+    return ret;
+}
+
 ReplaceExtraCompilerCacheKey::ReplaceExtraCompilerCacheKey(
         const QString &v, const QStringList &i, const QStringList &o, MakefileGenerator::ReplaceFor s)
 {

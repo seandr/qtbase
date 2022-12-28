@@ -189,6 +189,8 @@ Win32MakefileGenerator::findLibraries(bool linkPrl, bool mergeLflags)
             }
         }
         l = lopts;
+
+        l = cleanupStartEndGroup(l);
     }
   }
     return true;
