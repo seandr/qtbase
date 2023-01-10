@@ -232,7 +232,7 @@ QRegion QVxWorksFbScreen::doRedraw()
 
     QVector<QRect> rects = touched.rects();
     for (int i = 0; i < rects.size(); i++) {
-        mCompositePainter->drawImage(rects[i], *mFbScreenImage, rects[i]);
+        mCompositePainter->drawImage(rects[i], mScreenImage, rects[i]);
     }
     return touched;
 }
