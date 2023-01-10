@@ -1229,13 +1229,14 @@ bool QFileSystemEngine::createLink(const QFileSystemEntry &source, const QFileSy
     return false;
 }
 
-#if !defined(Q_OS_DARWIN) && !defined(Q_OS_VXWORKS)
+// trash bin support for Darwin is implemented elsewhere
+#if !defined(Q_OS_DARWIN)
 /*
     Implementing as per https://specifications.freedesktop.org/trash-spec/trashspec-1.0.html
 */
 
-// bootstrapped tools don't need this, and we don't want QStorageInfo
-#ifndef QT_BOOTSTRAPPED
+// bootstrapped tools don't need trash bin support and it doesn't exist for VxWorks
+#if !defined(QT_BOOTSTRAPPED) && !defined(Q_OS_VXWORKS)
 static QString freeDesktopTrashLocation(const QString &sourcePath)
 {
     auto makeTrashDir = [](const QDir &topDir, const QString &trashDir) -> QString {
@@ -1336,13 +1337,13 @@ static QString freeDesktopTrashLocation(const QString &sourcePath)
 
     return trash;
 }
-#endif // QT_BOOTSTRAPPED
+#endif // !defined(QT_BOOTSTRAPPED) && !defined(Q_OS_VXWORKS)
 
 //static
 bool QFileSystemEngine::moveFileToTrash(const QFileSystemEntry &source,
                                         QFileSystemEntry &newLocation, QSystemError &error)
 {
-#ifdef QT_BOOTSTRAPPED
+#if defined(QT_BOOTSTRAPPED) || defined(Q_OS_VXWORKS)
     Q_UNUSED(source);
     Q_UNUSED(newLocation);
     error = QSystemError(ENOSYS, QSystemError::StandardLibraryError);
@@ -1437,9 +1438,9 @@ bool QFileSystemEngine::moveFileToTrash(const QFileSystemEntry &source,
 
     newLocation = QFileSystemEntry(targetPath);
     return true;
-#endif // QT_BOOTSTRAPPED
+#endif // !defined(QT_BOOTSTRAPPED) && !defined(Q_OS_VXWORKS)
 }
-#endif // Q_OS_DARWIN && Q_OS_VXWORKS
+#endif // !defined(Q_OS_DARWIN)
 
 //static
 bool QFileSystemEngine::copyFile(const QFileSystemEntry &source, const QFileSystemEntry &target, QSystemError &error)
