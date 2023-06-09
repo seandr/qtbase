@@ -23,6 +23,16 @@
 
 #include "qglobal.h"
 
+// Recent versions of the VxWorks system libraries define getpagesize() as an
+// inline function in the unistd.h header. They also define getpagesize() as a
+// macro in the xf86drm.h header. This causes a compile time error whenever
+// xf86drm.h happens to be included before the unistd.h header. So we must check
+// for and undefine the getpagesize macro in order to successfully include the
+// unistd.h header, in case xf86drm.h has been included first.
+#if defined(Q_PROCESSOR_X86_64) && defined(getpagesize)
+#undef getpagesize
+#endif
+
 #include <unistd.h>
 
 // We are hot - unistd.h should have turned on the specific APIs we requested
