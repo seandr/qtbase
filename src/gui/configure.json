@@ -205,6 +205,7 @@
             "headers": [ "xf86drmMode.h", "xf86drm.h" ],
             "sources": [
                 { "type": "pkgConfig", "args": "libdrm" },
+                { "libs": "-lgfxLibDRM", "condition": "config.vxworks && arch.x86_64" },
                 { "libs": "-ldrm", "condition": "!config.integrity" },
                 { "libs": "-ldrm-nvdc -lposix -livfs -lnvll -lnvdc -lnvrm -lnvrm_graphics -lnvos -lnvtegrahv", "condition": "config.integrity" }
             ]
@@ -281,7 +282,8 @@
             },
             "headers": "gbm.h",
             "sources": [
-                { "type": "pkgConfig", "args": "gbm" }
+                { "type": "pkgConfig", "args": "gbm" },
+                { "libs": "-lgfxMesaEGL", "condition": "config.vxworks && arch.x86_64" }
             ]
         },
         "harfbuzz": {
