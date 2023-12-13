@@ -72,8 +72,8 @@ void tst_QHashFunctions::consistent()
     {
         const QString s = QStringLiteral("abcdefghijklmnopqrstuvxyz").repeated(16);
 
-        QCOMPARE(qHash(s), qHash(QStringRef(&s)));
-        QCOMPARE(qHash(s), qHash(QStringView(s)));
+        QCOMPARE(qHash(s, seed), qHash(QStringRef(&s), seed));
+        QCOMPARE(qHash(s, seed), qHash(QStringView(s), seed));
     }
 }
 

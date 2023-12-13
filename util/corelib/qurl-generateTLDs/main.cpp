@@ -95,8 +95,7 @@ int main(int argc, char **argv)
         printf("as obtained from http://publicsuffix.org/. To create indices and data\n");
         printf("file, do the following:\n\n");
         printf("       wget https://publicsuffix.org/list/public_suffix_list.dat -O public_suffix_list.dat\n");
-        printf("       grep -v '^//' public_suffix_list.dat | grep . > public_suffix_list.dat.trimmed\n");
-        printf("       ./%s public_suffix_list.dat.trimmed public_suffix_list.cpp\n\n", argv[0]);
+        printf("       ./%s public_suffix_list.dat public_suffix_list.cpp\n\n", argv[0]);
         printf("Now replace the code in qtbase/src/corelib/io/qurltlds_p.h with public_suffix_list.cpp's contents\n\n");
         return 1;
     }
@@ -119,10 +118,18 @@ int main(int argc, char **argv)
     QBuffer outDataBuffer(&outDataBufferBA);
     outDataBuffer.open(QIODevice::WriteOnly);
 
+    const auto skip = [](const QByteArray &line) {
+        if (line.isEmpty())
+            return true;
+        if (line.startsWith("//")) // comment
+            return true;
+        return false;
+    };
+
     int lineCount = 0;
     while (!file.atEnd()) {
-        file.readLine();
-        lineCount++;
+        if (!skip(file.readLine().trimmed()))
+            lineCount++;
     }
     outFile.write("static const quint16 tldCount = ");
     outFile.write(QByteArray::number(lineCount));
@@ -131,7 +138,10 @@ int main(int argc, char **argv)
     file.reset();
     QVector<QString> strings(lineCount);
     while (!file.atEnd()) {
-        QString st = QString::fromUtf8(file.readLine()).trimmed();
+        QByteArray line = file.readLine().trimmed();
+        if (skip(line))
+            continue;
+        QString st = QString::fromUtf8(std::move(line));
         int num = qt_hash(st) % lineCount;
         QString &entry = strings[num];
         st = utf8encode(st.toUtf8());

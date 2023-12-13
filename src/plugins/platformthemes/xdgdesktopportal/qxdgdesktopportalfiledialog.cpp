@@ -233,6 +233,9 @@ void QXdgDesktopPortalFileDialog::openPortal()
             filter.name = mimeType.comment();
             filter.filterConditions = filterConditions;
 
+            if (filter.name.isEmpty())
+                filter.name = mimeTypefilter;
+
             filterList << filter;
 
             if (!d->selectedMimeTypeFilter.isEmpty() && d->selectedMimeTypeFilter == mimeTypefilter)

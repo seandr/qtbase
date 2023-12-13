@@ -29,6 +29,16 @@ ANDROID_PERMISSIONS = \
     android.permission.INTERNET \
     android.permission.WRITE_EXTERNAL_STORAGE
 
+current = Qt_$$QT_MAJOR_VERSION
+isEmpty(QT_NAMESPACE): tag_symbol = qt_version_tag
+else: tag_symbol = qt_version_tag_$$QT_NAMESPACE
+for(i, 0..$$QT_MINOR_VERSION) {
+   previous = $$current
+   current = Qt_$${QT_MAJOR_VERSION}.$$i
+   equals(i, $$QT_MINOR_VERSION): MODULE_VERSCRIPT_CONTENT_EXT += "$$current { $$tag_symbol; } $$previous;"
+   else: MODULE_VERSCRIPT_CONTENT_EXT += "$$current {} $$previous;"
+}
+
 # QtCore can't be compiled with -Wl,-no-undefined because it uses the "environ"
 # variable and on FreeBSD and OpenBSD, this variable is in the final executable itself.
 # OpenBSD 6.0 will include environ in libc.

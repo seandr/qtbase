@@ -181,15 +181,6 @@ qCount(list.begin(), list.end(), 7, countOf7);
 //! [9]
 
 
-//! [10]
-double pi = 3.14;
-double e = 2.71;
-
-qSwap(pi, e);
-// pi == 2.71, e == 3.14
-//! [10]
-
-
 //! [11]
 QList<int> list;
 list << 33 << 12 << 68 << 6 << 12;

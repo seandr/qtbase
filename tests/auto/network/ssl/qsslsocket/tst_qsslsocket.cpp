@@ -306,8 +306,8 @@ protected slots:
 private:
     QSslSocket *socket;
     QList<QSslError> storedExpectedSslErrors;
+    bool isSecurityLevel0Required = false;
 #endif // QT_NO_SSL
-private:
     static int loopLevel;
 public:
     static QString testDataDir;
@@ -348,6 +348,7 @@ tst_QSslSocket::tst_QSslSocket()
 #ifndef QT_NO_OPENSSL
     qRegisterMetaType<QSslPreSharedKeyAuthenticator *>();
     qRegisterMetaType<tst_QSslSocket::PskConnectTestType>();
+    isSecurityLevel0Required = OPENSSL_VERSION_NUMBER >= 0x30100010;
 #endif
 #endif
 }
@@ -602,6 +603,10 @@ void tst_QSslSocket::simpleConnect()
     if (!QSslSocket::supportsSsl())
         return;
 
+    // Starting from OpenSSL v 3.1.1 deprecated protocol versions (we want to use when connecting) are not available by default.
+    if (isSecurityLevel0Required)
+        QSKIP("Testing with OpenSSL backend, but security level 0 is required for TLS v1.1 or earlier");
+
     QFETCH_GLOBAL(bool, setProxy);
     if (setProxy)
         return;
@@ -660,6 +665,10 @@ void tst_QSslSocket::simpleConnectWithIgnore()
     if (!QSslSocket::supportsSsl())
         return;
 
+    // Starting from OpenSSL v 3.1.1 deprecated protocol versions (we want to use when connecting) are not available by default.
+    if (isSecurityLevel0Required)
+        QSKIP("Testing with OpenSSL backend, but security level 0 is required for TLS v1.1 or earlier");
+
     QFETCH_GLOBAL(bool, setProxy);
     if (setProxy)
         return;
@@ -702,6 +711,10 @@ void tst_QSslSocket::simpleConnectWithIgnore()
 
 void tst_QSslSocket::sslErrors_data()
 {
+    // Starting from OpenSSL v 3.1.1 deprecated protocol versions (we want to use in 'sslErrors' test) are not available by default.
+    if (isSecurityLevel0Required)
+        QSKIP("Testing with OpenSSL backend, but security level 0 is required for TLS v1.1 or earlier");
+
     QTest::addColumn<QString>("host");
     QTest::addColumn<int>("port");
 
@@ -1713,6 +1726,10 @@ void tst_QSslSocket::waitForConnectedEncryptedReadyRead()
 {
     if (!QSslSocket::supportsSsl())
         return;
+
+    // Starting from OpenSSL v 3.1.1 deprecated protocol versions (we want to use here) are not available by default.
+    if (isSecurityLevel0Required)
+        QSKIP("Testing with OpenSSL backend, but security level 0 is required for TLS v1.1 or earlier");
 
     QSslSocketPtr socket = newSocket();
     this->socket = socket.data();
@@ -2848,6 +2865,10 @@ void tst_QSslSocket::encryptWithoutConnecting()
 
 void tst_QSslSocket::resume_data()
 {
+    // Starting from OpenSSL v 3.1.1 deprecated protocol versions (we want to use in 'resume' test) are not available by default.
+    if (isSecurityLevel0Required)
+        QSKIP("Testing with OpenSSL backend, but security level 0 is required for TLS v1.1 or earlier");
+
     QTest::addColumn<bool>("ignoreErrorsAfterPause");
     QTest::addColumn<QList<QSslError> >("errorsToIgnore");
     QTest::addColumn<bool>("expectSuccess");
