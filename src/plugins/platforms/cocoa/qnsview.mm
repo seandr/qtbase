@@ -35,6 +35,9 @@
 #endif
 #include "qcocoaintegration.h"
 #include <QtGui/private/qmacmimeregistry_p.h>
+#include <QtGui/private/qmetallayer_p.h>
+
+#include <QuartzCore/CATransaction.h>
 
 @interface QNSView (Drawing) <CALayerDelegate>
 - (void)initDrawing;
