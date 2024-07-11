@@ -474,12 +474,18 @@ bool QFontEngine::processOS2Table() const
             // Some fonts may have invalid OS/2 data. We detect this and bail out.
             if (winAscent == 0 && winDescent == 0)
                 return false;
-            const auto limitForQFixed = std::numeric_limits<int>::max() / (fontDef.pixelSize * 64);
+
+			const auto limitForQFixed = std::numeric_limits<int>::max() / (fontDef.pixelSize * 64);
             if (winAscent > limitForQFixed || winDescent > limitForQFixed)
                 return false;
-            m_ascent = QFixed::fromReal(winAscent * fontDef.pixelSize) / unitsPerEm;
-            m_descent = QFixed::fromReal(winDescent * fontDef.pixelSize) / unitsPerEm;
-            m_leading = QFixed{};
+            QFixed ascent = QFixed::fromReal(winAscent * fontDef.pixelSize) / unitsPerEm;
+            QFixed descent = QFixed::fromReal(winDescent * fontDef.pixelSize) / unitsPerEm;
+            if ((ascent != m_ascent) || (descent != m_descent))
+            {
+                m_ascent = ascent;
+                m_descent = descent;
+                m_leading = QFixed{};
+            }
         }
 
         return true;
