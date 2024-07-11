@@ -144,7 +144,7 @@ static QIOSScreen* qtPlatformScreenFor(UIScreen *uiScreen)
 - (void)orientationChanged:(NSNotification *)notification
 {
     Q_UNUSED(notification);
-    m_screen->updateProperties();
+    m_screen->updateRotation();
 }
 
 @end
@@ -156,24 +156,44 @@ static QIOSScreen* qtPlatformScreenFor(UIScreen *uiScreen)
 @implementation UIScreen (Compatibility)
 - (CGRect)qt_applicationFrame
 {
-#ifdef Q_OS_IOS
-    return self.applicationFrame;
-#else
     return self.bounds;
-#endif
 }
 @end
 
 // -------------------------------------------------------------------------
 
-@implementation QUIWindow
+@implementation QUIWindow {
+    QIOSScreen *m_screen;
+    BOOL m_observingEffectiveGeometry;
+}
 
-- (instancetype)initWithFrame:(CGRect)frame
+- (instancetype)initWithFrame:(CGRect)frame QIOSScreen:(QIOSScreen*)screen
 {
-    if ((self = [super initWithFrame:frame]))
+    if ((self = [super initWithFrame:frame])) {
         self->_sendingEvent = NO;
 
+        m_screen = screen;
+        m_observingEffectiveGeometry = NO;
+        if (@available(ios 16, macCatalyst 16.0, tvOS 16, *)) {
+			UIWindowSceneGeometry* effectiveGeometry = self.windowScene.effectiveGeometry;
+            if (effectiveGeometry) {
+                [self.windowScene addObserver:self forKeyPath:@"effectiveGeometry" options:(NSKeyValueObservingOptionNew) context:nullptr];
+                m_observingEffectiveGeometry = YES;
+            }
+            NSLog(@"%@:initwithFrame: m_uiWindow.windowScene=%@ effectiveGeometry=%@", self, self.windowScene, effectiveGeometry);
+        }
+    }
+    
     return self;
+}
+
+- (void)dealloc
+{
+    if (@available(ios 16, macCatalyst 16.0, tvOS 16, *)) {
+        if (m_observingEffectiveGeometry && self.windowScene)
+            [self.windowScene removeObserver:self forKeyPath:@"effectiveGeometry"];
+    }
+    [super dealloc];
 }
 
 - (void)sendEvent:(UIEvent *)event
@@ -202,7 +222,32 @@ static QIOSScreen* qtPlatformScreenFor(UIScreen *uiScreen)
             QIOSTheme::initializeSystemPalette();
             QWindowSystemInterface::handleThemeChange<QWindowSystemInterface::SynchronousDelivery>();
         }
-    }
+		if ((self.traitCollection.verticalSizeClass != previousTraitCollection.verticalSizeClass) ||
+			(self.traitCollection.horizontalSizeClass != previousTraitCollection.horizontalSizeClass))
+		{
+//                NSLog(@"%@:traitCollectionDidChange:%@ self.traitCollection=%@", self, previousTraitCollection, self.traitCollection);
+			if (m_screen)
+				m_screen->updateRotation();
+		}
+	}
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+	NSLog(@"observeValueForKeyPath:%@ ofObject:%@ change=%@", keyPath, object, change);
+	if (@available(ios 16, macCatalyst 16.0, tvOS 16, *)) {
+		if ((object == self.windowScene) && ([keyPath isEqual:@"effectiveGeometry"]))
+		{
+			if (m_screen) {
+				//                NSLog(@"**** EffectiveGeometry Changed...");
+				m_screen->updateRotation();
+				UIWindowSceneGeometry* effectiveGeometry = self.windowScene.effectiveGeometry;
+				if (effectiveGeometry) {
+					NSLog(@"windowScene.effectiveGeometry.interfaceOrientation=%ld", effectiveGeometry.interfaceOrientation);
+				}
+			}
+		}
+	}
 }
 
 @end
@@ -281,7 +326,7 @@ QIOSScreen::QIOSScreen(UIScreen *screen)
 
         if (!m_uiWindow) {
             // Create a window and associated view-controller that we can use
-            m_uiWindow = [[QUIWindow alloc] initWithFrame:[m_uiScreen bounds]];
+            m_uiWindow = [[QUIWindow alloc] initWithFrame:[m_uiScreen bounds] QIOSScreen:this];
             m_uiWindow.rootViewController = [[[QIOSViewController alloc] initWithQIOSScreen:this] autorelease];
         }
     }
@@ -311,12 +356,36 @@ QString QIOSScreen::name() const
         return "External display"_L1;
 }
 
-void QIOSScreen::updateProperties()
+void QIOSScreen::updateRotation()
 {
+//    NSLog(@"updateRotation()");
+    // At construction time, we don't yet have an associated QScreen, but we still want
+    // to compute the properties above so they are ready for when the QScreen attaches.
+    // Also, at destruction time the QScreen has already been torn down, so notifying
+    // Qt about changes to the screen will cause asserts in the event delivery system.
+    if (!screen())
+        return;
+
+    if (screen()->orientation() != orientation())
+        QWindowSystemInterface::handleScreenOrientationChange(screen(), orientation());
+}
+
+void QIOSScreen::updateGeometry()
+{
+//    NSLog(@"updateGeometry()");
     QRect previousGeometry = m_geometry;
     QRect previousAvailableGeometry = m_availableGeometry;
 
     m_geometry = QRectF::fromCGRect(m_uiScreen.bounds).toRect();
+	
+	NSLog(@"m_uiWindow=%@ m_uiWindow.windowScene=%@ interfaceOrientation=%ld", m_uiWindow, m_uiWindow.windowScene, m_uiWindow.windowScene.interfaceOrientation);
+	if (@available(ios 16, macCatalyst 16.0, tvOS 16, *)) {
+		NSLog(@"fullScreen=%@ effectiveGeometry=%@", [m_uiWindow.windowScene valueForKey:@"fullScreen"], [m_uiWindow.windowScene valueForKey:@"effectiveGeometry"]);
+		UIWindowSceneGeometry* effectiveGeometry = m_uiWindow.windowScene.effectiveGeometry;
+		if (effectiveGeometry) {
+			NSLog(@"effectiveGeometry.interfaceOrientation=%ld", effectiveGeometry.interfaceOrientation);
+		}
+	}
 
     // The application frame doesn't take safe area insets into account, and
     // the safe area insets are not available before the UIWindow is shown,
@@ -326,31 +395,6 @@ void QIOSScreen::updateProperties()
     UIEdgeInsets safeAreaInsets = m_uiWindow.safeAreaInsets;
     m_availableGeometry = m_geometry.adjusted(safeAreaInsets.left, safeAreaInsets.top,
         -safeAreaInsets.right, -safeAreaInsets.bottom).intersected(applicationFrame);
-
-#ifndef Q_OS_TVOS
-    if (m_uiScreen == [UIScreen mainScreen]) {
-        QIOSViewController *qtViewController = [m_uiWindow.rootViewController isKindOfClass:[QIOSViewController class]] ?
-            static_cast<QIOSViewController *>(m_uiWindow.rootViewController) : nil;
-
-        if (qtViewController.lockedOrientation) {
-            Q_ASSERT(!qt_apple_isApplicationExtension());
-
-            // Setting the statusbar orientation (content orientation) on will affect the screen geometry,
-            // which is not what we want. We want to reflect the screen geometry based on the locked orientation,
-            // and adjust the available geometry based on the repositioned status bar for the current status
-            // bar orientation.
-
-            Qt::ScreenOrientation statusBarOrientation = toQtScreenOrientation(
-                UIDeviceOrientation(qt_apple_sharedApplication().statusBarOrientation));
-
-            Qt::ScreenOrientation lockedOrientation = toQtScreenOrientation(UIDeviceOrientation(qtViewController.lockedOrientation));
-            QTransform transform = transformBetween(lockedOrientation, statusBarOrientation, m_geometry).inverted();
-
-            m_geometry = transform.mapRect(m_geometry);
-            m_availableGeometry = transform.mapRect(m_availableGeometry);
-        }
-    }
-#endif
 
     if (m_geometry != previousGeometry) {
         // We can't use the primaryOrientation of screen(), as we haven't reported the new geometry yet
@@ -374,16 +418,20 @@ void QIOSScreen::updateProperties()
     if (!screen())
         return;
 
-    if (screen()->orientation() != orientation())
-        QWindowSystemInterface::handleScreenOrientationChange(screen(), orientation());
-
-    // Note: The screen orientation change and the geometry changes are not atomic, so when
-    // the former is emitted, the latter has not been reported and reflected in the QScreen
-    // API yet. But conceptually it makes sense that the orientation update happens first,
-    // and the geometry updates caused by auto-rotation happen after that.
-
     if (m_geometry != previousGeometry || m_availableGeometry != previousAvailableGeometry)
         QWindowSystemInterface::handleScreenGeometryChange(screen(), m_geometry, m_availableGeometry);
+}
+
+void QIOSScreen::updateProperties()
+{
+//    NSLog(@"updateProperties()");
+    updateRotation();
+
+	// Note: The screen orientation change and the geometry changes are not atomic, so when
+	// the former is emitted, the latter has not been reported and reflected in the QScreen
+	// API yet. But conceptually it makes sense that the orientation update happens first,
+	// and the geometry updates caused by auto-rotation happen after that.
+    updateGeometry();
 }
 
 void QIOSScreen::setUpdatesPaused(bool paused)
@@ -461,11 +509,11 @@ qreal QIOSScreen::refreshRate() const
 
 Qt::ScreenOrientation QIOSScreen::nativeOrientation() const
 {
-    CGRect nativeBounds =
+	CGRect nativeBounds =
 #if defined(Q_OS_IOS)
-        m_uiScreen.nativeBounds;
+		m_uiScreen.nativeBounds;
 #else
-        m_uiScreen.bounds;
+		m_uiScreen.bounds;
 #endif
 
     // All known iOS devices have a native orientation of portrait, but to

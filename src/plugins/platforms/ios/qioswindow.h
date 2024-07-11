@@ -33,7 +33,7 @@ public:
     void setOpacity(qreal level) override;
 
     bool isExposed() const override;
-    void propagateSizeHints() override {}
+    void propagateSizeHints() override;
 
     QMargins safeAreaMargins() const override;
 

@@ -408,6 +408,7 @@ bool QFontEngine::processHheaTable() const
 
 void QFontEngine::initializeHeightMetrics() const
 {
+//	qDebug() << "QFontEngine::initializeHeightMetrics() - pre - leading=" << m_leading << " ascent=" << m_ascent << " descent=" << m_descent;
     bool hasEmbeddedBitmaps =
             !getSfntTable(QFont::Tag("EBLC").value()).isEmpty()
             || !getSfntTable(QFont::Tag("CBLC").value()).isEmpty()
@@ -415,9 +416,13 @@ void QFontEngine::initializeHeightMetrics() const
     if (!hasEmbeddedBitmaps) {
         // Get HHEA table values if available
         processHheaTable();
+//		qDebug() << "QFontEngine::initializeHeightMetrics() - processHheaTable - leading=" << m_leading << " ascent=" << m_ascent << " descent=" << m_descent;
 
+#ifndef Q_OS_ANDROID
         // Allow OS/2 metrics to override if present
         processOS2Table();
+//		qDebug() << "QFontEngine::initializeHeightMetrics() - processOS2Table - leading=" << m_leading << " ascent=" << m_ascent << " descent=" << m_descent;
+#endif
 
         if (!supportsSubPixelPositions()) {
             m_ascent = m_ascent.round();

@@ -331,6 +331,7 @@
 @implementation QIOSTextInputResponder {
     QString m_markedText;
     BOOL m_inSelectionChange;
+    BOOL m_noEditMenu;
 }
 
 - (instancetype)initWithInputContext:(QT_PREPEND_NAMESPACE(QIOSInputContext) *)inputContext
@@ -368,6 +369,7 @@
         break;
     }
 
+    m_noEditMenu = BOOL(hints & Qt::ImhNoEditMenu);
     self.secureTextEntry = BOOL(hints & Qt::ImhHiddenText);
     self.autocorrectionType = (hints & Qt::ImhNoPredictiveText) ?
                 UITextAutocorrectionTypeNo : UITextAutocorrectionTypeDefault;
@@ -473,6 +475,13 @@
 // -------------------------------------------------------------------------
 
 #ifndef QT_NO_SHORTCUT
+
+- (UIEditingInteractionConfiguration)editingInteractionConfiguration
+{
+    if (m_noEditMenu)
+        return UIEditingInteractionConfigurationNone;
+    return [super editingInteractionConfiguration];
+}
 
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender
 {

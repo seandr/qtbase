@@ -339,7 +339,7 @@ void QWidgetRepaintManager::sendUpdateRequest(QWidget *widget, UpdateTime update
     // compositing and waiting for vsync each and every time. Change to
     // UpdateLater, except for approx. once per frame to prevent starvation in
     // case the control does not get back to the event loop.
-    if (updateTime == UpdateNow && QWidgetPrivate::get(widget)->textureChildSeen) {
+    if (updateTime == UpdateNow && !widget->testAttribute(Qt::WidgetAttribute(142)) && QWidgetPrivate::get(widget)->textureChildSeen) {
         int refresh = 60;
         QWidget *w = widget->window();
         QScreen *ws = w->windowHandle()->screen();

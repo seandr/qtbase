@@ -13,6 +13,7 @@
 
 #include <QtCore/private/qcore_mac_p.h>
 
+#include <QtCore/private/qcore_mac_p.h>
 #include <QtGui/private/qwindow_p.h>
 #include <QtGui/private/qhighdpiscaling_p.h>
 #include <qpa/qplatformintegration.h>
@@ -238,6 +239,66 @@ bool QIOSWindow::isExposed() const
         && window()->isVisible() && !window()->geometry().isEmpty();
 }
 
+void QIOSWindow::propagateSizeHints()
+{
+    UIWindow* uiWindow = m_view.window;
+    // Get the window content sizes.
+    QSize minimumSize = windowMinimumSize();
+    if (!minimumSize.isValid()) // minimumSize is (-1, -1) when not set. Make that (0, 0) for Cocoa.
+        minimumSize = QSize(0, 0);
+    QSize maxSize = windowMaximumSize();
+    QSize baseSize = windowBaseSize();
+
+    // if we're effectively expected to be fixed size
+    if (!maxSize.isEmpty() && (minimumSize == maxSize))
+        m_view.qtViewController.preferredContentSize = maxSize.toCGSize();
+    else if (!baseSize.isNull() && baseSize.isValid())
+        m_view.qtViewController.preferredContentSize = baseSize.toCGSize();
+
+	Qt::WindowFlags flags = window()->flags();
+	// if we're in an app with scenes, try to find ours
+	NSSet* scenes = qt_apple_sharedApplication().connectedScenes;
+	if (scenes && (scenes.count != 0))
+	{
+		NSSet* relevantScenes = [scenes objectsPassingTest:^BOOL(id obj, BOOL* stop) {
+			if ([obj isKindOfClass:[UIWindowScene class]]) {
+				UIWindowScene* windowScene = (UIWindowScene*)obj;
+				if ((windowScene.screen == uiWindow.screen) && [windowScene.windows containsObject:uiWindow]) {
+					*stop = YES;
+					return YES;
+				} else
+					return NO;
+			} else
+				return NO;
+		}];
+	
+		// should only be one, so...
+		UIWindowScene* scene = [relevantScenes anyObject];
+		if (scene) {
+			if (@available(ios 16, macCatalyst 16.0, tvOS 16, *)) {
+				UISceneWindowingBehaviors* windowBehaviors = scene.windowingBehaviors;
+				// maybe nil
+				if (windowBehaviors) {
+					windowBehaviors.closable = (flags & Qt::WindowCloseButtonHint) ? YES : NO;
+					windowBehaviors.miniaturizable = (flags & Qt::WindowMinimizeButtonHint) ? YES : NO;
+				}
+			}
+			
+			UISceneSizeRestrictions* sizeRestrictions = scene.sizeRestrictions;
+			if (sizeRestrictions) {
+				if (minimumSize.isValid())
+					sizeRestrictions.minimumSize = minimumSize.toCGSize();
+				if (maxSize.isValid())
+					sizeRestrictions.maximumSize = maxSize.toCGSize();
+				if (@available(ios 16, macCatalyst 16.0, tvOS 16, *)) {
+					sizeRestrictions.allowsFullScreen = (flags & (Qt::WindowFullscreenButtonHint | Qt::MaximizeUsingFullscreenGeometryHint) ||
+														 (window()->windowStates() & (Qt::WindowFullScreen | Qt::WindowMaximized))) ? YES : NO;
+				}
+			}
+		}
+    }
+}
+
 void QIOSWindow::setWindowState(Qt::WindowStates state)
 {
     // Update the QWindow representation straight away, so that
@@ -245,8 +306,10 @@ void QIOSWindow::setWindowState(Qt::WindowStates state)
     // state before applying geometry changes.
     qt_window_private(window())->windowState = state;
 
-    if (window()->isTopLevel() && window()->isVisible() && window()->isActive())
+    if (window()->isTopLevel() && window()->isVisible() && window()->isActive()) {
         [m_view.qtViewController updateProperties];
+        propagateSizeHints();
+    }
 
     if (state & Qt::WindowMinimized) {
         applyGeometry(QRect());
@@ -326,9 +389,12 @@ void QIOSWindow::raiseOrLower(bool raise)
         // levels into account.
         for (int i = int(subviews.count) - 1; i >= 0; --i) {
             UIView *view = static_cast<UIView *>([subviews objectAtIndex:i]);
-            if (view.hidden || view == m_view || !view.qwindow)
+            if (view == m_view || !view.qwindow)
                 continue;
-            int level = static_cast<QIOSWindow *>(view.qwindow->handle())->m_windowLevel;
+            QIOSWindow * window = static_cast<QIOSWindow *>(view.qwindow->handle());
+	    if (view.hidden)
+                window->updateWindowLevel();
+            int level = window->m_windowLevel;
             if (m_windowLevel > level || (raise && m_windowLevel == level)) {
                 [m_view.superview insertSubview:m_view aboveSubview:view];
                 return;
