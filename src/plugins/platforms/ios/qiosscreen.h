@@ -46,6 +46,8 @@ public:
     void setUpdatesPaused(bool);
 
     void updateProperties();
+    void updateRotation();
+    void updateGeometry();
 
 private:
     void deliverUpdateRequests() const;

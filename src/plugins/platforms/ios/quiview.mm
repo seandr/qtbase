@@ -301,6 +301,7 @@ inline ulong getTimeStamp(UIEvent *event)
 
 - (BOOL)becomeFirstResponder
 {
+    NSLog(@"%@:becomeFirstResponder", self);
     {
         // Scope for the duration of becoming first responder only, as the window
         // activation event may trigger new responders, which we don't want to be
@@ -704,7 +705,9 @@ inline ulong getTimeStamp(UIEvent *event)
 {
 #ifndef Q_OS_TVOS
     // Check first if QIOSMenu should handle the action before continuing up the responder chain
-    return [QIOSMenu::menuActionTarget() targetForAction:action withSender:sender] != 0;
+    id target = [QIOSMenu::menuActionTarget() targetForAction:action withSender:sender];
+//    NSLog(@"%@:canPerformAction:%@ menuActionTarget=%@ targetForAction=%@ res=%d", self, NSStringFromSelector(action), QIOSMenu::menuActionTarget(), target, target != 0);
+    return target != 0;
 #else
     Q_UNUSED(action);
     Q_UNUSED(sender);
@@ -732,7 +735,13 @@ inline ulong getTimeStamp(UIEvent *event)
 
 - (UIEditingInteractionConfiguration)editingInteractionConfiguration
 {
-    // We only want the three-finger-tap edit menu to be available when there's
+	//    NSLog(@"%@:editingInteractionConfiguration isFirstResponder=%d noSys=%d", self, self.isFirstResponder, noSys);
+		// Only prevent menu iff this is the first responder AND overriding system gestures.
+		BOOL noSys = self.isFirstResponder && (self.platformWindow->window()->flags() & Qt::WindowOverridesSystemGestures);
+		if (noSys)
+			return UIEditingInteractionConfigurationNone;
+
+	// We only want the three-finger-tap edit menu to be available when there's
     // actually something to edit. Otherwise the OS will cause a slight delay
     // before delivering the release of three finger touch input. Note that we
     // do not do any hit testing here to check that the focus object is the one

@@ -1209,7 +1209,7 @@ void QWidget::create(WId window, bool initializeWindow, bool destroyOldWindow)
     d->create();
 
     // A real toplevel window needs a paint manager
-    if (isWindow() && windowType() != Qt::Desktop)
+    if ((isWindow() && windowType() != Qt::Desktop) || testAttribute(Qt::WidgetAttribute(169)))
         d->topData()->repaintManager.reset(new QWidgetRepaintManager(this));
 
     d->setModal_sys();

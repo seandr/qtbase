@@ -24,7 +24,7 @@ enum QWindowsGLFormatFlags
     QWindowsGLAccumBuffer = 0x8
 };
 
-// Additional format information for Windows.
+// Additional format information for Windows.h
 struct QWindowsOpenGLAdditionalFormat
 {
     QWindowsOpenGLAdditionalFormat(unsigned formatFlagsIn = 0, unsigned pixmapDepthIn = 0) :
