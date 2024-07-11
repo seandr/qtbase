@@ -1519,8 +1519,7 @@ QWindowsWindow::QWindowsWindow(QWindow *aWindow, const QWindowsWindowData &data)
         registerTouchWindow();
 
     const qreal opacity = qt_window_private(aWindow)->opacity;
-    if (!qFuzzyCompare(opacity, qreal(1.0)))
-        setOpacity(opacity);
+    setOpacity(opacity);
 
     setMask(QHighDpi::toNativeLocalRegion(window()->mask(), window()));
 
