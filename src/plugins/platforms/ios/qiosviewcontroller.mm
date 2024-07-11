@@ -29,6 +29,8 @@
 @property (nonatomic, assign) UIWindow *window;
 @property (nonatomic, assign) QPointer<QT_PREPEND_NAMESPACE(QIOSScreen)> platformScreen;
 @property (nonatomic, assign) BOOL changingOrientation;
+@property (nonatomic, assign) UIDeviceOrientation preLockedOrienation;
+- (void)updateToOrientation:(UIInterfaceOrientation)uiOrientation deviceOrientation:(UIDeviceOrientation)deviceOrientation;
 @end
 
 // -------------------------------------------------------------------------
@@ -239,6 +241,9 @@
 
         self.changingOrientation = NO;
 #ifndef Q_OS_TVOS
+        self.lockedOrientation = UIInterfaceOrientationUnknown;
+        self.preLockedOrienation = UIDevice.currentDevice.orientation;
+
         // Status bar may be initially hidden at startup through Info.plist
         self.prefersStatusBarHidden = infoPlistValue(@"UIStatusBarHidden", false);
         self.preferredStatusBarUpdateAnimation = UIStatusBarAnimationNone;
@@ -314,6 +319,42 @@
 
 // -------------------------------------------------------------------------
 
+- (BOOL)shouldAutorotate
+{
+#ifndef Q_OS_TVOS
+    if (self.platformScreen && self.platformScreen->uiScreen() == [UIScreen mainScreen])
+    {
+        if (!self.lockedOrientation)
+            return YES;
+        CGSize currentSize = self.view.frame.size;
+        if (UIInterfaceOrientationIsLandscape(self.lockedOrientation))
+            return (currentSize.width < currentSize.height); // if width is currently less than height should allow rotation, otherwise no.
+        else
+            return (currentSize.height < currentSize.width); // if height is currently less than width should allow rotation, otherwise no.
+    }
+    else
+        return NO; // no rotation on non-primary screen
+#else
+    return NO;
+#endif
+}
+
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations
+{
+    if (!self.lockedOrientation) // modern iPhones don't really do UpsideDown, so don't even try
+        return (self.traitCollection.userInterfaceIdiom != UIUserInterfaceIdiomPhone) ? UIInterfaceOrientationMaskAll  : UIInterfaceOrientationMaskAllButUpsideDown;
+    else // take advantage of the fact that the mask is just a bitshift of the the UIInterfaceOrientation values
+        return (UIInterfaceOrientationMask)(1 << self.lockedOrientation);
+}
+
+- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation
+{
+    if (!self.lockedOrientation)
+        return UIInterfaceOrientationUnknown;
+    else
+        return self.lockedOrientation;
+}
+
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)orientation duration:(NSTimeInterval)duration
 {
     self.changingOrientation = YES;
@@ -379,11 +420,78 @@
     if (!QCoreApplication::instance())
         return;
 
+//    NSLog(@"%@:viewWillLayoutSubviews", self);
     if (self.platformScreen)
         self.platformScreen->updateProperties();
 }
 
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
+{
+    NSLog(@"viewWillTransitionToSize:%@ withTransitionCoordinator:%@", NSStringFromCGSize(size), coordinator);
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+    
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+    } completion:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+        NSLog(@"viewWillTransitionToSize:%@ - COMPLETION!", NSStringFromCGSize(size));
+        if (!QCoreApplication::instance())
+            return;
+
+        if (self.platformScreen)
+            self.platformScreen->updateProperties();
+    }];
+}
 // -------------------------------------------------------------------------
+
+- (UIInterfaceOrientation)toUIInterfaceOrientation:(Qt::ScreenOrientation)qtOrientation
+{
+    UIInterfaceOrientation uiOrientation;
+    switch (qtOrientation) {
+    case Qt::LandscapeOrientation:
+        uiOrientation = UIInterfaceOrientationLandscapeRight;
+        break;
+    case Qt::InvertedLandscapeOrientation:
+        uiOrientation = UIInterfaceOrientationLandscapeLeft;
+        break;
+    case Qt::InvertedPortraitOrientation:
+        uiOrientation = UIInterfaceOrientationPortraitUpsideDown;
+        break;
+    case Qt::PrimaryOrientation:
+    case Qt::PortraitOrientation:
+    default:
+        uiOrientation = UIInterfaceOrientationPortrait;
+        break;
+    }
+    return uiOrientation;
+}
+
+- (void)updateToOrientation:(UIInterfaceOrientation)uiOrientation deviceOrientation:(UIDeviceOrientation)deviceOrientation
+{
+    self.lockedOrientation = uiOrientation;
+    
+    // Detect if this iOS16 method is available
+	if (@available(ios 16, macCatalyst 16.0, tvOS 16, *)) {
+		[self setNeedsUpdateOfSupportedInterfaceOrientations];
+
+		// Now check if we're in a scene, only need to do it if we somehow ended up there
+		Q_ASSERT(self.view.window);
+		UIWindowScene* scene =self.view.window.windowScene;
+			
+		// if our window isn't in a
+		if (!scene)
+			return;
+
+		UIInterfaceOrientationMask interfaceOrientations = [self supportedInterfaceOrientations];
+		UIWindowSceneGeometryPreferencesIOS* geometryPrefs = [[UIWindowSceneGeometryPreferencesIOS alloc] initWithInterfaceOrientations:interfaceOrientations];
+		[scene requestGeometryUpdateWithPreferences:geometryPrefs errorHandler:^(NSError* error) {
+			NSLog(@"***** iOS 16 rotation error=%@", error);
+		}];
+    } else {
+        // Frowned upon, but it works...
+        NSNumber* orientationValue = [NSNumber numberWithInt:(int)deviceOrientation];
+        [UIDevice.currentDevice setValue:orientationValue forKey:@"orientation"];
+        [UIViewController attemptRotationToDeviceOrientation];
+    }
+}
 
 - (void)updateProperties
 {
@@ -426,7 +534,6 @@
     focusWindow = qt_window_private(focusWindow)->topLevelWindow();
 
 #if !defined(Q_OS_TVOS) && !defined(Q_OS_VISIONOS)
-
     // -------------- Status bar style and visbility ---------------
 
     UIStatusBarStyle oldStatusBarStyle = self.preferredStatusBarStyle;
@@ -444,6 +551,43 @@
     if (self.prefersStatusBarHidden != currentStatusBarVisibility) {
         [self setNeedsStatusBarAppearanceUpdate];
         [self.view setNeedsLayout];
+    }
+
+    // -------------- Content orientation ---------------
+
+    Qt::ScreenOrientation contentOrientation = focusWindow->contentOrientation();
+    if (contentOrientation != Qt::PrimaryOrientation) {
+        UIInterfaceOrientation uiOrientation = UIInterfaceOrientationPortrait;
+        switch (contentOrientation) {
+        case Qt::LandscapeOrientation:
+            uiOrientation = UIInterfaceOrientationLandscapeRight;
+            break;
+        case Qt::InvertedLandscapeOrientation:
+            uiOrientation = UIInterfaceOrientationLandscapeLeft;
+            break;
+        case Qt::InvertedPortraitOrientation:
+            uiOrientation = UIInterfaceOrientationPortraitUpsideDown;
+            break;
+        case Qt::PortraitOrientation:
+        default:
+            uiOrientation = UIInterfaceOrientationPortrait;
+            break;
+        }
+        
+        // if orientation wasn't previously locked, then note the original orientation
+        if (!self.lockedOrientation)
+            self.preLockedOrienation = UIDevice.currentDevice.orientation;
+
+        [self updateToOrientation:uiOrientation deviceOrientation:fromQtScreenOrientation(contentOrientation)];
+    } else {
+        // The content orientation is set to Qt::PrimaryOrientation, meaning
+        // that auto-rotation should be enabled. But we may be coming out of
+        // a state of locked orientation, which needs some cleanup before we
+        // can enable auto-rotation again.
+        if (self.lockedOrientation) {
+            // Then we can re-enable auto-rotation and try to go back to the pre-locked orientation if possible
+            [self updateToOrientation:UIInterfaceOrientationUnknown deviceOrientation:self.preLockedOrienation];
+        }
     }
 #endif
 }
