@@ -25,6 +25,7 @@ void QAndroidPlatformForeignWindow::initialize()
         m_nativeViewId = m_view.callMethod<jint>("getId");
         return;
     }
+	qCDebug(lcQpaWindow) << "Foreign Window" << window << "nativeHandle=" << nativeHandle << "nativeViewId=" << m_view.callMethod<jint>("getId");
 
     if (m_view.isValid())
         QtAndroid::setViewVisibility(m_view.object(), false);
@@ -44,12 +45,9 @@ QAndroidPlatformForeignWindow::~QAndroidPlatformForeignWindow()
 
 void QAndroidPlatformForeignWindow::setVisible(bool visible)
 {
-    if (isEmbeddingContainer()) {
-        QAndroidPlatformWindow::setVisible(visible);
-        return;
-    }
+	QAndroidPlatformWindow::setVisible(visible);
 
-    if (!m_view.isValid())
+    if (!m_view.isValid() || isEmbeddingContainer())
         return;
 
     QtAndroid::setViewVisibility(m_view.object(), visible);
