@@ -196,11 +196,10 @@ qt_internal_add_global_definition(QT_EXPLICIT_QFILE_CONSTRUCTION_FROM_PATH)
 qt_internal_add_global_definition(QT_USE_QSTRINGBUILDER SCOPE PLUGIN TOOL MODULE)
 qt_internal_add_global_definition(QT_NO_FOREACH)
 
-if(WARNINGS_ARE_ERRORS)
-    qt_internal_set_warnings_are_errors_flags(PlatformModuleInternal INTERFACE)
-    qt_internal_set_warnings_are_errors_flags(PlatformPluginInternal INTERFACE)
-    qt_internal_set_warnings_are_errors_flags(PlatformAppInternal INTERFACE)
-endif()
+qt_internal_set_warnings_are_errors_flags(PlatformModuleInternal INTERFACE)
+qt_internal_set_warnings_are_errors_flags(PlatformPluginInternal INTERFACE)
+qt_internal_set_warnings_are_errors_flags(PlatformAppInternal INTERFACE)
+
 if(WIN32)
     # Needed for M_PI define. Same as mkspecs/features/qt_module.prf.
     # It's set for every module being built, but it's not propagated to user apps.
