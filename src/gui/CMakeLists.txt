@@ -398,7 +398,7 @@ qt_internal_extend_target(Gui CONDITION APPLE
         ${FWImageIO}
 )
 
-qt_internal_extend_target(Gui CONDITION APPLE AND QT_FEATURE_metal
+qt_internal_extend_target(Gui CONDITION IOS OR MACOS
     SOURCES
         platform/darwin/qmetallayer.mm platform/darwin/qmetallayer_p.h
     LIBRARIES
