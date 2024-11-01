@@ -305,7 +305,11 @@ QMargins QCocoaWindow::safeAreaMargins() const
     // not include the screen's insets automatically, so we need to manually
     // merge them.
     auto screenRect = m_view.window.screen.frame;
-    auto screenInsets = m_view.window.screen.safeAreaInsets;
+	NSEdgeInsets screenInsets;
+	if ([m_view.window.screen respondsToSelector:@selector(safeAreaInsets)]) {
+		screenInsets = m_view.window.screen.safeAreaInsets;
+	} else
+		screenInsets = NSEdgeInsetsZero;
     auto screenRelativeViewBounds = QCocoaScreen::mapFromNative(
         [m_view.window convertRectToScreen:
             [m_view convertRect:m_view.bounds toView:nil]]
