@@ -3459,9 +3459,9 @@ Qt::LayoutDirection QLocale::textDirection() const
 */
 QString QLocale::toUpper(const QString &str) const
 {
-#if QT_CONFIG(icu)
+#if !defined(QT_BOOTSTRAPPED) && QT_CONFIG(icu)
     bool ok = true;
-    QString result = QIcu::toUpper(d->bcp47Name('_'), str, &ok);
+    QString result = d->toUpper(str, &ok);
     if (ok)
         return result;
     // else fall through and use Qt's toUpper
@@ -3483,12 +3483,12 @@ QString QLocale::toUpper(const QString &str) const
 */
 QString QLocale::toLower(const QString &str) const
 {
-#if QT_CONFIG(icu)
+#if !defined(QT_BOOTSTRAPPED) && QT_CONFIG(icu)
     bool ok = true;
-    const QString result = QIcu::toLower(d->bcp47Name('_'), str, &ok);
+    const QString result = d->toLower(str, &ok);
     if (ok)
         return result;
-    // else fall through and use Qt's toUpper
+    // else fall through and use Qt's toLower
 #endif
     return str.toLower();
 }
