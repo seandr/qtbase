@@ -29,6 +29,7 @@ public:
     QPixmap grabWindow(WId window, int x, int y, int width, int height) const override;
     QRect geometry() const override { return m_geometry; }
     QRect availableGeometry() const override { return m_availableGeometry; }
+	virtual QRect safeAreaGeometry() const override { return m_safeAreaGeometry; }
     int depth() const override { return m_depth; }
     QImage::Format format() const override { return m_format; }
     QColorSpace colorSpace() const override { return m_colorSpace; }
@@ -83,6 +84,7 @@ private:
 
     QRect m_geometry;
     QRect m_availableGeometry;
+	QRect m_safeAreaGeometry;
     qreal m_refreshRate = 0;
     int m_depth = 0;
     QString m_name;

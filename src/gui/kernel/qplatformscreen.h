@@ -76,6 +76,7 @@ public:
 
     virtual QRect geometry() const = 0;
     virtual QRect availableGeometry() const {return geometry();}
+	virtual QRect safeAreaGeometry() const {return availableGeometry();}
 
     virtual int depth() const = 0;
     virtual QImage::Format format() const = 0;

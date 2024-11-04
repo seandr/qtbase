@@ -247,6 +247,7 @@ void QCocoaScreen::update(CGDirectDisplayID displayId)
 
     const QRect previousGeometry = m_geometry;
     const QRect previousAvailableGeometry = m_availableGeometry;
+	const QRect previouslySafeAreaGeometry = m_safeAreaGeometry;
     const qreal previousRefreshRate = m_refreshRate;
     const double previousRotation = m_rotation;
 
@@ -254,6 +255,17 @@ void QCocoaScreen::update(CGDirectDisplayID displayId)
     QRectF primaryScreenGeometry = QRectF::fromCGRect(CGDisplayBounds(CGMainDisplayID()));
     m_geometry = qt_mac_flip(QRectF::fromCGRect(nsScreen.frame), primaryScreenGeometry).toRect();
     m_availableGeometry = qt_mac_flip(QRectF::fromCGRect(nsScreen.visibleFrame), primaryScreenGeometry).toRect();
+	NSEdgeInsets safeAreaInsets;
+	if ([nsScreen respondsToSelector:@selector(safeAreaInsets)]) {
+		safeAreaInsets = nsScreen.safeAreaInsets;
+	} else
+		safeAreaInsets = NSEdgeInsetsZero;
+	QMarginsF screenSafeAreaMargins(safeAreaInsets.left, safeAreaInsets.top, safeAreaInsets.right, safeAreaInsets.bottom);
+	
+	qCDebug(lcQpaScreen) << "Raw geometry=" << m_geometry << " availableGeometry=" << m_availableGeometry << " screenSafeAreaMargins=" << screenSafeAreaMargins;
+	m_safeAreaGeometry = m_geometry.adjusted(safeAreaInsets.left, safeAreaInsets.top, -safeAreaInsets.right, -safeAreaInsets.bottom);
+	
+	qCDebug(lcQpaScreen) << "Adjusted safeGeometry=" << m_safeAreaGeometry ;
 
     m_devicePixelRatio = nsScreen.backingScaleFactor;
 
@@ -280,7 +292,7 @@ void QCocoaScreen::update(CGDirectDisplayID displayId)
     else
         m_name = displayName(m_displayId);
 
-    const bool didChangeGeometry = m_geometry != previousGeometry || m_availableGeometry != previousAvailableGeometry;
+    const bool didChangeGeometry = m_geometry != previousGeometry || m_availableGeometry != previousAvailableGeometry || previouslySafeAreaGeometry != m_safeAreaGeometry;
 
     if (m_rotation != previousRotation)
         QWindowSystemInterface::handleScreenOrientationChange(screen(), orientation());
