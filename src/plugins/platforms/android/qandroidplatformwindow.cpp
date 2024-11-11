@@ -126,7 +126,7 @@ void QAndroidPlatformWindow::raise()
 
 QMargins QAndroidPlatformWindow::safeAreaMargins() const
 {
-    if ((m_windowState & Qt::WindowMaximized) && (window()->flags() & Qt::MaximizeUsingFullscreenGeometryHint)) {
+    if ((m_windowState & Qt::WindowMaximized) && (window()->flags() & Qt::ExpandedClientAreaHint)) {
         QRect availableGeometry = platformScreen()->availableGeometry();
         return QMargins(availableGeometry.left(), availableGeometry.top(),
                         availableGeometry.right(), availableGeometry.bottom());
@@ -168,7 +168,7 @@ void QAndroidPlatformWindow::setVisible(bool visible)
         if (window()->isTopLevel()) {
             updateSystemUiVisibility();
             if ((m_windowState & Qt::WindowFullScreen)
-                || (window()->flags() & Qt::MaximizeUsingFullscreenGeometryHint)) {
+                    || ((m_windowState & Qt::WindowMaximized) && (window()->flags() & Qt::ExpandedClientAreaHint))) {
                 setGeometry(platformScreen()->geometry());
             } else if (m_windowState & Qt::WindowMaximized) {
                 setGeometry(platformScreen()->availableGeometry());
@@ -260,7 +260,7 @@ void QAndroidPlatformWindow::updateSystemUiVisibility()
     const bool isNonRegularWindow = flags & (Qt::Popup | Qt::Dialog | Qt::Sheet) & ~Qt::Window;
     if (!isNonRegularWindow) {
         const bool isFullScreen = (m_windowState & Qt::WindowFullScreen);
-        const bool expandedToCutout = (flags & Qt::MaximizeUsingFullscreenGeometryHint);
+        const bool expandedToCutout = (flags & Qt::ExpandedClientAreaHint);
         QtAndroid::backendRegister()->callInterface<QtJniTypes::QtWindowInterface, void>(
             "setSystemUiVisibility", isFullScreen, expandedToCutout);
     }

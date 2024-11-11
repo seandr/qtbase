@@ -86,8 +86,8 @@ static void formatWindowFlags(QTextStream &str, Qt::WindowFlags flags)
         str << "\n| Qt::WindowOverridesSystemGestures";
     if (flags & Qt::WindowDoesNotAcceptFocus)
         str << "\n| Qt::WindowDoesNotAcceptFocus";
-    if (flags & Qt::MaximizeUsingFullscreenGeometryHint)
-        str << "\n| Qt::MaximizeUsingFullscreenGeometryHint";
+    if (flags & Qt::ExpandedClientAreaHint)
+        str << "\n| Qt::ExpandedClientAreaHint";
     if (flags & Qt::NoDropShadowWindowHint)
         str << "\n| Qt::NoDropShadowWindowHint";
 }

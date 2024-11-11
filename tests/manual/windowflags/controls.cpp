@@ -32,6 +32,7 @@ HintControl::HintControl(QWidget *parent)
     , customizeWindowHintCheckBox(new QCheckBox(tr("Customize window")))
     , transparentForInputCheckBox(new QCheckBox(tr("Transparent for input")))
     , noDropShadowCheckBox(new QCheckBox(tr("No drop shadow")))
+    , expandedClientAreaCheckBox(new QCheckBox(tr("Expanded client area")))
 {
     connect(msWindowsFixedSizeDialogCheckBox, SIGNAL(clicked()), this, SLOT(slotCheckBoxChanged()));
     connect(x11BypassWindowManagerCheckBox, SIGNAL(clicked()), this, SLOT(slotCheckBoxChanged()));
@@ -49,6 +50,7 @@ HintControl::HintControl(QWidget *parent)
     connect(customizeWindowHintCheckBox, SIGNAL(clicked()), this, SLOT(slotCheckBoxChanged()));
     connect(transparentForInputCheckBox, SIGNAL(clicked()), this, SLOT(slotCheckBoxChanged()));
     connect(noDropShadowCheckBox, SIGNAL(clicked()), this, SLOT(slotCheckBoxChanged()));
+	connect(expandedClientAreaCheckBox, SIGNAL(clicked()), this, SLOT(slotCheckBoxChanged()));
     QGridLayout *layout = new QGridLayout(this);
     layout->setSpacing(0);
     layout->setContentsMargins(ControlLayoutMargin, ControlLayoutMargin,
@@ -69,6 +71,7 @@ HintControl::HintControl(QWidget *parent)
     layout->addWidget(customizeWindowHintCheckBox, 5, 0);
     layout->addWidget(transparentForInputCheckBox, 6, 0);
     layout->addWidget(noDropShadowCheckBox, 7, 0);
+	layout->addWidget(expandedClientAreaCheckBox, 8, 0);
 }
 
 Qt::WindowFlags HintControl::hints() const
@@ -106,6 +109,8 @@ Qt::WindowFlags HintControl::hints() const
         flags |= Qt::WindowTransparentForInput;
     if (noDropShadowCheckBox->isChecked())
         flags |= Qt::NoDropShadowWindowHint;
+    if (expandedClientAreaCheckBox->isChecked())
+        flags |= Qt::ExpandedClientAreaHint;
     return flags;
 }
 
@@ -127,6 +132,7 @@ void HintControl::setHints(Qt::WindowFlags flags)
     customizeWindowHintCheckBox->setChecked(flags & Qt::CustomizeWindowHint);
     transparentForInputCheckBox->setChecked(flags & Qt::WindowTransparentForInput);
     noDropShadowCheckBox->setChecked(flags & Qt::NoDropShadowWindowHint);
+    expandedClientAreaCheckBox->setChecked(flags & Qt::ExpandedClientAreaHint);
 }
 
 void HintControl::slotCheckBoxChanged()

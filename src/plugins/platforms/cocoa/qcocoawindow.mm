@@ -624,11 +624,12 @@ NSUInteger QCocoaWindow::windowStyleMask(Qt::WindowFlags flags)
     if (m_drawContentBorderGradient)
         styleMask |= NSWindowStyleMaskTexturedBackground;
 
+    if (flags & Qt::ExpandedClientAreaHint)
+        styleMask |= NSWindowStyleMaskFullSizeContentView;
+
     // Don't wipe existing states
     if (m_view.window.styleMask & NSWindowStyleMaskFullScreen)
         styleMask |= NSWindowStyleMaskFullScreen;
-    if (m_view.window.styleMask & NSWindowStyleMaskFullSizeContentView)
-        styleMask |= NSWindowStyleMaskFullSizeContentView;
 
     return styleMask;
 }

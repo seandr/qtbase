@@ -292,7 +292,7 @@ void tst_Android::testFullScreenDimensions()
     {
         // Translucent
         // available geometry == full display size (system bars visible but drawable under)
-        widget.setWindowFlags(widget.windowFlags() | Qt::MaximizeUsingFullscreenGeometryHint);
+        widget.setWindowFlags(widget.windowFlags() | Qt::ExpandedClientAreaHint);
         widget.show();
         QCoreApplication::processEvents();
         QTRY_COMPARE(screen->availableGeometry().width(), realSize.getField<jint>("x"));
