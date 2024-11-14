@@ -2781,10 +2781,10 @@ void QGuiApplicationPrivate::processSafeAreaMarginsChangedEvent(QWindowSystemInt
     if (wse->window.isNull())
         return;
 
-    // Handle by forwarding directly to QWindowPrivate, instead of sending spontaneous
-    // QEvent like most other functions, as there's no QEvent type for the safe area
-    // change, and we don't want to add one until we know that this is a good API.
-    qt_window_private(wse->window)->processSafeAreaMarginsChanged();
+    emit wse->window->safeAreaMarginsChanged(wse->window->safeAreaMargins());
+
+    QEvent event(QEvent::SafeAreaMarginsChange);
+    QGuiApplication::sendSpontaneousEvent(wse->window, &event);
 }
 
 void QGuiApplicationPrivate::processThemeChanged(QWindowSystemInterfacePrivate::ThemeChangeEvent *tce)

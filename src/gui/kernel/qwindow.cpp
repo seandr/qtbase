@@ -1968,6 +1968,37 @@ void QWindow::setFramePosition(const QPoint &point)
 }
 
 /*!
+    Returns the safe area margins of the window.
+
+    The safe area represents the part of the window where content
+    can be safely placed without risk of being obscured by, or
+    conflicting with, other UI elements, such as system UIs.
+
+    The margins are relative to the internal geometry of the
+    window, i.e QRect(0, 0, width(), height()).
+
+    \code
+    void PaintDeviceWindow::paintEvent(QPaintEvent *)
+    {
+        QPainter painter(this);
+        QRect rect(0, 0, width(), height());
+        painter.fillRect(rect, QGradient::SunnyMorning);
+        painter.fillRect(rect - safeAreaMargins(), QGradient::DustyGrass);
+    }
+    \endcode
+
+    \since 6.9
+    \sa geometry()
+*/
+QMargins QWindow::safeAreaMargins() const
+{
+    Q_D(const QWindow);
+    if (d->platformWindow)
+        return QHighDpi::fromNativePixels(d->platformWindow->safeAreaMargins(), this);
+    return {};
+}
+
+/*!
     \brief set the position of the window on the desktop to \a pt
 
     The position is in relation to the virtualGeometry() of its screen.
@@ -3255,6 +3286,9 @@ QDebug operator<<(QDebug debug, const QWindow *window)
             const QMargins margins = window->frameMargins();
             if (!margins.isNull())
                 debug << ", margins=" << margins;
+            const QMargins safeAreaMargins = window->safeAreaMargins();
+            if (!safeAreaMargins.isNull())
+                debug << ", safeAreaMargins=" << safeAreaMargins;
             debug << ", devicePixelRatio=" << window->devicePixelRatio();
             if (const QPlatformWindow *platformWindow = window->handle())
                 debug << ", winId=0x" << Qt::hex << platformWindow->winId() << Qt::dec;

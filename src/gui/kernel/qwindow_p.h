@@ -92,8 +92,6 @@ public:
                          qxp::function_ref<void()> funcWidthChanged,
                          qxp::function_ref<void()> funcHeightChanged);
 
-    virtual void processSafeAreaMarginsChanged() {}
-
     virtual bool participatesInLastWindowClosed() const;
     virtual bool treatAsVisible() const;
 

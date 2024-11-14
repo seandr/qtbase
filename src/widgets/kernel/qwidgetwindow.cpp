@@ -106,13 +106,6 @@ public:
 
     QRectF closestAcceptableGeometry(const QRectF &rect) const override;
 
-    void processSafeAreaMarginsChanged() override
-    {
-        Q_Q(QWidgetWindow);
-        if (QWidget *widget = q->widget())
-            QWidgetPrivate::get(widget)->updateContentsRect();
-    }
-
     bool participatesInLastWindowClosed() const override;
     bool treatAsVisible() const override;
 };
@@ -389,6 +382,10 @@ bool QWidgetWindow::event(QEvent *event)
 
     case QEvent::DevicePixelRatioChange:
         handleDevicePixelRatioChange();
+        break;
+
+    case QEvent::SafeAreaMarginsChange:
+        QWidgetPrivate::get(m_widget)->updateContentsRect();
         break;
 
     default:
