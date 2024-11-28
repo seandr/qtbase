@@ -382,6 +382,34 @@ void QAndroidPlatformWindow::windowFocusChanged(JNIEnv *env, jobject object,
     }
 }
 
+static void updateWindows(JNIEnv *env, jobject object)
+{
+    Q_UNUSED(env)
+    Q_UNUSED(object)
+
+    if (QGuiApplication::instance() != nullptr) {
+        const auto tlw = QGuiApplication::topLevelWindows();
+        for (QWindow *w : tlw) {
+
+            // Skip non-platform windows, e.g., offscreen windows.
+            if (!w->handle())
+                continue;
+
+            const QRect availableGeometry = w->screen()->availableGeometry();
+            const QRect geometry = w->geometry();
+            const bool isPositiveGeometry = (geometry.width() > 0 && geometry.height() > 0);
+            const bool isPositiveAvailableGeometry =
+                (availableGeometry.width() > 0 && availableGeometry.height() > 0);
+
+            if (isPositiveGeometry && isPositiveAvailableGeometry) {
+                const QRegion region = QRegion(QRect(QPoint(), w->geometry().size()));
+                QWindowSystemInterface::handleExposeEvent(w, region);
+            }
+        }
+    }
+}
+Q_DECLARE_JNI_NATIVE_METHOD(updateWindows)
+
 /*
     Due to calls originating from Android, it is possible for native methods to
     try to manipulate any given instance of QAndroidPlatformWindow when it is
@@ -398,6 +426,7 @@ bool QAndroidPlatformWindow::registerNatives(QJniEnvironment &env)
 {
     if (!env.registerNativeMethods(QtJniTypes::Traits<QtJniTypes::QtWindow>::className(),
                                 {
+                                    Q_JNI_NATIVE_METHOD(updateWindows),
                                     Q_JNI_NATIVE_SCOPED_METHOD(setSurface, QAndroidPlatformWindow),
                                     Q_JNI_NATIVE_SCOPED_METHOD(windowFocusChanged, QAndroidPlatformWindow)
                                 })) {

@@ -155,7 +155,7 @@ public class QtActivityBase extends Activity
         QtNative.setApplicationState(QtNative.ApplicationState.ApplicationActive);
         if (QtNative.getStateDetails().isStarted) {
             m_delegate.displayManager().registerDisplayListener();
-            QtNative.updateWindow();
+            QtWindow.updateWindows();
             // Suspending the app clears the immersive mode, so we need to set it again.
             m_delegate.displayManager().reinstateFullScreen();
         }

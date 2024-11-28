@@ -24,6 +24,7 @@ class QtWindow extends QtLayout implements QtSurfaceInterface {
 
     private static native void setSurface(int windowId, Surface surface);
     static native void windowFocusChanged(boolean hasFocus, int id);
+    static native void updateWindows();
 
     QtWindow(Context context, boolean isForeignWindow, QtWindow parentWindow,
                     QtInputConnection.QtInputConnectionListener listener)

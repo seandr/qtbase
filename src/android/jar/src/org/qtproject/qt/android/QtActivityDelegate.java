@@ -97,7 +97,7 @@ class QtActivityDelegate extends QtActivityDelegateBase
             if (m_layout != null) {
                 m_displayManager.setSystemUiVisibility(isFullScreen, expandedToCutout);
                 m_layout.requestLayout();
-                QtNative.updateWindow();
+                QtWindow.updateWindows();
             }
         });
     }
