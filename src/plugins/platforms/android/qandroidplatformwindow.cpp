@@ -12,6 +12,7 @@
 #include <qguiapplication.h>
 #include <qpa/qwindowsysteminterface.h>
 #include <private/qhighdpiscaling_p.h>
+#include <private/qjnihelpers_p.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -21,6 +22,7 @@ Q_DECLARE_JNI_CLASS(QtWindowInterface, "org/qtproject/qt/android/QtWindowInterfa
 Q_DECLARE_JNI_CLASS(QtInputInterface, "org/qtproject/qt/android/QtInputInterface")
 Q_DECLARE_JNI_CLASS(QtInputConnectionListener,
                     "org/qtproject/qt/android/QtInputConnection$QtInputConnectionListener")
+Q_DECLARE_JNI_CLASS(QtDisplayManager, "org/qtproject/qt/android/QtWindowInterface")
 
 QAndroidPlatformWindow::QAndroidPlatformWindow(QWindow *window)
     : QPlatformWindow(window), m_nativeQtWindow(nullptr),
@@ -126,13 +128,12 @@ void QAndroidPlatformWindow::raise()
 
 QMargins QAndroidPlatformWindow::safeAreaMargins() const
 {
-    if ((m_windowState & Qt::WindowMaximized) && (window()->flags() & Qt::ExpandedClientAreaHint)) {
-        QRect availableGeometry = platformScreen()->availableGeometry();
-        return QMargins(availableGeometry.left(), availableGeometry.top(),
-                        availableGeometry.right(), availableGeometry.bottom());
-    } else {
-        return QPlatformWindow::safeAreaMargins();
-    }
+    return m_safeAreaMargins;
+}
+
+void QAndroidPlatformWindow::setSafeAreaMargins(const QMargins safeMargins)
+{
+    m_safeAreaMargins = safeMargins;
 }
 
 void QAndroidPlatformWindow::setGeometry(const QRect &rect)
@@ -382,6 +383,42 @@ void QAndroidPlatformWindow::windowFocusChanged(JNIEnv *env, jobject object,
     }
 }
 
+void QAndroidPlatformWindow::safeAreaMarginsChanged(JNIEnv *env, jobject object, QtJniTypes::Insets insets)
+{
+    Q_UNUSED(env)
+    Q_UNUSED(object)
+
+    if (!qGuiApp)
+        return;
+
+    const auto tlw = qGuiApp->topLevelWindows();
+    if (tlw.isEmpty())
+        return;
+
+    QMargins safeMargins;
+    if (insets.isValid()) {
+        safeMargins = QMargins(
+            insets.getField<int>("left"),
+            insets.getField<int>("top"),
+            insets.getField<int>("right"),
+            insets.getField<int>("bottom"));
+    }
+
+    for (QWindow *window : qGuiApp->topLevelWindows()) {
+        if (!window->handle())
+            continue;
+
+        auto *pWindow = static_cast<QAndroidPlatformWindow *>(window->handle());
+        if (!pWindow)
+            return;
+
+        if (safeMargins != pWindow->safeAreaMargins()) {
+            pWindow->setSafeAreaMargins(safeMargins);
+            QWindowSystemInterface::handleSafeAreaMarginsChanged(window);
+        }
+    }
+}
+
 static void updateWindows(JNIEnv *env, jobject object)
 {
     Q_UNUSED(env)
@@ -425,11 +462,12 @@ QMutexLocker<QMutex> QAndroidPlatformWindow::destructionGuard()
 bool QAndroidPlatformWindow::registerNatives(QJniEnvironment &env)
 {
     if (!env.registerNativeMethods(QtJniTypes::Traits<QtJniTypes::QtWindow>::className(),
-                                {
-                                    Q_JNI_NATIVE_METHOD(updateWindows),
-                                    Q_JNI_NATIVE_SCOPED_METHOD(setSurface, QAndroidPlatformWindow),
-                                    Q_JNI_NATIVE_SCOPED_METHOD(windowFocusChanged, QAndroidPlatformWindow)
-                                })) {
+            {
+                Q_JNI_NATIVE_METHOD(updateWindows),
+                Q_JNI_NATIVE_SCOPED_METHOD(setSurface, QAndroidPlatformWindow),
+                Q_JNI_NATIVE_SCOPED_METHOD(windowFocusChanged, QAndroidPlatformWindow),
+                Q_JNI_NATIVE_SCOPED_METHOD(safeAreaMarginsChanged, QAndroidPlatformWindow)
+            })) {
         qCCritical(lcQpaWindow) << "RegisterNatives failed for"
                                 << QtJniTypes::Traits<QtJniTypes::QtWindow>::className();
         return false;
