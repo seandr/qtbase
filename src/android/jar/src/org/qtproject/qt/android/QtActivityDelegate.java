@@ -399,6 +399,7 @@ class QtActivityDelegate extends QtActivityDelegateBase
         QtNative.runAction(()-> {
             if (m_topLevelWindows.containsKey(id)) {
                 QtWindow window = m_topLevelWindows.remove(id);
+                window.setOnApplyWindowInsetsListener(null); // Set in QtWindow for safe margins
                 if (m_topLevelWindows.isEmpty()) {
                    // Keep last frame in stack until it is replaced to get correct
                    // shutdown transition
