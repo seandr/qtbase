@@ -1382,10 +1382,8 @@ static void readUnicodeData()
     };
 
     QFile f("data/UnicodeData.txt");
-    if (!f.exists())
-        qFatal("Couldn't find UnicodeData.txt");
-
-    f.open(QFile::ReadOnly);
+    if (!f.open(QFile::ReadOnly))
+        qFatal() << "Couldn't open UnicodeData.txt:" << f.errorString();
 
     Location loc{"UnicodeData.txt", 0};
     int &lineNo = loc.lineNo;
@@ -2094,10 +2092,8 @@ static void readBlocks()
     qDebug("Reading data/Blocks.txt");
 
     QFile f("data/Blocks.txt");
-    if (!f.exists())
-        qFatal("Couldn't find Blocks.txt");
-
-    f.open(QFile::ReadOnly);
+    if (!f.open(QFile::ReadOnly))
+        qFatal() << "Couldn't open Blocks.txt:" << f.errorString();
 
     while (!f.atEnd()) {
         QByteArray line = f.readLine();
@@ -3333,7 +3329,8 @@ int main(int, char **)
         "//\n\n";
 
     QFile f("../../src/corelib/text/qunicodetables.cpp");
-    f.open(QFile::WriteOnly|QFile::Truncate);
+    if (!f.open(QFile::WriteOnly|QFile::Truncate))
+        qFatal() << "Cannot open output file" << f.fileName() << "error:" << f.errorString();
     f.write(header);
     f.write(note);
     f.write("#include \"qunicodetables_p.h\"\n\n");
@@ -3352,7 +3349,8 @@ int main(int, char **)
     f.close();
 
     f.setFileName("../../src/corelib/text/qunicodetables_p.h");
-    f.open(QFile::WriteOnly | QFile::Truncate);
+    if (!f.open(QFile::WriteOnly | QFile::Truncate))
+        qFatal() << "Cannot open output file" << f.fileName() << "error:" << f.errorString();
     f.write(header);
     f.write(note);
     f.write(warning);
