@@ -34,18 +34,28 @@ qt_commandline_option(android-abis TYPE string)
 qt_commandline_option(android-ndk TYPE string)
 qt_commandline_option(android-ndk-platform TYPE string)
 qt_commandline_option(android-sdk TYPE string)
-qt_commandline_option(android-javac-target TYPE string)
-qt_commandline_option(android-javac-source TYPE string)
+qt_commandline_option(android-javac-target
+    TYPE string
+    CMAKE_VARIABLE QT_ANDROID_JAVAC_TARGET
+)
+qt_commandline_option(android-javac-source
+    TYPE string
+    CMAKE_VARIABLE QT_ANDROID_JAVAC_SOURCE
+)
 qt_commandline_option(android-style-assets TYPE boolean)
 qt_commandline_option(appstore-compliant TYPE boolean)
 qt_commandline_option(avx TYPE boolean)
 qt_commandline_option(avx2 TYPE boolean)
 qt_commandline_option(avx512 TYPE boolean NAME avx512f)
 qt_commandline_option(c++std TYPE cxxstd)
-qt_commandline_option(unity-build TYPE boolean NAME unity_build)
-qt_commandline_option(unity-build-batch-size TYPE string NAME unity_build_batch_size)
-qt_commandline_option(ccache TYPE boolean NAME ccache)
-qt_commandline_option(vcpkg TYPE boolean)
+qt_commandline_option(unity-build TYPE boolean NAME unity_build CMAKE_VARIABLE QT_UNITY_BUILD)
+qt_commandline_option(unity-build-batch-size
+    TYPE string
+    NAME unity_build_batch_size
+    CMAKE_VARIABLE QT_UNITY_BUILD_BATCH_SIZE
+)
+qt_commandline_option(ccache TYPE boolean NAME ccache CMAKE_VARIABLE QT_USE_CCACHE)
+qt_commandline_option(vcpkg TYPE boolean CMAKE_VARIABLE QT_USE_VCPKG)
 qt_commandline_option(commercial TYPE void)
 qt_commandline_option(confirm-license TYPE void)
 qt_commandline_option(dbus TYPE optionalString VALUES no yes linked runtime)
@@ -82,7 +92,10 @@ qt_commandline_option(libcpp-hardening TYPE boolean NAME libcpp_hardening)
 qt_commandline_option(relro-now-linker TYPE boolean NAME relro_now_linker)
 qt_commandline_option(make TYPE addString VALUES examples libs tests tools
                       benchmarks manual-tests minimal-static-tests)
-qt_commandline_option(install-examples-sources TYPE boolean)
+qt_commandline_option(install-examples-sources
+    TYPE boolean
+    CMAKE_VARIABLE QT_INSTALL_EXAMPLES_SOURCES
+)
 qt_commandline_option(mips_dsp TYPE boolean)
 qt_commandline_option(mips_dspr2 TYPE boolean)
 qt_commandline_option(nomake TYPE addString VALUES examples tests tools benchmarks
@@ -92,21 +105,29 @@ qt_commandline_option(optimize-debug TYPE boolean NAME optimize_debug)
 qt_commandline_option(optimize-size TYPE boolean NAME optimize_size)
 qt_commandline_option(optimized-qmake TYPE boolean NAME release_tools)
 qt_commandline_option(optimized-tools TYPE boolean NAME release_tools)
-qt_commandline_option(pch TYPE boolean NAME precompile_header)
+qt_commandline_option(pch TYPE boolean NAME precompile_header CMAKE_VARIABLE BUILD_WITH_PCH)
 qt_commandline_option(pkg-config TYPE boolean)
-qt_commandline_option(platform TYPE string)
+qt_commandline_option(platform TYPE string CMAKE_VARIABLE QT_QMAKE_TARGET_MKSPEC)
 qt_commandline_option(plugin-manifests TYPE boolean)
 qt_commandline_option(profile TYPE boolean)
-qt_commandline_option(qreal TYPE string)
-qt_commandline_option(qtinlinenamespace TYPE boolean)
-qt_commandline_option(qtlibinfix TYPE string NAME qt_libinfix)
-qt_commandline_option(qtnamespace TYPE string NAME qt_namespace)
+qt_commandline_option(qreal TYPE string CMAKE_VARIABLE QT_COORD_TYPE)
+qt_commandline_option(qtinlinenamespace TYPE boolean CMAKE_VARIABLE QT_INLINE_NAMESPACE)
+qt_commandline_option(qtlibinfix
+    TYPE string
+    NAME qt_libinfix
+    CMAKE_VARIABLE QT_LIBINFIX
+)
+qt_commandline_option(qtnamespace
+    TYPE string
+    NAME qt_namespace
+    CMAKE_VARIABLE QT_NAMESPACE
+)
 qt_commandline_option(reduce-exports TYPE boolean NAME reduce_exports)
 qt_commandline_option(reduce-relocations TYPE boolean NAME reduce_relocations)
 qt_commandline_option(release TYPE enum NAME debug MAPPING yes no no yes)
 qt_commandline_option(rpath TYPE boolean)
 qt_commandline_option(sanitize TYPE sanitize)
-qt_commandline_option(sdk TYPE string)
+qt_commandline_option(sdk TYPE string CMAKE_VARIABLE QT_APPLE_SDK)
 qt_commandline_option(separate-debug-info TYPE boolean NAME separate_debug_info)
 qt_commandline_option(shared TYPE boolean)
 qt_commandline_option(silent TYPE void)
@@ -121,10 +142,14 @@ qt_commandline_option(static-runtime TYPE boolean NAME static_runtime)
 qt_commandline_option(strip TYPE boolean)
 qt_commandline_option(sysroot TYPE string)
 qt_commandline_option(use-gold-linker TYPE boolean NAME use_gold_linker_alias)
-qt_commandline_option(warnings-are-errors TYPE boolean NAME warnings_are_errors)
+qt_commandline_option(warnings-are-errors
+    TYPE boolean
+    NAME warnings_are_errors
+    CMAKE_VARIABLE WARNINGS_ARE_ERRORS
+)
 qt_commandline_option(Werror TYPE boolean NAME warnings_are_errors)
 qt_commandline_option(widgets TYPE boolean)
-qt_commandline_option(xplatform TYPE string)
+qt_commandline_option(xplatform TYPE string CMAKE_VARIABLE QT_QMAKE_TARGET_MKSPEC)
 qt_commandline_option(zlib CONTROLS_FEATURE TYPE enum NAME system-zlib MAPPING system yes qt no)
 qt_commandline_option(zstd TYPE boolean)
 qt_commandline_option(coverage TYPE optionalString VALUES gcov)
