@@ -70,8 +70,9 @@ if(QT_WILL_INSTALL)
         DESTINATION "${__build_internals_install_dir}")
 endif()
 
-set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/QtBuildInternals/${__build_internals_standalone_test_template_dir}/CMakeLists.txt")
+_qt_internal_append_cmake_configure_depends(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/QtBuildInternals/${__build_internals_standalone_test_template_dir}/CMakeLists.txt"
+)
 
 qt_internal_create_toolchain_file()
 
