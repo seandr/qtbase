@@ -1394,17 +1394,8 @@ function(_qt_internal_configure_android_multiabi_target target)
         return()
     endif()
 
-    get_target_property(target_abis ${target} QT_ANDROID_ABIS)
-    if(target_abis)
-        # Use target-specific Qt for Android ABIs.
-        set(android_abis ${target_abis})
-    elseif(QT_ANDROID_BUILD_ALL_ABIS)
-        # Use autodetected Qt for Android ABIs.
-        set(android_abis ${QT_DEFAULT_ANDROID_ABIS})
-    elseif(QT_ANDROID_ABIS)
-        # Use project-wide Qt for Android ABIs.
-        set(android_abis ${QT_ANDROID_ABIS})
-    else()
+    _qt_internal_android_get_target_abis(android_abis ${target})
+    if(NOT android_abis)
         # User have an empty list of Qt for Android ABIs.
         message(FATAL_ERROR
             "The list of Android ABIs is empty, when building ${target}.\n"
@@ -1831,6 +1822,24 @@ function(_qt_internal_android_find_asan_wrap_sh out_wrap_sh_path)
         message(WARNING "Address Sanitizer: the wrap script not found at ${ndk_wrap_sh_path}.")
         set(${out_wrap_sh_path} "" PARENT_SCOPE)
     endif()
+endfunction()
+
+function(_qt_internal_android_get_target_abis out_abis target)
+    get_target_property(target_abis ${target} QT_ANDROID_ABIS)
+    if(target_abis)
+        # Use target-specific Qt for Android ABIs.
+        set(android_abis ${target_abis})
+    elseif(QT_ANDROID_BUILD_ALL_ABIS)
+        # Use autodetected Qt for Android ABIs.
+        set(android_abis ${QT_DEFAULT_ANDROID_ABIS})
+    elseif(QT_ANDROID_ABIS)
+        # Use project-wide Qt for Android ABIs.
+        set(android_abis ${QT_ANDROID_ABIS})
+    else()
+        set(android_abis "")
+    endif()
+
+    set(${out_abis} "${android_abis}" PARENT_SCOPE)
 endfunction()
 
 # Return the path to the target template directory if it's set for the target.
