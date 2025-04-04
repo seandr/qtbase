@@ -15,6 +15,7 @@ QAndroidPlatformForeignWindow::QAndroidPlatformForeignWindow(QWindow *window, WI
     , m_view(reinterpret_cast<jobject>(nativeHandle))
     , m_nativeViewInserted(false)
 {
+	qCDebug(lcQpaWindow) << "Foreign Window" << window << "nativeHandle=" << nativeHandle << "nativeViewId=" << m_view.callMethod<jint>("getId");
 }
 
 void QAndroidPlatformForeignWindow::initialize()
@@ -25,7 +26,6 @@ void QAndroidPlatformForeignWindow::initialize()
         m_nativeViewId = m_view.callMethod<jint>("getId");
         return;
     }
-	qCDebug(lcQpaWindow) << "Foreign Window" << window << "nativeHandle=" << nativeHandle << "nativeViewId=" << m_view.callMethod<jint>("getId");
 
     if (m_view.isValid())
         QtAndroid::setViewVisibility(m_view.object(), false);
