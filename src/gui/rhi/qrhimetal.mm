@@ -376,8 +376,6 @@ struct QMetalRenderTargetData
         id<MTLTexture> dsResolveTex = nil;
         bool hasStencil = false;
         bool depthNeedsStore = false;
-        bool preserveColor = false;
-        bool preserveDs = false;
     } fb;
 
     QRhiRenderTargetAttachmentTracker::ResIdList currentResIdList;
@@ -2958,6 +2956,8 @@ void QRhiMetal::beginPass(QRhiCommandBuffer *cb,
     if (resourceUpdates)
         enqueueResourceUpdates(cb, resourceUpdates);
 
+	bool preserveColor = false;
+
     QMetalRenderTargetData *rtD = nullptr;
     switch (rt->resourceType()) {
     case QRhiResource::SwapChainRenderTarget:
@@ -2991,14 +2991,15 @@ void QRhiMetal::beginPass(QRhiCommandBuffer *cb,
     {
         QMetalTextureRenderTarget *rtTex = QRHI_RES(QMetalTextureRenderTarget, rt);
         rtD = rtTex->d;
+		preserveColor = (rtD->colorAttCount > 0) && rtTex->m_flags.testFlag(QRhiTextureRenderTarget::PreserveColorContents);
         if (!QRhiRenderTargetAttachmentTracker::isUpToDate<QMetalTexture, QMetalRenderBuffer>(rtTex->description(), rtD->currentResIdList))
             rtTex->create();
         cbD->d->currentPassRpDesc = d->createDefaultRenderPass(rtD->dsAttCount, colorClearValue, depthStencilClearValue, rtD->colorAttCount);
-        if (rtD->fb.preserveColor) {
+        if (preserveColor) {
             for (uint i = 0; i < uint(rtD->colorAttCount); ++i)
                 cbD->d->currentPassRpDesc.colorAttachments[i].loadAction = MTLLoadActionLoad;
         }
-        if (rtD->dsAttCount && rtD->fb.preserveDs) {
+        if (rtD->dsAttCount && rtTex->m_flags.testFlag(QRhiTextureRenderTarget::PreserveDepthStencilContents)) {
             cbD->d->currentPassRpDesc.depthAttachment.loadAction = MTLLoadActionLoad;
             cbD->d->currentPassRpDesc.stencilAttachment.loadAction = MTLLoadActionLoad;
         }
@@ -3040,7 +3041,7 @@ void QRhiMetal::beginPass(QRhiCommandBuffer *cb,
         cbD->d->currentPassRpDesc.colorAttachments[i].depthPlane = NSUInteger(rtD->fb.colorAtt[i].slice);
         cbD->d->currentPassRpDesc.colorAttachments[i].level = NSUInteger(rtD->fb.colorAtt[i].level);
         if (rtD->fb.colorAtt[i].resolveTex) {
-            cbD->d->currentPassRpDesc.colorAttachments[i].storeAction = rtD->fb.preserveColor ? MTLStoreActionStoreAndMultisampleResolve
+            cbD->d->currentPassRpDesc.colorAttachments[i].storeAction = preserveColor ? MTLStoreActionStoreAndMultisampleResolve
                                                                                               : MTLStoreActionMultisampleResolve;
             cbD->d->currentPassRpDesc.colorAttachments[i].resolveTexture = rtD->fb.colorAtt[i].resolveTex;
             cbD->d->currentPassRpDesc.colorAttachments[i].resolveSlice = NSUInteger(rtD->fb.colorAtt[i].resolveLayer);
@@ -4241,7 +4242,6 @@ bool QMetalTextureRenderTarget::create()
             d->fb.dsTex = depthTexD->d->tex;
             d->fb.hasStencil = rhiD->isStencilSupportingFormat(depthTexD->format());
             d->fb.depthNeedsStore = !m_flags.testFlag(DoNotStoreDepthStencilContents) && !m_desc.depthResolveTexture();
-            d->fb.preserveDs = m_flags.testFlag(QRhiTextureRenderTarget::PreserveDepthStencilContents);
             if (d->colorAttCount == 0) {
                 d->pixelSize = depthTexD->pixelSize();
                 d->sampleCount = depthTexD->samples;
@@ -4251,7 +4251,6 @@ bool QMetalTextureRenderTarget::create()
             d->fb.dsTex = depthRbD->d->tex;
             d->fb.hasStencil = true;
             d->fb.depthNeedsStore = false;
-            d->fb.preserveDs = false;
             if (d->colorAttCount == 0) {
                 d->pixelSize = depthRbD->pixelSize();
                 d->sampleCount = depthRbD->samples;
@@ -4265,9 +4264,6 @@ bool QMetalTextureRenderTarget::create()
     } else {
         d->dsAttCount = 0;
     }
-
-    if (d->colorAttCount > 0)
-        d->fb.preserveColor = m_flags.testFlag(QRhiTextureRenderTarget::PreserveColorContents);
 
     QRhiRenderTargetAttachmentTracker::updateResIdList<QMetalTexture, QMetalRenderBuffer>(m_desc, &d->currentResIdList);
 
