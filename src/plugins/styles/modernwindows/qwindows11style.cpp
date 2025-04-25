@@ -1673,7 +1673,7 @@ void QWindows11Style::drawControl(ControlElement element, const QStyleOption *op
     }
     case CE_ItemViewItem: {
         if (const QStyleOptionViewItem *vopt = qstyleoption_cast<const QStyleOptionViewItem *>(option)) {
-            if (const QAbstractItemView *view = qobject_cast<const QAbstractItemView *>(widget)) {
+            if (qobject_cast<const QAbstractItemView *>(widget)) {
                 QRect checkRect = proxy()->subElementRect(SE_ItemViewItemCheckIndicator, vopt, widget);
                 QRect iconRect = proxy()->subElementRect(SE_ItemViewItemDecoration, vopt, widget);
                 QRect textRect = proxy()->subElementRect(SE_ItemViewItemText, vopt, widget);
@@ -1706,8 +1706,10 @@ void QWindows11Style::drawControl(ControlElement element, const QStyleOption *op
                 }
 
                 const bool isTreeView = qobject_cast<const QTreeView *>(widget);
+                const bool highlightCurrent = vopt->state.testAnyFlags(State_Selected | State_MouseOver);
 
-                if ((vopt->state & State_Selected || vopt->state & State_MouseOver) && !(isTreeView && vopt->state & State_MouseOver) && vopt->showDecorationSelected) {
+                if (highlightCurrent && !(isTreeView && vopt->state & State_MouseOver) && vopt->showDecorationSelected) {
+                    const QAbstractItemView *view = qobject_cast<const QAbstractItemView *>(widget);
                     painter->setBrush(WINUI3Colors[colorSchemeIndex][subtleHighlightColor]);
                     QWidget *editorWidget = view ? view->indexWidget(view->currentIndex()) : nullptr;
                     if (editorWidget) {
@@ -1764,11 +1766,12 @@ void QWindows11Style::drawControl(ControlElement element, const QStyleOption *op
                 QIcon::State state = vopt->state & QStyle::State_Open ? QIcon::On : QIcon::Off;
                 vopt->icon.paint(painter, iconRect, vopt->decorationAlignment, mode, state);
 
-                if (!view || !view->isPersistentEditorOpen(vopt->index)) {
-                    painter->setPen(QPen(option->palette.text().color()));
-                    d->viewItemDrawText(painter, vopt, textRect);
-                }
-                if (vopt->state & State_Selected && (isFirst || onlyOne)) {
+                painter->setPen(highlightCurrent && highContrastTheme ? vopt->palette.base().color()
+                                                                      : vopt->palette.text().color());
+                d->viewItemDrawText(painter, vopt, textRect);
+
+                // paint a vertical marker for QListView
+                if (vopt->state & State_Selected) {
                     if (const QListView *lv = qobject_cast<const QListView *>(widget);
                         lv && lv->viewMode() != QListView::IconMode) {
                         painter->setPen(QPen(vopt->palette.accent().color()));
