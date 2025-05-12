@@ -1,5 +1,6 @@
 // Copyright (C) 2020 Intel Corporation.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:critical reason:cryptography
 
 #ifndef QRANDOM_H
 #define QRANDOM_H
