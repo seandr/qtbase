@@ -7726,11 +7726,11 @@ QMargins QWidgetPrivate::safeAreaMargins() const
     if (!nativeWidget->windowHandle())
         return QMargins();
 
-    QPlatformWindow *platformWindow = nativeWidget->windowHandle()->handle();
-    if (!platformWindow)
+    QWindow *window = q->windowHandle();
+    if (!window)
         return QMargins();
 
-    QMargins safeAreaMargins = platformWindow->safeAreaMargins();
+    QMargins safeAreaMargins = window->safeAreaMargins();
 
     if (!q->isWindow()) {
         // In theory the native parent widget already has a contents rect reflecting
