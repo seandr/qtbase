@@ -15,6 +15,7 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 
 import android.os.Build;
 
@@ -80,7 +81,13 @@ class QtWindow extends QtLayout implements QtSurfaceInterface {
             setOnApplyWindowInsetsListener((view, insets) -> {
                 Insets safeInsets;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    int types = WindowInsets.Type.displayCutout() | WindowInsets.Type.systemBars();
+                    WindowInsetsController insetsController = view.getWindowInsetsController();
+                    int sysbarBehavior = insetsController.getSystemBarsBehavior();
+
+                    int types = WindowInsets.Type.displayCutout();
+                    // We only want to get the system bars and stay out of their way if their normally visible.
+                    if (sysbarBehavior == WindowInsetsController.BEHAVIOR_DEFAULT)
+                       types |= WindowInsets.Type.systemBars();
                     safeInsets = insets.getInsets(types);
                 } else {
                     int left = 0;
