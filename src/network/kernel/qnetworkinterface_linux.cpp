@@ -1,5 +1,6 @@
 // Copyright (C) 2017 Intel Corporation.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:trusted-data
 
 #include "qnetworkinterface.h"
 #include "qnetworkinterface_p.h"
