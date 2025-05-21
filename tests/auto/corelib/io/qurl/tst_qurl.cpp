@@ -1307,6 +1307,12 @@ void tst_QUrl::toString_constructed()
     QCOMPARE(url.toString(formattingOptions), asString);
     QCOMPARE(QString::fromLatin1(url.toEncoded(formattingOptions)), QString::fromLatin1(asEncoded)); // readable in case of differences
     QCOMPARE(url.toEncoded(formattingOptions), asEncoded);
+
+    if (options == QUrl::UrlFormattingOption::None) {
+        QUrl parsed(asString);
+        QCOMPARE(url, parsed);
+        QCOMPARE(qHash(url), qHash(parsed));
+    }
 }
 
 void tst_QUrl::toDisplayString_PreferLocalFile_data()
@@ -4141,6 +4147,11 @@ void tst_QUrl::setComponents()
         QCOMPARE(copy.toString(), toString);
         // Check round-tripping
         QCOMPARE(QUrl(copy.toString()).toString(), toString);
+
+        // check comparisons
+        QUrl recreated(toString);
+        QCOMPARE(copy, recreated);
+        QCOMPARE(qHash(copy), qHash(recreated));
     } else {
         QVERIFY(copy.toString().isEmpty());
     }
