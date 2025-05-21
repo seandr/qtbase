@@ -537,6 +537,19 @@ public:
     void setQuery(const QString &value, qsizetype from, qsizetype end);
     void setFragment(const QString &value, qsizetype from, qsizetype end);
 
+    uint presentSections() const noexcept
+    {
+        uint s = sectionIsPresent;
+
+        // We have to ignore the host-is-present flag for local files (the
+        // "file" protocol), due to the requirements of the XDG file URI
+        // specification.
+        if (isLocalFile())
+            s &= ~Host;
+
+        return s;
+    }
+
     inline bool hasScheme() const { return sectionIsPresent & Scheme; }
     inline bool hasAuthority() const { return sectionIsPresent & Authority; }
     inline bool hasUserInfo() const { return sectionIsPresent & UserInfo; }
@@ -3073,14 +3086,7 @@ bool QUrl::operator ==(const QUrl &url) const
     if (!url.d)
         return d->isEmpty();
 
-    // First, compare which sections are present, since it speeds up the
-    // processing considerably. We just have to ignore the host-is-present flag
-    // for local files (the "file" protocol), due to the requirements of the
-    // XDG file URI specification.
-    int mask = QUrlPrivate::FullUrl;
-    if (isLocalFile())
-        mask &= ~QUrlPrivate::Host;
-    return (d->sectionIsPresent & mask) == (url.d->sectionIsPresent & mask) &&
+    return (d->presentSections() == url.d->presentSections()) &&
             d->scheme == url.d->scheme &&
             d->userName == url.d->userName &&
             d->password == url.d->password &&
@@ -3110,13 +3116,7 @@ bool QUrl::matches(const QUrl &url, FormattingOptions options) const
     if (!url.d)
         return d->isEmpty();
 
-    // First, compare which sections are present, since it speeds up the
-    // processing considerably. We just have to ignore the host-is-present flag
-    // for local files (the "file" protocol), due to the requirements of the
-    // XDG file URI specification.
-    int mask = QUrlPrivate::FullUrl;
-    if (isLocalFile())
-        mask &= ~QUrlPrivate::Host;
+    uint mask = d->presentSections();
 
     if (options.testFlag(QUrl::RemoveScheme))
         mask &= ~QUrlPrivate::Scheme;
