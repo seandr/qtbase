@@ -29,6 +29,8 @@ import android.graphics.Color;
 import android.util.TypedValue;
 import android.content.res.Resources.Theme;
 
+import android.util.Log;
+
 class QtDisplayManager {
 
     // screen methods
@@ -246,10 +248,28 @@ class QtDisplayManager {
     @UsedFromNativeCode
     static Size getDisplaySize(Context displayContext, Display display)
     {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            DisplayMetrics realMetrics = new DisplayMetrics();
-            display.getRealMetrics(realMetrics);
-            return new Size(realMetrics.widthPixels, realMetrics.heightPixels);
+        if (display == null || context == null)
+            return new Size(0, 0);
+
+        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            final DisplayMetrics metrics = new DisplayMetrics();
+            display.getRealMetrics(metrics);
+            return new Size(metrics.widthPixels, metrics.heightPixels);
+        } else {
+            try {
+                Context displayContext = context.createDisplayContext(display);
+                WindowManager windowManager = displayContext.getSystemService(WindowManager.class);
+                if (windowManager != null) {
+                    WindowMetrics metrics = windowManager.getCurrentWindowMetrics();
+                    Rect areaBounds = metrics.getBounds();
+                    return new Size(areaBounds.width(), areaBounds.height());
+                } else {
+                    Log.e(QtTAG, "getDisplaySize(): WindowManager null, display ID" + display.getDisplayId());
+                }
+            } catch (Exception e) {
+                Log.e(QtTAG, "Failed to retrieve display metrics with " + e);
+            }
+            return new Size(0, 0);
         }
 
         Context windowsContext = displayContext.createWindowContext(
