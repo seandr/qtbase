@@ -1273,6 +1273,7 @@ function(qt_describe_module target)
         string(APPEND extra_build_information "
         \"android\": {
             \"api_version\": \"${QT_ANDROID_API_VERSION}\",
+            \"android_platform\": \"${ANDROID_PLATFORM}\",
             \"ndk\": {
                 \"version\": \"${ANDROID_NDK_REVISION}\"
             }
