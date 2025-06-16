@@ -1,6 +1,7 @@
 // Copyright (C) 2016 The Qt Company Ltd.
 // Copyright (C) 2016 Intel Corporation.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QDBUSCONNECTION_H
 #define QDBUSCONNECTION_H
