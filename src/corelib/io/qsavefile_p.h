@@ -1,5 +1,6 @@
 // Copyright (C) 2013 David Faure <faure@kde.org>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:header-decls-only
 
 #ifndef QSAVEFILE_P_H
 #define QSAVEFILE_P_H

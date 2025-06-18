@@ -1,5 +1,6 @@
 // Copyright (C) 2012 David Faure <faure@kde.org>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:critical reason:guaranteed-behavior
 
 #include "qsavefile.h"
 
