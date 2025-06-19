@@ -1,5 +1,6 @@
 // Copyright (C) 2016 Alex Trotsenko <alex1973tr@gmail.com>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QSCTPSOCKET_P_H
 #define QSCTPSOCKET_P_H
