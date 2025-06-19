@@ -1,5 +1,6 @@
 // Copyright (C) 2018 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QNETWORKREPLYWASMIMPL_H
 #define QNETWORKREPLYWASMIMPL_H

@@ -1,5 +1,6 @@
 // Copyright (C) 2014 BlackBerry Limited. All rights reserved.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QABSTRACTPROTOCOLHANDLER_H
 #define QABSTRACTPROTOCOLHANDLER_H

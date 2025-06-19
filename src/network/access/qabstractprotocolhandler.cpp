@@ -1,5 +1,6 @@
 // Copyright (C) 2014 BlackBerry Limited. All rights reserved.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #include <private/qabstractprotocolhandler_p.h>
 #include <private/qhttpnetworkconnectionchannel_p.h>
