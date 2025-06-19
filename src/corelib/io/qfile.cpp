@@ -1,6 +1,7 @@
 // Copyright (C) 2020 The Qt Company Ltd.
 // Copyright (C) 2017 Intel Corporation.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #include "qplatformdefs.h"
 #include "qdebug.h"
