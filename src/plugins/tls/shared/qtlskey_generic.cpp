@@ -1,6 +1,7 @@
 // Copyright (C) 2014 Jeremy Lainé <jeremy.laine@m4x.org>
 // Copyright (C) 2021 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:critical reason:data-parser
 
 #include "qtlskey_generic_p.h"
 #include "qasn1element_p.h"

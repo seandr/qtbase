@@ -1,6 +1,7 @@
 // Copyright (C) 2015 Mikkel Krautz <mikkel@krautz.dk>
 // Copyright (C) 2016 Richard J. Moore <rich@kde.org>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:critical reason:cryptography
 
 #include "qsslsocket_openssl_symbols_p.h"
 #include "qtlsbackend_openssl_p.h"

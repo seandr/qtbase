@@ -3,6 +3,7 @@
 // Copyright (C) 2014 Governikus GmbH & Co. KG.
 // Copyright (C) 2016 Richard J. Moore <rich@kde.org>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:critical reason:cryptography
 
 #include <QtNetwork/qsslsocket.h>
 #include <QtNetwork/qssldiffiehellmanparameters.h>

@@ -1,6 +1,7 @@
 // Copyright (C) 2021 The Qt Company Ltd.
 // Copyright (C) 2014 Jeremy Lainé <jeremy.laine@m4x.org>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:critical reason:cryptography
 
 #include "qtls_st_p.h"
 #include "qtlsbackend_st_p.h"
