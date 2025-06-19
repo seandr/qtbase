@@ -1,5 +1,6 @@
 // Copyright (C) 2021 Ilya Fedin <fedin-ilja2010@ya.ru>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #include <QtNetwork/private/qnetworkinformation_p.h>
 
