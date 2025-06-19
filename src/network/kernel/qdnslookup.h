@@ -1,5 +1,6 @@
 // Copyright (C) 2012 Jeremy Lainé <jeremy.laine@m4x.org>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QDNSLOOKUP_H
 #define QDNSLOOKUP_H

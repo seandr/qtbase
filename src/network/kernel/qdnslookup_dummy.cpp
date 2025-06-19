@@ -1,5 +1,6 @@
 // Copyright (C) 2012 Collabora Ltd, author <robin.burchell@collabora.co.uk>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #include "qdnslookup_p.h"
 

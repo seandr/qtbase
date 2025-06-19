@@ -1,5 +1,6 @@
 // Copyright (C) 2015 Intel Corporation.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QNETWORKDATAGRAM_P_H
 #define QNETWORKDATAGRAM_P_H
