@@ -1,5 +1,6 @@
 // Copyright (C) 2014 Jeremy Lainé <jeremy.laine@m4x.org>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QTLS_ST_P_H
 #define QTLS_ST_P_H
