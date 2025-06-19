@@ -1,5 +1,6 @@
 // Copyright (C) 2011 Richard J. Moore <rich@kde.org>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QSSLCERTIFICATEEXTENSION_H
 #define QSSLCERTIFICATEEXTENSION_H

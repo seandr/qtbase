@@ -1,6 +1,7 @@
 // Copyright (C) 2011 Richard J. Moore <rich@kde.org>
 // Copyright (C) 2019 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QOCSPRESPONSE_P_H
 #define QOCSPRESPONSE_P_H

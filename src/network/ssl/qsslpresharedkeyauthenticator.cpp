@@ -1,5 +1,6 @@
 // Copyright (C) 2014 Governikus GmbH & Co. KG.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #include "qsslpresharedkeyauthenticator.h"
 #include "qsslpresharedkeyauthenticator_p.h"

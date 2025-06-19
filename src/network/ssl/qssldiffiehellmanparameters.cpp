@@ -1,5 +1,6 @@
 // Copyright (C) 2015 Mikkel Krautz <mikkel@krautz.dk>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 
 /*!
