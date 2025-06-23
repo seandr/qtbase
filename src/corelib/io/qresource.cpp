@@ -1,6 +1,7 @@
 // Copyright (C) 2019 The Qt Company Ltd.
 // Copyright (C) 2020 Intel Corporation.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:critical reason:data-parser
 
 #include "qresource.h"
 #include "qresource_p.h"

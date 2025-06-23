@@ -1,6 +1,7 @@
 // Copyright (C) 2020 The Qt Company Ltd.
 // Copyright (C) 2019 Intel Corporation.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QRESOURCE_H
 #define QRESOURCE_H
