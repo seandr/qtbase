@@ -3,6 +3,7 @@
 // Copyright (C) 2016 Intel Corporation.
 // Copyright (C) 2023 Ahmad Samir <a.samirh78@gmail.com>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #include "qstorageinfo_linux_p.h"
 

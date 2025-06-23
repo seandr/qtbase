@@ -1,5 +1,6 @@
 // Copyright (C) 2014 Ivan Komissarov <ABBAPOH@gmail.com>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QSTORAGEINFO_P_H
 #define QSTORAGEINFO_P_H
