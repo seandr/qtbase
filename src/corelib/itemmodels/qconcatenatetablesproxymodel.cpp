@@ -1,5 +1,6 @@
 // Copyright (C) 2016 Klarälvdalens Datakonsult AB, a KDAB Group company, info@kdab.com, author David Faure <david.faure@kdab.com>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #include "qconcatenatetablesproxymodel.h"
 #include <private/qabstractitemmodel_p.h>

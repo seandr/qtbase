@@ -1,5 +1,6 @@
 // Copyright (C) 2021 Klarälvdalens Datakonsult AB, a KDAB Group company, info@kdab.com, author Stephen Kelly <stephen.kelly@kdab.com>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QIDENTITYPROXYMODEL_P_H
 #define QIDENTITYPROXYMODEL_P_H

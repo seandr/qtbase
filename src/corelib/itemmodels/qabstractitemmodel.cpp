@@ -1,6 +1,7 @@
 // Copyright (C) 2022 The Qt Company Ltd.
 // Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, info@kdab.com, author Giuseppe D'Angelo <giuseppe.dangelo@kdab.com>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #include "qabstractitemmodel.h"
 #include <private/qabstractitemmodel_p.h>

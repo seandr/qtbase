@@ -1,5 +1,6 @@
 // Copyright (C) 2018 Luca Beldi <v.ronin@yahoo.it>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #include "qtransposeproxymodel.h"
 #include <private/qtransposeproxymodel_p.h>
