@@ -1,6 +1,6 @@
 // Copyright (C) 2024 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
-// Qt-Security score:critical reason:executing-external-code
+// Qt-Security score:critical reason:execute-external-code
 
 package org.qtproject.qt.android;
 
