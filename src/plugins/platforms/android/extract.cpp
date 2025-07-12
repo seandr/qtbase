@@ -1,7 +1,6 @@
 // Copyright (C) 2021 The Qt Company Ltd.
 // Copyright (C) 2014 BogDan Vatra <bogdan@kde.org>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
-// Qt-Security score:critical reason:data-serializing
 
 #include <QtCore/QJniEnvironment>
 

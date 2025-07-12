@@ -1,7 +1,7 @@
 ﻿// Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2022 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
-// Qt-Security score:critical reason:file-handling
+// Qt-Security score:critical reason:data-parser
 
 #include "androidcontentfileengine.h"
 
