@@ -1,5 +1,7 @@
 // Copyright (C) 2019 Klarälvdalens Datakonsult AB, a KDAB Group company, info@kdab.com, author Marc Mutz <marc.mutz@kdab.com>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
+
 #ifndef QWAITCONDITION_P_H
 #define QWAITCONDITION_P_H
 

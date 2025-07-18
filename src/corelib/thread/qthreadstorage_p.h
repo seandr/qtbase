@@ -1,5 +1,6 @@
 // Copyright (C) 2025 Intel Corporation.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QTHREADSTORAGE_P_H
 #define QTHREADSTORAGE_P_H

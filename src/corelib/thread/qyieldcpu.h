@@ -1,6 +1,7 @@
 // Copyright (C) 2023 The Qt Company Ltd.
 // Copyright (C) 2023 Intel Corporation.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QYIELDCPU_H
 #define QYIELDCPU_H

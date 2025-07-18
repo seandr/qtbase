@@ -1,5 +1,6 @@
 // Copyright (C) 2023 Intel Corporation.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QFUTEX_WIN_P_H
 #define QFUTEX_WIN_P_H
