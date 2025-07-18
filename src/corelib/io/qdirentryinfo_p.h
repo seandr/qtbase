@@ -1,5 +1,6 @@
 // Copyright (C) 2024 Ahmad Samir <a.samirh78@gmail.com>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QDIRENTRYINFO_P_H
 #define QDIRENTRYINFO_P_H

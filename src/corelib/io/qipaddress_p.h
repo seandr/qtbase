@@ -1,5 +1,6 @@
 // Copyright (C) 2016 Intel Corporation.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QIPADDRESS_P_H
 #define QIPADDRESS_P_H
