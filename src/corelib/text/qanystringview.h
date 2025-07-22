@@ -253,7 +253,7 @@ public:
     }
 
     [[nodiscard]] constexpr QAnyStringView sliced(qsizetype pos) const
-    { verify(pos, 0); auto r = *this; r.advanceData(pos); r.setSize(size() - pos); return r; }
+    { verify(pos, 0); auto r = *this; r.advanceData(pos); r.decreaseSize(pos); return r; }
     [[nodiscard]] constexpr QAnyStringView sliced(qsizetype pos, qsizetype n) const
     { verify(pos, n); auto r = *this; r.advanceData(pos); r.setSize(n); return r; }
     [[nodiscard]] constexpr QAnyStringView first(qsizetype n) const
@@ -271,7 +271,7 @@ public:
     constexpr void truncate(qsizetype n)
     { verify(0, n); setSize(n); }
     constexpr void chop(qsizetype n)
-    { verify(0, n); setSize(size() - n); }
+    { verify(0, n); decreaseSize(n); }
 
 
     [[nodiscard]] inline QString toString() const; // defined in qstring.h
@@ -340,6 +340,11 @@ private:
     [[nodiscard]] inline constexpr QLatin1StringView asLatin1StringView() const;
     [[nodiscard]] constexpr size_t charSize() const noexcept { return isUtf16() ? 2 : 1; }
     constexpr void setSize(qsizetype sz) noexcept { m_size = size_t(sz) | tag(); }
+    constexpr void decreaseSize(qsizetype delta) noexcept
+    {
+        delta <<= SizeShift;
+        m_size -= delta;
+    }
     constexpr void advanceData(qsizetype delta) noexcept
     { m_data_utf8 += delta * charSize(); }
     Q_ALWAYS_INLINE constexpr void verify([[maybe_unused]] qsizetype pos = 0,
