@@ -45,7 +45,7 @@ static inline constexpr TerritoryLanguage ImperialMeasurementSystems[] = {
 };
 
 /*
-  Storage for alpha codes with length of up to 4 allowing efficient comparison.
+  Storage for alpha codes with length of up to 3 allowing efficient comparison.
 */
 struct AlphaCode {
     constexpr AlphaCode(char c1 = 0, char c2 = 0, char c3 = 0)
