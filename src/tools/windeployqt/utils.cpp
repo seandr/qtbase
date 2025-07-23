@@ -190,7 +190,7 @@ static inline void appendToCommandLine(const QString &argument, QString *command
 bool runProcess(const QString &binary, const QStringList &args,
                 const QString &workingDirectory,
                 unsigned long *exitCode, QByteArray *stdOut, QByteArray *stdErr,
-                QString *errorMessage)
+                QString *errorMessage, int timeout)
 {
     if (exitCode)
         *exitCode = 0;
@@ -256,7 +256,7 @@ bool runProcess(const QString &binary, const QStringList &args,
         return false;
     }
 
-    WaitForSingleObject(pi.hProcess, INFINITE);
+    WaitForSingleObject(pi.hProcess, timeout);
     CloseHandle(pi.hThread);
     if (exitCode)
         GetExitCodeProcess(pi.hProcess, exitCode);
