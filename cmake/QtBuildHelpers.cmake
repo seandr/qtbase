@@ -289,10 +289,13 @@ function(qt_internal_get_qt_build_public_helpers out_var)
         QtPublicGitHelpers
         QtPublicPluginHelpers
         QtPublicSbomAttributionHelpers
+        QtPublicSbomCommonGenerationHelpers
         QtPublicSbomCpeHelpers
+        QtPublicSbomCycloneDXHelpers
         QtPublicSbomDepHelpers
         QtPublicSbomFileHelpers
         QtPublicSbomGenerationHelpers
+        QtPublicSbomGenerationCycloneDXHelpers
         QtPublicSbomHelpers
         QtPublicSbomLicenseHelpers
         QtPublicSbomOpsHelpers
