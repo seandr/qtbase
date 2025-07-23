@@ -1,5 +1,6 @@
 // Copyright (C) 2016 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:critical reason:execute-external-code
 
 #include "qgenericunixservices_p.h"
 #include <QtGui/private/qtguiglobal_p.h>
