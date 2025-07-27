@@ -965,7 +965,7 @@ void tst_QDir::entryListWithTestFiles()
         QVERIFY2(QFile::remove(testFiles.at(i)), qPrintable(testFiles.at(i)));
 
     if (doContentCheck)
-        QCOMPARE(actual, expected);
+        QCOMPARE_EQ(actual, expected);
 }
 
 void tst_QDir::entryListTimedSort()
