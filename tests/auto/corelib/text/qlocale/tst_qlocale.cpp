@@ -1437,6 +1437,8 @@ void tst_QLocale::long_long_conversion_data()
 
     QTest::newRow("C null")                   << QString("C")     << QString()       << false << (qlonglong) 0;
     QTest::newRow("C empty")                  << QString("C")     << QString("")     << false << (qlonglong) 0;
+    QTest::newRow("C 0")                      << QString("C")     << "0"             << true  << (qlonglong) 0;
+    QTest::newRow("C 0,")                     << QString("C")     << "0,"            << false << (qlonglong) 0;
     QTest::newRow("C 1")                      << QString("C")     << "1"             << true  << (qlonglong) 1;
     QTest::newRow("C 1,")                     << QString("C")     << "1,"            << false << (qlonglong) 0;
     QTest::newRow("C 1,2")                    << QString("C")     << "1,2"           << false << (qlonglong) 0;
@@ -1507,6 +1509,20 @@ void tst_QLocale::long_long_conversion()
 
     if (ok)
         QCOMPARE(l, num);
+
+    if (num >= 0) {
+        qulonglong ull = locale.toULongLong(num_str, &ok);
+        QCOMPARE(ok, good);
+
+        if (ok)
+            QCOMPARE(ull, num);
+
+        ull = locale.toULongLong(num_strRef, &ok);
+        QCOMPARE(ok, good);
+
+        if (ok)
+            QCOMPARE(ull, num);
+    }
 }
 
 void tst_QLocale::long_long_conversion_extra()
