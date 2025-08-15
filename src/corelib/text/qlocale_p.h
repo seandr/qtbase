@@ -220,18 +220,6 @@ Q_DECLARE_TYPEINFO(QLocaleId, Q_PRIMITIVE_TYPE);
 
 using CharBuff = QVarLengthArray<char, 256>;
 
-struct ParsingResult
-{
-    enum State { // A duplicate of QValidator::State
-        Invalid,
-        Intermediate,
-        Acceptable
-    };
-
-    State state = Invalid;
-    CharBuff buff;
-};
-
 struct QLocaleData
 {
 public:
@@ -266,6 +254,18 @@ public:
     };
 
     enum NumberMode { IntegerMode, DoubleStandardMode, DoubleScientificMode };
+
+    struct ParsingResult
+    {
+        enum State { // A duplicate of QValidator::State
+            Invalid,
+            Intermediate,
+            Acceptable,
+        };
+
+        State state = Invalid;
+        CharBuff buff;
+    };
 
 private:
     enum PrecisionMode {
