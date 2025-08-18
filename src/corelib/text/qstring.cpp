@@ -1645,7 +1645,11 @@ static int qArgDigitValue(QChar ch) noexcept
 
 #if QT_CONFIG(regularexpression)
 Q_DECL_COLD_FUNCTION
-void qtWarnAboutInvalidRegularExpression(const QString &pattern, const char *where);
+static void qtWarnAboutInvalidRegularExpression(const QRegularExpression &re, const char *cls, const char *method)
+{
+    extern void qtWarnAboutInvalidRegularExpression(const QString &pattern, const char *cls, const char *method);
+    qtWarnAboutInvalidRegularExpression(re.pattern(), cls, method);
+}
 #endif
 
 /*!
@@ -4729,7 +4733,7 @@ Q_DECLARE_TYPEINFO(QStringCapture, Q_PRIMITIVE_TYPE);
 QString &QString::replace(const QRegularExpression &re, const QString &after)
 {
     if (!re.isValid()) {
-        qtWarnAboutInvalidRegularExpression(re.pattern(), "QString::replace");
+        qtWarnAboutInvalidRegularExpression(re, "QString", "replace");
         return *this;
     }
 
@@ -5249,7 +5253,7 @@ static QString extractSections(QSpan<qt_section_chunk> sections, qsizetype start
 QString QString::section(const QRegularExpression &re, qsizetype start, qsizetype end, SectionFlags flags) const
 {
     if (!re.isValid()) {
-        qtWarnAboutInvalidRegularExpression(re.pattern(), "QString::section");
+        qtWarnAboutInvalidRegularExpression(re, "QString", "section");
         return QString();
     }
 
@@ -8299,7 +8303,7 @@ static ResultList splitString(const String &source, const QRegularExpression &re
 {
     ResultList list;
     if (!re.isValid()) {
-        qtWarnAboutInvalidRegularExpression(re.pattern(), "QString::split");
+        qtWarnAboutInvalidRegularExpression(re, "QString", "split");
         return list;
     }
 
@@ -10094,7 +10098,7 @@ qsizetype QtPrivate::lastIndexOf(QLatin1StringView haystack, qsizetype from, QLa
 qsizetype QtPrivate::indexOf(QStringView viewHaystack, const QString *stringHaystack, const QRegularExpression &re, qsizetype from, QRegularExpressionMatch *rmatch)
 {
     if (!re.isValid()) {
-        qtWarnAboutInvalidRegularExpression(re.pattern(), "QString(View)::indexOf");
+        qtWarnAboutInvalidRegularExpression(re, "QString(View)", "indexOf");
         return -1;
     }
 
@@ -10119,7 +10123,7 @@ qsizetype QtPrivate::indexOf(QStringView haystack, const QRegularExpression &re,
 qsizetype QtPrivate::lastIndexOf(QStringView viewHaystack, const QString *stringHaystack, const QRegularExpression &re, qsizetype from, QRegularExpressionMatch *rmatch)
 {
     if (!re.isValid()) {
-        qtWarnAboutInvalidRegularExpression(re.pattern(), "QString(View)::lastIndexOf");
+        qtWarnAboutInvalidRegularExpression(re, "QString(View)", "lastIndexOf");
         return -1;
     }
 
@@ -10151,7 +10155,7 @@ qsizetype QtPrivate::lastIndexOf(QStringView haystack, const QRegularExpression 
 bool QtPrivate::contains(QStringView viewHaystack, const QString *stringHaystack, const QRegularExpression &re, QRegularExpressionMatch *rmatch)
 {
     if (!re.isValid()) {
-        qtWarnAboutInvalidRegularExpression(re.pattern(), "QString(View)::contains");
+        qtWarnAboutInvalidRegularExpression(re, "QString(View)", "contains");
         return false;
     }
     QRegularExpressionMatch m = stringHaystack
@@ -10171,7 +10175,7 @@ bool QtPrivate::contains(QStringView haystack, const QRegularExpression &re, QRe
 qsizetype QtPrivate::count(QStringView haystack, const QRegularExpression &re)
 {
     if (!re.isValid()) {
-        qtWarnAboutInvalidRegularExpression(re.pattern(), "QString(View)::count");
+        qtWarnAboutInvalidRegularExpression(re, "QString(View)", "count");
         return 0;
     }
     qsizetype count = 0;
