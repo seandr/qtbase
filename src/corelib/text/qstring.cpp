@@ -2800,7 +2800,7 @@ void QString::reallocData(qsizetype alloc, QArrayData::AllocationOption option)
         if (dd.size > 0)
             ::memcpy(dd.data(), d.data(), dd.size * sizeof(QChar));
         dd.data()[dd.size] = 0;
-        d = dd;
+        d.swap(dd);
     } else {
         d->reallocate(alloc, option);
     }
@@ -2816,7 +2816,7 @@ void QString::reallocGrowData(qsizetype n)
         Q_CHECK_PTR(dd.data());
         dd->copyAppend(d.data(), d.data() + d.size);
         dd.data()[dd.size] = 0;
-        d = dd;
+        d.swap(dd);
     } else {
         d->reallocate(d.constAllocatedCapacity() + n, QArrayData::Grow);
     }
