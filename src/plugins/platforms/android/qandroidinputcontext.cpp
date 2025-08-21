@@ -75,9 +75,15 @@ static void runOnQtThread(const std::function<void()> &func)
     QMetaObject::invokeMethod(m_androidInputContext, "safeCall", Qt::BlockingQueuedConnection, Q_ARG(std::function<void()>, func));
 }
 
+static bool hasValidFocusObject()
+{
+    return m_androidInputContext && m_androidInputContext->focusObject()
+        && m_androidInputContext->isInputPanelVisible();
+}
+
 static jboolean beginBatchEdit(JNIEnv */*env*/, jobject /*thiz*/)
 {
-    if (!m_androidInputContext)
+    if (!hasValidFocusObject())
         return JNI_FALSE;
 
     qCDebug(lcQpaInputMethods) << "@@@ BEGINBATCH";
@@ -88,7 +94,7 @@ static jboolean beginBatchEdit(JNIEnv */*env*/, jobject /*thiz*/)
 
 static jboolean endBatchEdit(JNIEnv */*env*/, jobject /*thiz*/)
 {
-    if (!m_androidInputContext)
+    if (!hasValidFocusObject())
         return JNI_FALSE;
 
     qCDebug(lcQpaInputMethods) << "@@@ ENDBATCH";
@@ -101,7 +107,7 @@ static jboolean endBatchEdit(JNIEnv */*env*/, jobject /*thiz*/)
 
 static jboolean commitText(JNIEnv *env, jobject /*thiz*/, jstring text, jint newCursorPosition)
 {
-    if (!m_androidInputContext)
+    if (!hasValidFocusObject())
         return JNI_FALSE;
 
     jboolean isCopy;
@@ -117,7 +123,7 @@ static jboolean commitText(JNIEnv *env, jobject /*thiz*/, jstring text, jint new
 
 static jboolean deleteSurroundingText(JNIEnv */*env*/, jobject /*thiz*/, jint leftLength, jint rightLength)
 {
-    if (!m_androidInputContext)
+    if (!hasValidFocusObject())
         return JNI_FALSE;
 
     qCDebug(lcQpaInputMethods) << "@@@ DELETE" << leftLength << rightLength;
@@ -128,7 +134,7 @@ static jboolean deleteSurroundingText(JNIEnv */*env*/, jobject /*thiz*/, jint le
 
 static jboolean finishComposingText(JNIEnv */*env*/, jobject /*thiz*/)
 {
-    if (!m_androidInputContext)
+    if (!hasValidFocusObject())
         return JNI_FALSE;
 
     qCDebug(lcQpaInputMethods) << "@@@ FINISH";
@@ -139,7 +145,7 @@ static jboolean finishComposingText(JNIEnv */*env*/, jobject /*thiz*/)
 
 static jint getCursorCapsMode(JNIEnv */*env*/, jobject /*thiz*/, jint reqModes)
 {
-    if (!m_androidInputContext)
+    if (!hasValidFocusObject())
         return 0;
 
     jint res = 0;
@@ -149,7 +155,7 @@ static jint getCursorCapsMode(JNIEnv */*env*/, jobject /*thiz*/, jint reqModes)
 
 static jobject getExtractedText(JNIEnv *env, jobject /*thiz*/, int hintMaxChars, int hintMaxLines, jint flags)
 {
-    if (!m_androidInputContext)
+    if (!hasValidFocusObject())
         return 0;
 
     QAndroidInputContext::ExtractedText extractedText;
@@ -173,7 +179,7 @@ static jobject getExtractedText(JNIEnv *env, jobject /*thiz*/, int hintMaxChars,
 
 static jstring getSelectedText(JNIEnv *env, jobject /*thiz*/, jint flags)
 {
-    if (!m_androidInputContext)
+    if (!hasValidFocusObject())
         return 0;
 
     QString text;
@@ -186,7 +192,7 @@ static jstring getSelectedText(JNIEnv *env, jobject /*thiz*/, jint flags)
 
 static jstring getTextAfterCursor(JNIEnv *env, jobject /*thiz*/, jint length, jint flags)
 {
-    if (!m_androidInputContext)
+    if (!hasValidFocusObject())
         return 0;
 
     QString text;
@@ -197,7 +203,7 @@ static jstring getTextAfterCursor(JNIEnv *env, jobject /*thiz*/, jint length, ji
 
 static jstring getTextBeforeCursor(JNIEnv *env, jobject /*thiz*/, jint length, jint flags)
 {
-    if (!m_androidInputContext)
+    if (!hasValidFocusObject())
         return 0;
 
     QString text;
@@ -208,7 +214,7 @@ static jstring getTextBeforeCursor(JNIEnv *env, jobject /*thiz*/, jint length, j
 
 static jboolean setComposingText(JNIEnv *env, jobject /*thiz*/, jstring text, jint newCursorPosition)
 {
-    if (!m_androidInputContext)
+    if (!hasValidFocusObject())
         return JNI_FALSE;
 
     jboolean isCopy;
@@ -224,7 +230,7 @@ static jboolean setComposingText(JNIEnv *env, jobject /*thiz*/, jstring text, ji
 
 static jboolean setComposingRegion(JNIEnv */*env*/, jobject /*thiz*/, jint start, jint end)
 {
-    if (!m_androidInputContext)
+    if (!hasValidFocusObject())
         return JNI_FALSE;
 
     qCDebug(lcQpaInputMethods) << "@@@ SETR" << start << end;
@@ -236,7 +242,7 @@ static jboolean setComposingRegion(JNIEnv */*env*/, jobject /*thiz*/, jint start
 
 static jboolean setSelection(JNIEnv */*env*/, jobject /*thiz*/, jint start, jint end)
 {
-    if (!m_androidInputContext)
+    if (!hasValidFocusObject())
         return JNI_FALSE;
 
     qCDebug(lcQpaInputMethods) << "@@@ SETSEL" << start << end;
@@ -248,7 +254,7 @@ static jboolean setSelection(JNIEnv */*env*/, jobject /*thiz*/, jint start, jint
 
 static jboolean selectAll(JNIEnv */*env*/, jobject /*thiz*/)
 {
-    if (!m_androidInputContext)
+    if (!hasValidFocusObject())
         return JNI_FALSE;
 
     qCDebug(lcQpaInputMethods) << "@@@ SELALL";
@@ -259,7 +265,7 @@ static jboolean selectAll(JNIEnv */*env*/, jobject /*thiz*/)
 
 static jboolean cut(JNIEnv */*env*/, jobject /*thiz*/)
 {
-    if (!m_androidInputContext)
+    if (!hasValidFocusObject())
         return JNI_FALSE;
 
     qCDebug(lcQpaInputMethods) << "@@@";
@@ -270,7 +276,7 @@ static jboolean cut(JNIEnv */*env*/, jobject /*thiz*/)
 
 static jboolean copy(JNIEnv */*env*/, jobject /*thiz*/)
 {
-    if (!m_androidInputContext)
+    if (!hasValidFocusObject())
         return JNI_FALSE;
 
     qCDebug(lcQpaInputMethods) << "@@@";
@@ -281,7 +287,7 @@ static jboolean copy(JNIEnv */*env*/, jobject /*thiz*/)
 
 static jboolean copyURL(JNIEnv */*env*/, jobject /*thiz*/)
 {
-    if (!m_androidInputContext)
+    if (!hasValidFocusObject())
         return JNI_FALSE;
 
     qCDebug(lcQpaInputMethods) << "@@@";
@@ -292,7 +298,7 @@ static jboolean copyURL(JNIEnv */*env*/, jobject /*thiz*/)
 
 static jboolean paste(JNIEnv */*env*/, jobject /*thiz*/)
 {
-    if (!m_androidInputContext)
+    if (!hasValidFocusObject())
         return JNI_FALSE;
 
     qCDebug(lcQpaInputMethods) << "@@@ PASTE";
@@ -303,7 +309,7 @@ static jboolean paste(JNIEnv */*env*/, jobject /*thiz*/)
 
 static jboolean updateCursorPosition(JNIEnv */*env*/, jobject /*thiz*/)
 {
-    if (!m_androidInputContext)
+    if (!hasValidFocusObject())
         return JNI_FALSE;
 
     qCDebug(lcQpaInputMethods) << "@@@ UPDATECURSORPOS";
@@ -314,7 +320,7 @@ static jboolean updateCursorPosition(JNIEnv */*env*/, jobject /*thiz*/)
 
 static void reportFullscreenMode(JNIEnv */*env*/, jobject /*thiz*/, jboolean enabled)
 {
-    if (!m_androidInputContext)
+    if (!hasValidFocusObject())
         return;
 
     runOnQtThread([&]{m_androidInputContext->reportFullscreenMode(enabled);});
@@ -322,7 +328,10 @@ static void reportFullscreenMode(JNIEnv */*env*/, jobject /*thiz*/, jboolean ena
 
 static jboolean fullscreenMode(JNIEnv */*env*/, jobject /*thiz*/)
 {
-    return m_androidInputContext ? m_androidInputContext->fullscreenMode() : false;
+    if (!hasValidFocusObject())
+        return false;
+
+    return m_androidInputContext->fullscreenMode();
 }
 
 static JNINativeMethod methods[] = {
@@ -956,6 +965,11 @@ void QAndroidInputContext::clear()
     m_extractedText.clear();
 }
 
+
+QObject *QAndroidInputContext::focusObject()
+{
+    return m_focusObject;
+}
 
 void QAndroidInputContext::setFocusObject(QObject *object)
 {
