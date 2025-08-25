@@ -5261,7 +5261,7 @@ bool QString::isUpper() const
 
     while (it.hasNext()) {
         const char32_t uc = it.next();
-        if (qGetProp(uc)->cases[QUnicodeTables::UpperCase].diff)
+        if (caseConversion(uc)[QUnicodeTables::UpperCase].diff)
             return false;
     }
 
@@ -5287,7 +5287,7 @@ bool QString::isLower() const
 
     while (it.hasNext()) {
         const char32_t uc = it.next();
-        if (qGetProp(uc)->cases[QUnicodeTables::LowerCase].diff)
+        if (caseConversion(uc)[QUnicodeTables::LowerCase].diff)
             return false;
     }
 
@@ -6734,7 +6734,7 @@ static QString convertCase(T &str, QUnicodeTables::Case which)
     QStringIterator it(p, e);
     while (it.hasNext()) {
         const char32_t uc = it.next();
-        if (qGetProp(uc)->cases[which].diff) {
+        if (caseConversion(uc)[which].diff) {
             it.recede();
             return detachAndConvertCase(str, it, which);
         }

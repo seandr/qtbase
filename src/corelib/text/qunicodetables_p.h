@@ -21,6 +21,8 @@
 
 #include <QtCore/qchar.h>
 
+#include <array>
+
 QT_BEGIN_NAMESPACE
 
 #define UNICODE_DATA_VERSION QChar::Unicode_16_0
@@ -36,6 +38,11 @@ enum Case {
     NumCases
 };
 
+struct CaseConversion {
+    ushort special    : 1;
+    signed short diff : 15;
+};
+
 struct Properties {
     ushort category            : 8; /* 5 used */
     ushort direction           : 8; /* 5 used */
@@ -49,10 +56,7 @@ struct Properties {
 #ifdef Q_OS_WASM
     unsigned char              : 0; //wasm 64 packing trick
 #endif
-    struct {
-        ushort special    : 1;
-        signed short diff : 15;
-    } cases[NumCases];
+    std::array<CaseConversion, NumCases> cases;
 #ifdef Q_OS_WASM
     unsigned char              : 0; //wasm 64 packing trick
 #endif
@@ -68,6 +72,9 @@ Q_DECL_CONST_FUNCTION
 Q_CORE_EXPORT const Properties * QT_FASTCALL properties(char32_t ucs4) noexcept;
 Q_DECL_CONST_FUNCTION
 Q_CORE_EXPORT const Properties * QT_FASTCALL properties(char16_t ucs2) noexcept;
+
+Q_DECL_CONST_FUNCTION Q_CORE_EXPORT
+const std::array<CaseConversion, NumCases> & QT_FASTCALL caseConversion(char32_t ucs4) noexcept;
 
 static_assert(sizeof(Properties) == 20);
 
