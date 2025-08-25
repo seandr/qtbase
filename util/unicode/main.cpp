@@ -10,13 +10,16 @@
 #include <qspan.h>
 #include <qstring.h>
 #include <qbitarray.h>
+#include <qvarlengtharray.h>
 #include <private/qstringiterator_p.h>
 #if 0
 #include <private/qunicodetables_p.h>
 #endif
 
+#include <array>
 #include <QtCore/qxpfunctional.h>
 #include <QtCore/q26numeric.h>
+#include <vector>
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 9, 0)
 // QSpan, QIODevice::readLineInto()
@@ -973,13 +976,14 @@ static const char *property_string =
     "    ushort unicodeVersion      : 5; /* 5 used */\n"
     "    ushort eastAsianWidth      : 3; /* 3 used */\n"
     "    ushort nfQuickCheck        : 8;\n" // could be narrowed
-    "    std::array<CaseConversion, NumCases> cases;\n"
+    "    ushort caseIndex           : 16; /* 9 used */\n"
     "    ushort graphemeBreakClass  : 5; /* 5 used */\n"
     "    ushort wordBreakClass      : 5; /* 5 used */\n"
     "    ushort lineBreakClass      : 6; /* 6 used */\n"
     "    ushort sentenceBreakClass  : 4; /* 4 used */\n"
     "    ushort idnaStatus          : 4; /* 3 used */\n"
     "    ushort script              : 8;\n"
+    "    ushort reserved            : 16; /* makes sizeof a nice round 16 bytes */\n"
     "};\n\n"
     "Q_DECL_CONST_FUNCTION\n"
     "Q_CORE_EXPORT const Properties * QT_FASTCALL properties(char32_t ucs4) noexcept;\n"
@@ -1020,7 +1024,7 @@ static const char *methods =
     "{ return eastAsianWidth(ch.unicode()); }\n"
     "\n";
 
-static const int SizeOfPropertiesStruct = 20;
+static const int SizeOfPropertiesStruct = 16;
 
 static const QByteArray sizeOfPropertiesStructCheck =
         "static_assert(sizeof(Properties) == " + QByteArray::number(SizeOfPropertiesStruct) + ");\n\n";
@@ -1051,6 +1055,7 @@ struct PropertyFlags {
                 && upperCaseSpecial == o.upperCaseSpecial
                 && titleCaseSpecial == o.titleCaseSpecial
                 && caseFoldSpecial == o.caseFoldSpecial
+                // caseIndex is _not_ part of equality
                 && graphemeBreakClass == o.graphemeBreakClass
                 && wordBreakClass == o.wordBreakClass
                 && sentenceBreakClass == o.sentenceBreakClass
@@ -1082,6 +1087,7 @@ struct PropertyFlags {
     bool upperCaseSpecial = 0;
     bool titleCaseSpecial = 0;
     bool caseFoldSpecial = 0;
+    int caseIndex = -1; // not part of equality; replaces {lower,upper,title,fold}CaseDiff
     GraphemeBreakClass graphemeBreakClass = GraphemeBreak_Any;
     WordBreakClass wordBreakClass = WordBreak_Any;
     SentenceBreakClass sentenceBreakClass = SentenceBreak_Any;
@@ -2533,6 +2539,77 @@ static void computeUniqueProperties()
     qDebug("    %zd unique unicode properties found", ssize_t(uniqueProperties.size()));
 }
 
+struct CaseConversion {
+    ushort special : 1;
+    signed short diff : 15;
+
+    friend bool operator==(CaseConversion lhs, CaseConversion rhs) noexcept
+    {
+        static_assert(std::has_unique_object_representations_v<CaseConversion>);
+        return std::memcmp(&lhs, &rhs, sizeof(lhs)) == 0;
+    }
+};
+using CaseConversions = std::array<CaseConversion, 4>;
+
+static std::vector<CaseConversions>
+computeUniqueCaseConversions(QList<PropertyFlags> &l)
+{
+    std::vector<CaseConversions> result;
+    result.emplace_back(); // all zeros should be at the beginning
+
+    qDebug("computeUniqueCaseConversions:");
+
+    size_t nonNullDuplicates = 0;
+
+    for (auto &e : l) {
+        CaseConversions candidate = {
+            CaseConversion{ e.lowerCaseSpecial, short(e.lowerCaseDiff) },
+            CaseConversion{ e.upperCaseSpecial, short(e.upperCaseDiff) },
+            CaseConversion{ e.titleCaseSpecial, short(e.titleCaseDiff) },
+            CaseConversion{ e.caseFoldSpecial,  short(e.caseFoldDiff)  },
+        };
+        const auto it = std::find(result.begin(), result.end(), candidate);
+        if (it == result.end()) {
+            // new one, add:
+            e.caseIndex = int(result.size());
+            result.push_back(std::move(candidate));
+        } else {
+            e.caseIndex = it - result.begin();
+            if (e.caseIndex != 0)
+                ++nonNullDuplicates;
+        }
+    }
+
+    qDebug("    %llu unique case conversions found (with %llu non-null duplicates)",
+           qulonglong(result.size()),
+           qulonglong(nonNullDuplicates));
+
+    return result;
+}
+
+static QByteArray createCaseConversions(std::vector<CaseConversions> conv)
+{
+    QByteArray out;
+
+    qDebug("createCaseConversions:");
+
+    out += "static constexpr std::array<CaseConversion, NumCases> caseConversions[] = {\n";
+    for (const auto &e : conv) {
+        out += "    { { ";
+        for (const auto &f : e) {
+            out += "{ ";
+            out += QByteArray::number(f.special);
+            out += ", ";
+            out += QByteArray::number(f.diff);
+            out += " }, ";
+        }
+        out.chop(2); // removes ", "
+        out += " } },\n";
+    }
+    out += "};\n\n";
+    return out;
+}
+
 struct UniqueBlock {
     inline UniqueBlock() : index(-1) {}
 
@@ -2713,24 +2790,9 @@ static QByteArray createPropertyInfo()
 //     "        ushort nfQuickCheck        : 8;\n"
         out += QByteArray::number( p.nfQuickCheck );
         out += ", ";
-//     "        std::array<CaseConversion, NumCases> cases;\n"
-        out += "{ { { ";
-        out += QByteArray::number( p.lowerCaseSpecial );
+//     "        ushort caseIndex; /* 9 used */\n"
+        out += QByteArray::number(p.caseIndex);
         out += ", ";
-        out += QByteArray::number( p.lowerCaseDiff );
-        out += "}, {";
-        out += QByteArray::number( p.upperCaseSpecial );
-        out += ", ";
-        out += QByteArray::number( p.upperCaseDiff );
-        out += "}, {";
-        out += QByteArray::number( p.titleCaseSpecial );
-        out += ", ";
-        out += QByteArray::number( p.titleCaseDiff );
-        out += "}, {";
-        out += QByteArray::number( p.caseFoldSpecial );
-        out += ", ";
-        out += QByteArray::number( p.caseFoldDiff );
-        out += "} } }, ";
 //     "        ushort graphemeBreakClass  : 5; /* 5 used */\n"
 //     "        ushort wordBreakClass      : 5; /* 5 used */\n"
 //     "        ushort lineBreakClass      : 6; /* 6 used */\n"
@@ -2748,6 +2810,9 @@ static QByteArray createPropertyInfo()
         out += ", ";
 //     "        ushort script              : 8;\n"
         out += QByteArray::number( p.script );
+        out += ", ";
+//     "        ushort reserved;\n"
+        out += '0';
         out += " },";
     }
     if (out.endsWith(','))
@@ -2789,7 +2854,7 @@ static QByteArray createPropertyInfo()
            "\n"
            "QSpan<const CaseConversion, NumCases> QT_FASTCALL caseConversion(char32_t ucs4) noexcept\n"
            "{\n"
-           "    return qGetProp(ucs4)->cases;\n"
+           "    return caseConversions[qGetProp(ucs4)->caseIndex];\n"
            "}\n\n";
 
     out += "Q_CORE_EXPORT GraphemeBreakClass QT_FASTCALL graphemeBreakClass(char32_t ucs4) noexcept\n"
@@ -3308,6 +3373,8 @@ int main(int, char **)
     resolveIdnaStatus();
 
     computeUniqueProperties();
+
+    const QByteArray caseConv = createCaseConversions(computeUniqueCaseConversions(uniqueProperties));
     QByteArray properties = createPropertyInfo();
     QByteArray specialCases = createSpecialCaseMap();
     QByteArray compositions = createCompositionInfo();
@@ -3346,6 +3413,7 @@ int main(int, char **)
     f.write("#include \"qunicodetables_p.h\"\n\n");
     f.write("QT_BEGIN_NAMESPACE\n\n");
     f.write("namespace QUnicodeTables {\n\n");
+    f.write(caseConv.data());
     f.write(properties);
     f.write(specialCases);
     f.write(compositions);
