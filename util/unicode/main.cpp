@@ -2977,7 +2977,8 @@ static QByteArray createSpecialCaseMap()
     out += QByteArray::number(maxN);
     out += ";\n\n";
 
-    qDebug("    memory usage: %zd bytes", ssize_t(specialCaseMap.size() * sizeof(unsigned short)));
+    qDebug("    memory usage: %llu bytes",
+           qulonglong{specialCaseMap.size() * sizeof(unsigned short)});
 
     return out;
 }
