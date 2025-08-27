@@ -1557,9 +1557,7 @@ static void readArabicShaping()
 static void readDerivedAge()
 {
     readUnicodeFile("DerivedAge.txt",
-                    [] (QByteArray &line, int lineNo) {
-        line.replace(" ", "");
-
+                    [] (const QByteArray &line, int lineNo) {
         QList<QByteArray> l = line.split(';');
         Q_ASSERT(l.size() == 2);
 
