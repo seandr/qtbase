@@ -1609,7 +1609,7 @@ static void readEastAsianWidth()
         const QByteArray widthString = fields[1].trimmed();
         if (!eastAsianWidthMap.contains(widthString)) {
             qFatal("Unhandled EastAsianWidth property value for %s: %s",
-                   qPrintable(codePoints), qPrintable(widthString));
+                   fields[0].constData(), widthString.data());
         }
         auto width = eastAsianWidthMap.value(widthString);
 
@@ -2505,7 +2505,7 @@ static void readIdnaMappingTable()
         const QByteArray statusString = fields[1].trimmed();
         if (!idnaStatusMap.contains(statusString))
             qFatal("Unhandled IDNA status property value for %s: %s",
-                   qPrintable(codePoints), qPrintable(statusString));
+                   fields[0].constData(), statusString.data());
         IdnaRawStatus rawStatus = idnaStatusMap.value(statusString);
 
         bool ok;
@@ -2540,7 +2540,7 @@ static void readIdnaMappingTable()
             // Some deviations have empty mappings, others should not...
             if (mapping.isEmpty()) {
                 Q_ASSERT(rawStatus == IdnaRawStatus::Deviation);
-                qDebug() << "    Empty IDNA mapping for" << codePoints;
+                qDebug() << "    Empty IDNA mapping for" << fields[0];
             }
 
             break;
