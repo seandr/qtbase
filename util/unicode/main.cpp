@@ -15,6 +15,8 @@
 #include <private/qunicodetables_p.h>
 #endif
 
+#include <QtCore/qxpfunctional.h>
+
 #if QT_VERSION < QT_VERSION_CHECK(6, 9, 0)
 // QSpan, QIODevice::readLineInto()
 #  error This tool needs Qt >= 6.9, even if you are building tables for Qt 6.5 or 6.8.
@@ -1266,8 +1268,7 @@ static int maxLowerCaseDiff = 0;
 static int maxUpperCaseDiff = 0;
 static int maxTitleCaseDiff = 0;
 
-template <typename LineConsumer>
-void readUnicodeFile(const char *fileName, LineConsumer yield)
+void readUnicodeFile(const char *fileName, qxp::function_ref<void(const QByteArray &, int)> yield)
 {
     qDebug("Reading %s", fileName);
 
@@ -1731,15 +1732,13 @@ static QByteArray createNormalizationCorrections()
 static void readLineBreak()
 {
     readUnicodeFile("LineBreak.txt",
-                    [] (QByteArray &line, int lineNo) {
-        line.replace(" ", "");
-
+                    [] (const QByteArray &line, int lineNo) {
         QList<QByteArray> l = line.split(';');
         Q_ASSERT(l.size() == 2);
 
         const auto [from, to] = parseHexRange(l[0], lineNo);
 
-        LineBreakClass lb = line_break_map.value(l[1], LineBreak_Unassigned);
+        LineBreakClass lb = line_break_map.value(l[1].trimmed(), LineBreak_Unassigned);
         if (lb == LineBreak_Unassigned)
             qFatal("unassigned line break class: %s", l[1].constData());
 
@@ -1842,16 +1841,13 @@ static void readCaseFolding()
 static void readGraphemeBreak()
 {
     readUnicodeFile("GraphemeBreakProperty.txt",
-                    [] (QByteArray &line, int lineNo) {
-
-        line.replace(" ", "");
-
+                    [] (const QByteArray &line, int lineNo) {
         QList<QByteArray> l = line.split(';');
         Q_ASSERT(l.size() == 2);
 
         const auto [from, to] = parseHexRange(l[0], lineNo);
 
-        GraphemeBreakClass brk = grapheme_break_map.value(l[1], GraphemeBreak_Unassigned);
+        GraphemeBreakClass brk = grapheme_break_map.value(l[1].trimmed(), GraphemeBreak_Unassigned);
         if (brk == GraphemeBreak_Unassigned)
             qFatal("unassigned grapheme break class: %s", l[1].constData());
 
@@ -1865,16 +1861,14 @@ static void readGraphemeBreak()
 static void readEmojiData()
 {
     readUnicodeFile("emoji-data.txt",
-                    [] (QByteArray &line, int lineNo) {
-        line.replace(" ", "");
-
+                    [] (const QByteArray &line, int lineNo) {
         QList<QByteArray> l = line.split(';');
         Q_ASSERT(l.size() == 2);
 
         // NOTE: for the moment we process emoji_data only to extract
         // the code points with Extended_Pictographic. This is needed by
         // extended grapheme clustering (cf. the GB11 rule in UAX #29).
-        if (l[1] != "Extended_Pictographic")
+        if (l[1].trimmed() != "Extended_Pictographic")
             return;
 
         const auto [from, to] = parseHexRange(l[0], lineNo);
@@ -1891,15 +1885,13 @@ static void readEmojiData()
 static void readWordBreak()
 {
     readUnicodeFile("WordBreakProperty.txt",
-                    [] (QByteArray &line, int lineNo) {
-        line.replace(" ", "");
-
+                    [] (const QByteArray &line, int lineNo) {
         QList<QByteArray> l = line.split(';');
         Q_ASSERT(l.size() == 2);
 
         const auto [from, to] = parseHexRange(l[0], lineNo);
 
-        WordBreakClass brk = word_break_map.value(l[1], WordBreak_Unassigned);
+        WordBreakClass brk = word_break_map.value(l[1].trimmed(), WordBreak_Unassigned);
         if (brk == WordBreak_Unassigned)
             qFatal("unassigned word break class: %s", l[1].constData());
 
@@ -1922,15 +1914,13 @@ static void readWordBreak()
 static void readSentenceBreak()
 {
     readUnicodeFile("SentenceBreakProperty.txt",
-                    [] (QByteArray &line, int lineNo) {
-        line.replace(" ", "");
-
+                    [] (const QByteArray &line, int lineNo) {
         QList<QByteArray> l = line.split(';');
         Q_ASSERT(l.size() == 2);
 
         const auto [from, to] = parseHexRange(l[0], lineNo);
 
-        SentenceBreakClass brk = sentence_break_map.value(l[1], SentenceBreak_Unassigned);
+        SentenceBreakClass brk = sentence_break_map.value(l[1].trimmed(), SentenceBreak_Unassigned);
         if (brk == SentenceBreak_Unassigned)
             qFatal("unassigned sentence break class: %s", l[1].constData());
 
@@ -2136,16 +2126,11 @@ static void readBlocks()
 static void readScripts()
 {
     readUnicodeFile("Scripts.txt",
-                    [] (QByteArray &line, int lineNo) {
-        line.replace(" ", "");
-
-        if (line.isEmpty())
-            return;
-
+                    [] (const QByteArray &line, int lineNo) {
         int semicolon = line.indexOf(';');
         Q_ASSERT(semicolon >= 0);
         QByteArray codePoints = line.left(semicolon);
-        QByteArray scriptName = line.mid(semicolon + 1);
+        QByteArray scriptName = line.mid(semicolon + 1).trimmed();
 
         const auto [first, last] = parseHexRange(codePoints, lineNo);
 
