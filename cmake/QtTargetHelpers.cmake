@@ -1777,6 +1777,5 @@ function(qt_internal_add_platform_internal_target target)
 
     qt_internal_add_sbom("${target}"
         TYPE QT_MODULE
-        IMMEDIATE_FINALIZATION
     )
 endfunction()
