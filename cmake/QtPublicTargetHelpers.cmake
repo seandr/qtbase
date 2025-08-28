@@ -508,6 +508,23 @@ function(_qt_internal_warn_about_example_add_subdirectory)
     endif()
 endfunction()
 
+function(__qt_internal_workaround_android_cmp0155_issue)
+    # Work around upstream cmake issue: https://gitlab.kitware.com/cmake/cmake/-/issues/27169
+    if(ANDROID
+        AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.29
+        AND NOT ANDROID_USE_LEGACY_TOOLCHAIN_FILE
+        AND NOT CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS
+        AND NOT QT_NO_SET_CMAKE_CXX_SCAN_FOR_MODULES_TO_OFF
+      )
+      message(DEBUG
+        "Setting CMAKE_CXX_SCAN_FOR_MODULES to OFF in the Qt6 package directory scope to "
+        "avoid issues with not being able to find the Threads package when targeting Android with "
+        "cmake_minimum_required(3.29) and CMAKE_CXX_STANDARD >= 20."
+      )
+      set(CMAKE_CXX_SCAN_FOR_MODULES OFF PARENT_SCOPE)
+    endif()
+endfunction()
+
 # Get the real target checking for ALIASED_TARGET
 function(_qt_internal_get_real_target out_var target)
     get_target_property(aliased_target "${target}" ALIASED_TARGET)
