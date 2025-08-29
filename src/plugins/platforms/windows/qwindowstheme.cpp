@@ -27,6 +27,7 @@
 #include <QtCore/qthread.h>
 #include <QtCore/qmutex.h>
 #include <QtCore/qwaitcondition.h>
+#include <QtCore/qoperatingsystemversion.h>
 #include <QtGui/qcolor.h>
 #include <QtGui/qpalette.h>
 #include <QtGui/qguiapplication.h>
@@ -46,7 +47,6 @@
 #   include <QtCore/private/qt_winrtbase_p.h>
 
 #   include <winrt/Windows.UI.ViewManagement.h>
-#   include <winrt/Windows.System.Profile.h>
 #endif // QT_CONFIG(cpp_winrt)
 
 #if defined(__IImageList_INTERFACE_DEFINED__) && defined(__IID_DEFINED__)
@@ -222,19 +222,6 @@ static QColor placeHolderColor(QColor textColor)
     return textColor;
 }
 
-static inline bool isWindows11() {
-    bool retVal = false;
-#if QT_CONFIG(cpp_winrt)
-    auto versionStr = winrt::Windows::System::Profile::AnalyticsInfo::VersionInfo().DeviceFamilyVersion();
-    uint64_t version = std::stoull(std::wstring(versionStr));
-    uint32_t major = (version >> 48) & 0xFFFF;
-    uint32_t minor = (version >> 32) & 0xFFFF;
-    uint32_t build = (version >> 16) & 0xFFFF;
-    retVal = (major >= 10 && minor >= 0 and build >= 22000);
-#endif
-    return retVal;
-}
-
 /*
     This is used when the theme is light mode, and when the theme is dark but the
     application doesn't support dark mode. In the latter case, we need to check.
@@ -356,9 +343,10 @@ static void populateDarkSystemBasePalette(QPalette &result)
 static inline QPalette toolTipPalette(const QPalette &systemPalette, bool light, bool highContrastEnabled)
 {
     QPalette result(systemPalette);
-    const QColor tipBgColor = highContrastEnabled ? (isWindows11() ? getSysColor(COLOR_WINDOW) : getSysColor(COLOR_BTNFACE)) :
+    static const bool isWindows11 = QOperatingSystemVersion::current() >= QOperatingSystemVersion::Windows11;
+    const QColor tipBgColor = highContrastEnabled ? (isWindows11 ? getSysColor(COLOR_WINDOW) : getSysColor(COLOR_BTNFACE)) :
                                     (light ? getSysColor(COLOR_INFOBK) : systemPalette.button().color());
-    const QColor tipTextColor = highContrastEnabled ? (isWindows11() ? getSysColor(COLOR_WINDOWTEXT) : getSysColor(COLOR_BTNTEXT)) :
+    const QColor tipTextColor = highContrastEnabled ? (isWindows11 ? getSysColor(COLOR_WINDOWTEXT) : getSysColor(COLOR_BTNTEXT)) :
                                     (light ? getSysColor(COLOR_INFOTEXT) : systemPalette.buttonText().color().darker(120));
 
     result.setColor(QPalette::All, QPalette::Button, tipBgColor);
