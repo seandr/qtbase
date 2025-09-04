@@ -423,7 +423,7 @@ function(qt_internal_add_plugin target)
 
     if(QT_GENERATE_SBOM)
         set(sbom_args "")
-        list(APPEND sbom_args TYPE QT_PLUGIN)
+        list(APPEND sbom_args DEFAULT_SBOM_ENTITY_TYPE QT_PLUGIN)
 
         qt_get_cmake_configurations(configs)
         foreach(config IN LISTS configs)

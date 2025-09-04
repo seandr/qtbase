@@ -1781,6 +1781,6 @@ function(qt_internal_add_platform_internal_target target)
     qt_internal_mark_as_internal_library("${target}")
 
     qt_internal_add_sbom("${target}"
-        TYPE QT_MODULE
+        SBOM_ENTITY_TYPE QT_MODULE
     )
 endfunction()
