@@ -2,6 +2,13 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
 
 /*!
+    \headerfile <QtVersionChecks>
+    \inmodule QtCore
+    \ingroup funclists
+    \brief Macros for performing Qt version checks.
+*/
+
+/*!
     \macro QT_VERSION_CHECK(major, minor, patch)
     \relates <QtVersionChecks>
 
