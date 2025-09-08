@@ -88,7 +88,7 @@ void QXcbConnection::xi2SelectDeviceEvents(xcb_window_t window)
     }
 
     qt_xcb_input_event_mask_t mask;
-    mask.header.deviceid = XCB_INPUT_DEVICE_ALL_MASTER;
+    mask.header.deviceid = XCB_INPUT_DEVICE_ALL;
     mask.header.mask_len = 1;
     mask.mask = bitMask;
     xcb_void_cookie_t cookie =
@@ -303,8 +303,10 @@ void QXcbConnection::xi2SetupDevices()
             continue;
         }
         // only slave pointer devices are relevant here
-        if (deviceInfo->type == XCB_INPUT_DEVICE_TYPE_SLAVE_POINTER)
+        if (deviceInfo->type == XCB_INPUT_DEVICE_TYPE_SLAVE_POINTER) {
+            m_xiSlavePointerIds.append(deviceInfo->deviceid);
             xi2SetupDevice(deviceInfo, false);
+        }
     }
 
     if (m_xiMasterPointerIds.size() > 1)
@@ -522,6 +524,23 @@ static inline qreal fixed1616ToReal(xcb_input_fp1616_t val)
 void QXcbConnection::xi2HandleEvent(xcb_ge_event_t *event)
 {
     auto *xiEvent = reinterpret_cast<qt_xcb_input_device_event_t *>(event);
+    setTime(xiEvent->time);
+    if (m_xiSlavePointerIds.contains(xiEvent->deviceid) && xiEvent->event_type != XCB_INPUT_PROPERTY) {
+        if (!m_duringSystemMoveResize)
+            return;
+        if (xiEvent->event == XCB_NONE)
+            return;
+
+        if (xiEvent->event_type == XCB_INPUT_BUTTON_RELEASE
+            && xiEvent->detail == XCB_BUTTON_INDEX_1 ) {
+            abortSystemMoveResize(xiEvent->event);
+        } else if (xiEvent->event_type == XCB_INPUT_TOUCH_END) {
+            abortSystemMoveResize(xiEvent->event);
+            return;
+        } else {
+            return;
+        }
+    }
     int sourceDeviceId = xiEvent->deviceid; // may be the master id
     qt_xcb_input_device_event_t *xiDeviceEvent = nullptr;
     xcb_input_enter_event_t *xiEnterEvent = nullptr;
@@ -627,7 +646,16 @@ void QXcbConnection::xi2ProcessTouch(void *xiDevEvent, QXcbWindow *platformWindo
 {
     auto *xiDeviceEvent = reinterpret_cast<xcb_input_touch_begin_event_t *>(xiDevEvent);
     TouchDeviceData *dev = touchDeviceForId(xiDeviceEvent->sourceid);
-    Q_ASSERT(dev);
+    if (!dev) {
+        qCDebug(lcQpaXInputEvents) << "didn't find the dev for given sourceid - " << xiDeviceEvent->sourceid
+            << ", try to repopulate xi2 devices";
+        xi2SetupDevices();
+        dev = touchDeviceForId(xiDeviceEvent->sourceid);
+        if (!dev) {
+            qCDebug(lcQpaXInputEvents) << "still can't find the dev for it, give up.";
+            return;
+        }
+    }
     const bool firstTouch = dev->touchPoints.isEmpty();
     if (xiDeviceEvent->event_type == XCB_INPUT_TOUCH_BEGIN) {
         QWindowSystemInterface::TouchPoint tp;
@@ -803,6 +831,8 @@ bool QXcbConnection::startSystemMoveResizeForTouch(xcb_window_t window, int edge
                     m_startSystemMoveResizeInfo.deviceid = devIt.key();
                     m_startSystemMoveResizeInfo.pointid = pointIt.key();
                     m_startSystemMoveResizeInfo.edges = edges;
+                    setDuringSystemMoveResize(true);
+                    qCDebug(lcQpaXInputDevices) << "triggered system move or resize from touch";
                     return true;
                 }
             }
@@ -811,9 +841,38 @@ bool QXcbConnection::startSystemMoveResizeForTouch(xcb_window_t window, int edge
     return false;
 }
 
-void QXcbConnection::abortSystemMoveResizeForTouch()
+void QXcbConnection::abortSystemMoveResize(xcb_window_t window)
 {
+    qCDebug(lcQpaXInputDevices) << "sending client message NET_WM_MOVERESIZE_CANCEL to window: " << window;
     m_startSystemMoveResizeInfo.window = XCB_NONE;
+
+    const xcb_atom_t moveResize = connection()->atom(QXcbAtom::_NET_WM_MOVERESIZE);
+    xcb_client_message_event_t xev;
+    xev.response_type = XCB_CLIENT_MESSAGE;
+    xev.type = moveResize;
+    xev.sequence = 0;
+    xev.window = window;
+    xev.format = 32;
+    xev.data.data32[0] = 0;
+    xev.data.data32[1] = 0;
+    xev.data.data32[2] = 11; // _NET_WM_MOVERESIZE_CANCEL
+    xev.data.data32[3] = 0;
+    xev.data.data32[4] = 0;
+    xcb_send_event(xcb_connection(), false, primaryScreen()->root(),
+                   XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY,
+                   (const char *)&xev);
+
+    m_duringSystemMoveResize = false;
+}
+
+bool QXcbConnection::isDuringSystemMoveResize() const
+{
+    return m_duringSystemMoveResize;
+}
+
+void QXcbConnection::setDuringSystemMoveResize(bool during)
+{
+    m_duringSystemMoveResize = during;
 }
 
 bool QXcbConnection::xi2SetMouseGrabEnabled(xcb_window_t w, bool grab)

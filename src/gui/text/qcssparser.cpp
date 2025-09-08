@@ -364,7 +364,7 @@ static bool operator<(const QCssKnownValue &prop, const QString &name)
 
 static quint64 findKnownValue(const QString &name, const QCssKnownValue *start, int numValues)
 {
-    const QCssKnownValue *end = start + numValues - 1;
+    const QCssKnownValue *end = start + (numValues - 1);
     const QCssKnownValue *prop = std::lower_bound(start, end, name);
     if ((prop == end) || (name < *prop))
         return 0;
@@ -429,7 +429,7 @@ static int lengthValueFromData(const LengthData& data, const QFont& f)
     const int scale = (data.unit == LengthData::Ex ? QFontMetrics(f).xHeight()
                       : data.unit == LengthData::Em ? QFontMetrics(f).height() : 1);
     // raised lower limit due to the implementation of qRound()
-    return qRound(qBound(double(INT_MIN) + 0.1, scale * data.number, double(INT_MAX)));
+    return qRound(qBound<double>(double(INT_MIN) + 0.1, scale * data.number, double(INT_MAX)));
 }
 
 int ValueExtractor::lengthValue(const Declaration &decl)

@@ -3270,6 +3270,9 @@ Qt::LayoutDirection QLocale::textDirection() const
   Otherwise the conversion may be done in a platform-dependent manner,
   with QString::toUpper() as a generic fallback.
 
+  \note In some cases the uppercase form of a string may be longer than the
+  original.
+
   \sa QString::toUpper()
 */
 QString QLocale::toUpper(const QString &str) const
@@ -4464,9 +4467,9 @@ QString QLocale::formattedDataSize(qint64 bytes, int precision, DataSizeFormats 
     if (!bytes) {
         power = 0;
     } else if (format & DataSizeBase1000) {
-        power = int(std::log10(qAbs(bytes)) / 3);
+        power = int(std::log10(QtPrivate::qUnsignedAbs(bytes)) / 3);
     } else { // Compute log2(bytes) / 10:
-        power = int((63 - qCountLeadingZeroBits(quint64(qAbs(bytes)))) / 10);
+        power = int((63 - qCountLeadingZeroBits(QtPrivate::qUnsignedAbs(bytes))) / 10);
         base = 1024;
     }
     // Only go to doubles if we'll be using a quantifier:

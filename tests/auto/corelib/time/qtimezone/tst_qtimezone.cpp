@@ -1005,6 +1005,7 @@ void tst_QTimeZone::utcTest()
     QCOMPARE(tzp.daylightTimeOffset(0), 0);
     QCOMPARE(tzp.hasDaylightTime(), false);
     QCOMPARE(tzp.hasTransitions(), false);
+#endif // QT_BUILD_INTERNAL
 
     // Test create from UTC Offset (uses minimal id, skipping minutes if 0)
     QDateTime now = QDateTime::currentDateTime();
@@ -1045,7 +1046,6 @@ void tst_QTimeZone::utcTest()
     QCOMPARE(tz.offsetFromUtc(now), 123456);
     QCOMPARE(tz.standardTimeOffset(now), 123456);
     QCOMPARE(tz.daylightTimeOffset(now), 0);
-#endif // QT_BUILD_INTERNAL
 }
 
 void tst_QTimeZone::icuTest()

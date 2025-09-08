@@ -215,7 +215,7 @@ bool QPersistentModelIndex::operator<(const QPersistentModelIndex &other) const
     if (d && other.d)
         return d->index < other.d->index;
 
-    return std::less<>{}(d, other.d);
+    return std::less<QPersistentModelIndexData *>{}(d, other.d);
 }
 
 /*!
@@ -417,7 +417,8 @@ QModelIndex QPersistentModelIndex::child(int row, int column) const
 
 /*!
     Returns the data for the given \a role for the item referred to by the
-    index.
+    index, or a default-constructed QVariant if this persistent model index
+    is \l{isValid()}{invalid}.
 
     \sa Qt::ItemDataRole, QAbstractItemModel::setData()
 */
@@ -1146,7 +1147,8 @@ void QAbstractItemModel::resetInternalData()
     \fn QVariant QModelIndex::data(int role) const
 
     Returns the data for the given \a role for the item referred to by the
-    index.
+    index, or a default-constructed QVariant if this model index is
+    \l{isValid()}{invalid}.
 */
 
 /*!

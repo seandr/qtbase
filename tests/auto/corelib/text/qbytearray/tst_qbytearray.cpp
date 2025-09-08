@@ -94,6 +94,7 @@ private slots:
     void replace_data();
     void replace();
     void replaceWithSpecifiedLength();
+    void replaceDoesNotReplaceTheTerminatingNull();
     void indexOf_data();
     void indexOf();
     void lastIndexOf_data();
@@ -869,7 +870,11 @@ void tst_QByteArray::qvsnprintf()
 
 #ifndef Q_OS_WIN
     memset(buf, 42, sizeof(buf));
+    QT_WARNING_PUSH
+    QT_WARNING_DISABLE_GCC("-Wformat-zero-length")
+    QT_WARNING_DISABLE_CLANG("-Wformat-zero-length")
     QCOMPARE(::qsnprintf(buf, 10, ""), 0);
+    QT_WARNING_POP
 #endif
 }
 
@@ -1386,6 +1391,24 @@ void tst_QByteArray::lastIndexOf()
         if (needle.size() == 1)
             QCOMPARE( haystack.lastIndexOf(needle.at(0)), expected );
     }
+}
+
+void tst_QByteArray::replaceDoesNotReplaceTheTerminatingNull()
+{
+    // Try really hard to replace the implicit terminating '\0' byte:
+    constexpr char content[] = "Hello, World!";
+#define CHECK(...) do { \
+        QByteArray ba(content); \
+        QCOMPARE(qAsConst(ba).data()[ba.size()], '\0'); \
+        ba.replace(__VA_ARGS__); \
+        QCOMPARE(ba, content); \
+        QCOMPARE(qAsConst(ba).data()[ba.size()], '\0'); \
+    } while (false)
+    CHECK('\0', 'a');
+    constexpr char bangbang[] = "!!";
+    CHECK(bangbang + 1, 2, // including \0, matches end of `ba`
+          bangbang,     2);
+#undef CHECK
 }
 
 void tst_QByteArray::number()

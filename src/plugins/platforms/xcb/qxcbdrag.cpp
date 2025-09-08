@@ -1110,9 +1110,8 @@ void QXcbDrag::handleFinished(const xcb_client_message_event_t *event)
         return;
 #endif
 
-    const unsigned long *l = (const unsigned long *)event->data.data32;
-    if (l[0]) {
-        int at = findTransactionByWindow(l[0]);
+    if (xcb_window_t w = event->data.data32[0]) {
+        int at = findTransactionByWindow(w);
         if (at != -1) {
 
             Transaction t = transactions.takeAt(at);
@@ -1294,7 +1293,7 @@ void QXcbDrag::handleSelectionRequest(const xcb_selection_request_event_t *event
 
 bool QXcbDrag::dndEnable(QXcbWindow *w, bool on)
 {
-    qCDebug(lcQpaXDnd) << "dndEnable" << w << on;
+    qCDebug(lcQpaXDnd) << "dndEnable" << static_cast<QPlatformWindow *>(w) << on;
     // Windows announce that they support the XDND protocol by creating a window property XdndAware.
     if (on) {
         QXcbWindow *window = nullptr;
@@ -1374,24 +1373,27 @@ QVariant QXcbDropData::xdndObtainData(const QByteArray &format, QMetaType::Type 
         QMimeData *data = drag->currentDrag()->mimeData();
         if (data->hasFormat(QLatin1String(format)))
             result = data->data(QLatin1String(format));
-        return result;
+        return result.isNull() ? QVariant() : result;
     }
 
     QVector<xcb_atom_t> atoms = drag->xdnd_types;
     QByteArray encoding;
     xcb_atom_t a = mimeAtomForFormat(c, QLatin1String(format), requestedType, atoms, &encoding);
     if (a == XCB_NONE)
-        return result;
+        return QVariant();
 
 #ifndef QT_NO_CLIPBOARD
     if (c->clipboard()->getSelectionOwner(drag->atom(QXcbAtom::XdndSelection)) == XCB_NONE)
-        return result; // should never happen?
+        return QVariant(); // should never happen?
 
     xcb_atom_t xdnd_selection = c->atom(QXcbAtom::XdndSelection);
     result = c->clipboard()->getSelection(xdnd_selection, a, xdnd_selection, drag->targetTime());
-#endif
-
+    if (result.isNull())
+        return QVariant();
     return mimeConvertToFormat(c, a, result, QLatin1String(format), requestedType, encoding);
+#else
+    return QVariant();
+#endif
 }
 
 bool QXcbDropData::hasFormat_sys(const QString &format) const
