@@ -1,5 +1,6 @@
 // Copyright (C) 2020 Aleix Pol Gonzalez <aleixpol@kde.org>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:critical reason:data-parser
 
 #include "qcollator_p.h"
 #include "qlocale_p.h"
