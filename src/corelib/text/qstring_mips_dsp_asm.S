@@ -1,5 +1,6 @@
 // Copyright (C) 2013 Imagination Technologies Limited, www.imgtec.com
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:critical reason:data-parser
 
 #include "../../gui/painting/qt_mips_asm_dsp_p.h"
 
