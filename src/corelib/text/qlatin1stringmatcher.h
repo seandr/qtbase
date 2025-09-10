@@ -1,5 +1,6 @@
 // Copyright (C) 2022 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:critical reason:data-parser
 
 #ifndef QLATIN1STRINGMATCHER_H
 #define QLATIN1STRINGMATCHER_H
