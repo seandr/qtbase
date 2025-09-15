@@ -1,5 +1,6 @@
 // Copyright (C) 2017-2018 Red Hat, Inc
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #include "qxdgdesktopportalfiledialog_p.h"
 
