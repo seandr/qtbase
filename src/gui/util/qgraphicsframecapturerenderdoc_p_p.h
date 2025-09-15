@@ -1,5 +1,6 @@
 // Copyright (C) 2023 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QGRAPHICSFRAMECAPTURERENDERDOC_P_P_H
 #define QGRAPHICSFRAMECAPTURERENDERDOC_P_P_H
