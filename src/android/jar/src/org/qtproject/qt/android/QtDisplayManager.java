@@ -6,6 +6,8 @@ package org.qtproject.qt.android;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
@@ -32,6 +34,7 @@ import android.content.res.Resources.Theme;
 import android.util.Log;
 
 class QtDisplayManager {
+    private static String QtTAG = "QtDisplayManager";
 
     // screen methods
     static native void setDisplayMetrics(int screenWidthPixels, int screenHeightPixels,
@@ -185,25 +188,59 @@ class QtDisplayManager {
             decorView.setSystemUiVisibility(systemUiVisibility);
         }
 
-        // Handle transparent status and navigation bars
-        if (m_expandedToCutout) {
-            window.setStatusBarColor(Color.TRANSPARENT);
-            window.setNavigationBarColor(Color.TRANSPARENT);
-        } else {
-            // Restore theme's system bars colors
-            Theme theme = m_activity.getTheme();
-            TypedValue typedValue = new TypedValue();
+        if (!isFullScreen && !edgeToEdgeEnabled(m_activity)) {
+            // These are needed to operate on system bar colors
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
+                        | WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
 
-            theme.resolveAttribute(android.R.attr.statusBarColor, typedValue, true);
-            int defaultStatusBarColor = typedValue.data;
-            window.setStatusBarColor(defaultStatusBarColor);
+            // Handle transparent status and navigation bars
+            if (m_expandedToCutout) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    window.setStatusBarColor(Color.TRANSPARENT);
+                    window.setNavigationBarColor(Color.TRANSPARENT);
+                } else {
+                    // Android 9 and prior doesn't add the semi-transparent bars
+                    // to avoid low contrast system icons, so try to mimick it
+                    // by taking the current color and only increase the opacity.
+                    int statusBarColor = window.getStatusBarColor();
+                    int transparentStatusBar = statusBarColor & 0x00FFFFFF;
+                    window.setStatusBarColor(transparentStatusBar);
 
-            theme.resolveAttribute(android.R.attr.navigationBarColor, typedValue, true);
-            int defaultNavigationBarColor = typedValue.data;
-            window.setNavigationBarColor(defaultNavigationBarColor);
+                    int navigationBarColor = window.getNavigationBarColor();
+                    int semiTransparentNavigationBar = navigationBarColor & 0x7FFFFFFF;
+                    window.setNavigationBarColor(semiTransparentNavigationBar);
+                }
+            } else {
+                // Restore theme's system bars colors
+                Theme theme = m_activity.getTheme();
+                TypedValue typedValue = new TypedValue();
+
+                theme.resolveAttribute(android.R.attr.statusBarColor, typedValue, true);
+                int defaultStatusBarColor = typedValue.data;
+                window.setStatusBarColor(defaultStatusBarColor);
+
+                theme.resolveAttribute(android.R.attr.navigationBarColor, typedValue, true);
+                int defaultNavigationBarColor = typedValue.data;
+                window.setNavigationBarColor(defaultNavigationBarColor);
+            }
         }
 
         decorView.post(() -> decorView.requestApplyInsets());
+    }
+
+    private static boolean edgeToEdgeEnabled(Activity activity) {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.VANILLA_ICE_CREAM)
+            return true;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM)
+            return false;
+        int[] attrs = new int[] { android.R.attr.windowOptOutEdgeToEdgeEnforcement };
+        TypedArray ta = activity.getTheme().obtainStyledAttributes(attrs);
+        try {
+            return !ta.getBoolean(0, false);
+        } finally {
+            ta.recycle();
+        }
     }
 
     boolean isFullScreen()
@@ -250,7 +287,7 @@ class QtDisplayManager {
     @UsedFromNativeCode
     static Size getDisplaySize(Context displayContext, Display display)
     {
-        if (display == null || context == null)
+        if (display == null || displayContext == null)
             return new Size(0, 0);
 
         if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
@@ -259,7 +296,6 @@ class QtDisplayManager {
             return new Size(metrics.widthPixels, metrics.heightPixels);
         } else {
             try {
-                Context displayContext = context.createDisplayContext(display);
                 WindowManager windowManager = displayContext.getSystemService(WindowManager.class);
                 if (windowManager != null) {
                     WindowMetrics metrics = windowManager.getCurrentWindowMetrics();
@@ -273,14 +309,6 @@ class QtDisplayManager {
             }
             return new Size(0, 0);
         }
-
-        Context windowsContext = displayContext.createWindowContext(
-                WindowManager.LayoutParams.TYPE_APPLICATION, null);
-        WindowManager windowManager =
-                (WindowManager) windowsContext.getSystemService(Context.WINDOW_SERVICE);
-        WindowMetrics windowsMetrics = windowManager.getCurrentWindowMetrics();
-        Rect bounds = windowsMetrics.getBounds();
-        return new Size(bounds.width(), bounds.height());
     }
 
     static void setApplicationDisplayMetrics(Activity activity, int width, int height)
