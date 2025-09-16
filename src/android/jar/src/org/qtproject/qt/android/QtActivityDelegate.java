@@ -146,7 +146,7 @@ class QtActivityDelegate extends QtActivityDelegateBase
                                                              ViewGroup.LayoutParams.MATCH_PARENT));
         QtDisplayManager.handleOrientationChanges(m_activity);
 
-        handleUiModeChange(m_activity.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK);
+        handleUiModeChange();
 
         Display display = (Build.VERSION.SDK_INT < Build.VERSION_CODES.R)
                 ? m_activity.getWindowManager().getDefaultDisplay()
