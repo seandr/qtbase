@@ -1,5 +1,6 @@
 // Copyright (C) 2022 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:critical reason:data-parser
 
 #include "qsql_ibase_p.h"
 #include <QtCore/qcoreapplication.h>

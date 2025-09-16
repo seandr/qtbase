@@ -1,6 +1,8 @@
 // Copyright (C) 2022 The Qt Company Ltd.
 // Copyright (C) 2022 Mimer Information Technology
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
+
 #ifndef QSQL_MIMER_H
 #define QSQL_MIMER_H
 

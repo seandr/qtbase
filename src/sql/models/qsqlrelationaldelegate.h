@@ -1,5 +1,6 @@
 // Copyright (C) 2016 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QSQLRELATIONALDELEGATE_H
 #define QSQLRELATIONALDELEGATE_H

@@ -1,5 +1,6 @@
 // Copyright (C) 2016 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QSQL_IBASE_H
 #define QSQL_IBASE_H

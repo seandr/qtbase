@@ -1,5 +1,6 @@
 // Copyright (C) 2023 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QSQL_SQLITE_VFS_H
 #define QSQL_SQLITE_VFS_H
