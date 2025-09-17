@@ -1,5 +1,6 @@
 // Copyright (C) 2016 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QGRAPHICSANCHORLAYOUT_P_H
 #define QGRAPHICSANCHORLAYOUT_P_H

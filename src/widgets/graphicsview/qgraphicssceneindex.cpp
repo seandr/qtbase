@@ -1,5 +1,6 @@
 // Copyright (C) 2016 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 /*!
     \class QGraphicsSceneIndex
     \brief The QGraphicsSceneIndex class provides a base class to implement
