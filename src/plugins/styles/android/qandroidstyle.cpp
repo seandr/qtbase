@@ -1,5 +1,6 @@
 // Copyright (C) 2013 BogDan Vatra <bogdan@kde.org>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #include "qandroidstyle_p.h"
 
