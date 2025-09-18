@@ -81,9 +81,9 @@ private slots:
 
     void columnWidthWithImage_data();
     void columnWidthWithImage();
-#endif
 
     void QTBUG138678_insertColumnAtStartWithRowspan();
+#endif
 
 private:
     QTextTable *create2x2Table();
@@ -1339,7 +1339,6 @@ void tst_QTextTable::columnWidthWithImage()
     QCOMPARE(leftRect.size().toSize(), imageSize);
     QVERIFY(rightRect.left() > leftRect.right());
 }
-#endif
 
 void tst_QTextTable::QTBUG138678_insertColumnAtStartWithRowspan()
 {
@@ -1383,6 +1382,7 @@ void tst_QTextTable::QTBUG138678_insertColumnAtStartWithRowspan()
     // Don't assert
     currentTable->insertColumns(0, 1);
 }
+#endif
 
 
 QTEST_MAIN(tst_QTextTable)
