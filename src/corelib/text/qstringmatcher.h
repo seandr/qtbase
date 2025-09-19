@@ -1,7 +1,7 @@
 // Copyright (C) 2020 The Qt Company Ltd.
 // Copyright (C) 2019 Mail.ru Group.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
-// Qt-Security score:sensitive reason:trivial-impl-only
+// Qt-Security score:significant reason:trivial-impl-only
 
 #ifndef QSTRINGMATCHER_H
 #define QSTRINGMATCHER_H

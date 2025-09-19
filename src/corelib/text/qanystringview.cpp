@@ -1,6 +1,6 @@
 // Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, info@kdab.com, author Marc Mutz <marc.mutz@kdab.com>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
-// Qt-Security score:sensitive reason:trivial-impl-only
+// Qt-Security score:significant reason:trivial-impl-only
 
 #include "qanystringview.h"
 #include "qdebug.h"

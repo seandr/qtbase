@@ -1,6 +1,7 @@
 // Copyright (C) 2016 The Qt Company Ltd.
 // Copyright (C) 2020 Intel Corporation.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:compile-time-only
 
 #ifndef QSTRINGLITERAL_H
 #define QSTRINGLITERAL_H

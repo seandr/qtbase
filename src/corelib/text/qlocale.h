@@ -1,6 +1,6 @@
 // Copyright (C) 2021 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
-// Qt-Security score:sensitive reason:trivial-impl-only
+// Qt-Security score:significant reason:trivial-impl-only
 
 #ifndef QLOCALE_H
 #define QLOCALE_H

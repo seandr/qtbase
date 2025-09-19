@@ -1,6 +1,6 @@
 // Copyright (C) 2016 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
-// Qt-Security score:sensitive reason:trivial-impl-only
+// Qt-Security score:significant reason:trivial-impl-only
 
 #ifndef QTEXTBOUNDARYFINDER_H
 #define QTEXTBOUNDARYFINDER_H
