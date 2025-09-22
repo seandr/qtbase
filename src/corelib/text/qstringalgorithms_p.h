@@ -1,5 +1,6 @@
 // Copyright (C) 2016 Intel Corporation.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:critical reason:data-parser
 
 #ifndef QSTRINGALGORITHMS_P_H
 #define QSTRINGALGORITHMS_P_H
