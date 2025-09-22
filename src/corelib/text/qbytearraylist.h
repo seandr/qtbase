@@ -2,6 +2,7 @@
 // Copyright (C) 2016 Intel Corporation.
 // Copyright (C) 2014 by Southwest Research Institute (R)
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #include <QtCore/qlist.h>
 
