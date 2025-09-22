@@ -432,6 +432,7 @@
 
 #include "qabstractsocket.h"
 #include "qabstractsocket_p.h"
+#include "qnetworkinterface.h"
 
 #include "private/qhostinfo_p.h"
 
@@ -1504,8 +1505,6 @@ bool QAbstractSocketPrivate::bind(const QHostAddress &address, quint16 port, QAb
 {
     Q_Q(QAbstractSocket);
 
-    Q_UNUSED(iface); // will be used in a follow-up patch
-
     // now check if the socket engine is initialized and to the right type
     if (!socketEngine || !socketEngine->isValid()) {
         QHostAddress nullAddress;
@@ -1537,6 +1536,10 @@ bool QAbstractSocketPrivate::bind(const QHostAddress &address, quint16 port, QAb
         socketEngine->setOption(QAbstractSocketEngine::BindExclusively, 0);
 #endif
     }
+#if QT_CONFIG(networkinterface)
+    if (iface && iface->isValid())
+        socketEngine->setOption(QAbstractSocketEngine::BindInterfaceIndex, iface->index());
+#endif
     bool result = socketEngine->bind(address, port);
     cachedSocketDescriptor = socketEngine->socketDescriptor();
 
