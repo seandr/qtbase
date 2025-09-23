@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
 
 #include <QtCore/qassociativeiterable.h>
+#include <QtCore/qiterable_impl.h>
 #include <QtCore/qvariant.h>
-
-#include <QtCore/private/qiterable_p.h>
 
 QT_BEGIN_NAMESPACE
 

@@ -1,10 +1,9 @@
 // Copyright (C) 2020 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
 
+#include <QtCore/qiterable_impl.h>
 #include <QtCore/qsequentialiterable.h>
 #include <QtCore/qvariant.h>
-
-#include <QtCore/private/qiterable_p.h>
 
 QT_BEGIN_NAMESPACE
 
