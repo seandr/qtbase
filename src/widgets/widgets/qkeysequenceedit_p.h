@@ -1,6 +1,7 @@
 // Copyright (C) 2016 The Qt Company Ltd.
 // Copyright (C) 2013 Ivan Komissarov.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:default
 
 #ifndef QKEYSEQUENCEEDIT_P_H
 #define QKEYSEQUENCEEDIT_P_H
