@@ -2,6 +2,7 @@
 // Copyright (C) 2021 Intel Corporation.
 // Copyright (C) 2015 Olivier Goffart <ogoffart@woboq.com>
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:critical reason:data-parser
 
 #include "qvariant_p.h"
 #include "qbitarray.h"
