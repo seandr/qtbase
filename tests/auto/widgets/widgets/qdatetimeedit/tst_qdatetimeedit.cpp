@@ -4424,7 +4424,8 @@ void tst_QDateTimeEdit::stepModifierButtons()
 
     testWidget->hide();
 
-    EditorDateEdit edit(0);
+    EditorDateEdit edit;
+    edit.setDisplayFormat("HH:mm:ss");
     edit.setTime(startTime);
     edit.show();
     QVERIFY(QTest::qWaitForWindowActive(&edit));
