@@ -1291,6 +1291,12 @@ static int maxLowerCaseDiff = 0;
 static int maxUpperCaseDiff = 0;
 static int maxTitleCaseDiff = 0;
 
+static void couldNotOpenFile(const QFile &file)
+{
+    qFatal("Cannot open output file: %ls error: %ls",
+           qUtf16Printable(file.fileName()), qUtf16Printable(file.errorString()));
+}
+
 void readUnicodeFile(const char *fileName,
                      qxp::function_ref<void(QSpan<const QByteArrayView>, Location)> yield)
 {
@@ -1383,7 +1389,7 @@ static void readUnicodeData()
 
     QFile f("data/UnicodeData.txt");
     if (!f.open(QFile::ReadOnly))
-        qFatal() << "Couldn't open UnicodeData.txt:" << f.errorString();
+        couldNotOpenFile(f);
 
     Location loc{"UnicodeData.txt", 0};
     int &lineNo = loc.lineNo;
@@ -3331,7 +3337,7 @@ int main(int, char **)
 
     QFile f("../../src/corelib/text/qunicodetables.cpp");
     if (!f.open(QFile::WriteOnly|QFile::Truncate))
-        qFatal() << "Cannot open output file" << f.fileName() << "error:" << f.errorString();
+        couldNotOpenFile(f);
     f.write(header);
     f.write(note);
     f.write("#include \"qunicodetables_p.h\"\n\n");
@@ -3351,7 +3357,7 @@ int main(int, char **)
 
     f.setFileName("../../src/corelib/text/qunicodetables_p.h");
     if (!f.open(QFile::WriteOnly | QFile::Truncate))
-        qFatal() << "Cannot open output file" << f.fileName() << "error:" << f.errorString();
+        couldNotOpenFile(f);
     f.write(header);
     f.write(note);
     f.write(warning);
