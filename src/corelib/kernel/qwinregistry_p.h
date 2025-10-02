@@ -1,5 +1,6 @@
 // Copyright (C) 2019 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:trivial-impl-only
 
 #ifndef QWINREGISTRY_H
 #define QWINREGISTRY_H
