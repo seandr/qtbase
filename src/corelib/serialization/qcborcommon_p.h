@@ -1,6 +1,7 @@
 // Copyright (C) 2018 Intel Corporation.
 // Copyright (C) 2019 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:critical reason:data-parser
 
 #ifndef QCBORCOMMON_P_H
 #define QCBORCOMMON_P_H
