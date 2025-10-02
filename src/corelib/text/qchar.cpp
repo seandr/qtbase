@@ -1817,7 +1817,7 @@ QDataStream &operator>>(QDataStream &in, QChar &chr)
 
     The following code creates a QLatin1Char:
     \code
-    using namespace Qt::Literals::StringLiterals;
+    using namespace Qt::StringLiterals;
 
     auto ch = 'a'_L1;
     \endcode
