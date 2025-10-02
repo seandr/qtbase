@@ -1,5 +1,6 @@
 // Copyright (C) 2018 Intel Corporation.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:critical reason:data-parser
 
 #include "qcborarray.h"
 #include "qcborvalue_p.h"
