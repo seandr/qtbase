@@ -18,7 +18,7 @@ QT_USE_NAMESPACE
 
 Q_LOGGING_CATEGORY(lcAccessibilityTable, "qt.accessibility.table")
 
-using namespace Qt::Literals::StringLiterals;
+using namespace Qt::StringLiterals;
 
 #if QT_CONFIG(accessibility)
 
