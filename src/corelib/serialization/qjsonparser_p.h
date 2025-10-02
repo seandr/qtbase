@@ -1,5 +1,6 @@
 // Copyright (C) 2016 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// Qt-Security score:significant reason:header-decls-only
 
 #ifndef QJSONPARSER_P_H
 #define QJSONPARSER_P_H
