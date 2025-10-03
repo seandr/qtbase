@@ -398,6 +398,7 @@ static QString mainSourcePath;
 static bool inTestFunction = false;
 
 #if defined(Q_OS_MACOS)
+static std::optional<QTestPrivate::AppNapDisabler> appNapDisabler;
 static IOPMAssertionID macPowerSavingDisabled = 0;
 #endif
 
@@ -1903,7 +1904,8 @@ void QTest::qInit(QObject *testObject, int argc, char **argv)
     QTestPrivate::disableWindowRestore();
 
     // Disable App Nap which may cause tests to stall
-    QTestPrivate::AppNapDisabler appNapDisabler;
+    if (!appNapDisabler)
+        appNapDisabler.emplace();
 
     if (qApp && (qstrcmp(qApp->metaObject()->className(), "QApplication") == 0)) {
         IOPMAssertionCreateWithName(kIOPMAssertionTypeNoDisplaySleep,
@@ -2063,6 +2065,7 @@ void QTest::qCleanup()
 
 #if defined(Q_OS_MACOS)
     IOPMAssertionRelease(macPowerSavingDisabled);
+    appNapDisabler = std::nullopt;
 #endif
 }
 
