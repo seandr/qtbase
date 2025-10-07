@@ -509,6 +509,8 @@ void QWidgetWindow::handleNonClientAreaMouseEvent(QMouseEvent *e)
 
 void QWidgetWindow::handleMouseEvent(QMouseEvent *event)
 {
+    QPointer<QWidgetWindow> self = this;
+
     if (auto *activePopupWidget = QApplication::activePopupWidget()) {
         QPointF mapped = event->position();
         if (activePopupWidget != m_widget)
@@ -587,6 +589,10 @@ void QWidgetWindow::handleMouseEvent(QMouseEvent *event)
                 break;
             }
         }
+
+        // Event delivery above might have destroyed this object. See QTBUG-138419.
+        if (self.isNull())
+            return;
 
         if (QApplication::activePopupWidget() != activePopupWidget
             && QApplicationPrivate::replayMousePress
