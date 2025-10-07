@@ -4221,7 +4221,7 @@ void tst_Moc::optionsFileError()
 }
 
 static void checkEnum(const QMetaEnum &enumerator, const QByteArray &name,
-                      const QList<QPair<QByteArray, quint64>> &keys,
+                      const QList<std::pair<QByteArray, quint64>> &keys,
                       const QMetaType enumType)
 {
     QCOMPARE(enumerator.name(), QByteArrayView{name});
