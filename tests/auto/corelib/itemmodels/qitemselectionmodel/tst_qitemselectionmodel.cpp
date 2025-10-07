@@ -103,7 +103,7 @@ QDataStream &operator<<(QDataStream &, const QModelIndexList &);
 QDataStream &operator>>(QDataStream &, QModelIndexList &);
 
 typedef QList<int> IntList;
-typedef QPair<int, int> IntPair;
+using IntPair = std::pair<int, int>;
 typedef QList<IntPair> PairList;
 
 class QStreamHelper: public QAbstractItemModel
@@ -1673,7 +1673,7 @@ void tst_QItemSelectionModel::removeColumns()
 }
 
 typedef QList<IntList> IntListList;
-typedef QPair<IntPair, IntPair> IntPairPair;
+using IntPairPair = std::pair<IntPair, IntPair>;
 typedef QList<IntPairPair> IntPairPairList;
 
 void tst_QItemSelectionModel::modelLayoutChanged_data()
