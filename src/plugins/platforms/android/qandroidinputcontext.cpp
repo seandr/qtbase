@@ -80,9 +80,6 @@ static bool hasValidFocusObject()
     if (!m_androidInputContext)
         return false;
 
-    if (!m_androidInputContext->isInputPanelVisible())
-        return false;
-
     const auto focusObject = m_androidInputContext->focusObject();
     if (!focusObject)
         return false;
