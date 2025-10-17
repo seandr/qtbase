@@ -2882,6 +2882,8 @@ qreal QPainterPath::percentAtLength(qreal len) const
     if (len > totalLength)
         return 1;
 
+    Q_ASSERT(totalLength != 0);
+
     qreal curLen = 0;
     for (int i=1; i<d->elements.size(); ++i) {
         const Element &e = d->elements.at(i);
@@ -3006,6 +3008,7 @@ QPointF QPainterPath::pointAtPercent(qreal t) const
     qreal curLen = 0;
     qreal bezierLen = 0;
     QBezier b = bezierAtT(*this, t, &curLen, &bezierLen);
+    Q_ASSERT(bezierLen != 0);
     qreal realT = (totalLength * t - curLen) / bezierLen;
 
     return b.pointAt(qBound(qreal(0), realT, qreal(1)));
@@ -3030,10 +3033,14 @@ qreal QPainterPath::angleAtPercent(qreal t) const
         return 0;
     }
 
+    if (isEmpty())
+        return 0;
+
     qreal totalLength = length();
     qreal curLen = 0;
     qreal bezierLen = 0;
     QBezier bez = bezierAtT(*this, t, &curLen, &bezierLen);
+    Q_ASSERT(bezierLen != 0);
     qreal realT = (totalLength * t - curLen) / bezierLen;
 
     qreal m1 = slopeAt(realT, bez.x1, bez.x2, bez.x3, bez.x4);
@@ -3059,10 +3066,14 @@ qreal QPainterPath::slopeAtPercent(qreal t) const
         return 0;
     }
 
+    if (isEmpty())
+        return 0;
+
     qreal totalLength = length();
     qreal curLen = 0;
     qreal bezierLen = 0;
     QBezier bez = bezierAtT(*this, t, &curLen, &bezierLen);
+    Q_ASSERT(bezierLen != 0);
     qreal realT = (totalLength * t - curLen) / bezierLen;
 
     qreal m1 = slopeAt(realT, bez.x1, bez.x2, bez.x3, bez.x4);
