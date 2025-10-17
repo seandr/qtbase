@@ -288,6 +288,8 @@ private slots:
     void hdrColors();
 #endif
 
+    void floatRounding();
+
 private:
     void fillData();
     void setPenColor(QPainter& p);
@@ -5600,6 +5602,30 @@ void tst_QPainter::hdrColors()
     QCOMPARE(img2.pixelColor(5, 5), color);
 }
 #endif
+
+void tst_QPainter::floatRounding()
+{
+    // oss-fuzz issue 429123947
+    // The following triggered an assert in QDashStroker::processCurrentSubpath(): "dpos >= 0"
+    // when it expected the calculation's result to be zero but it was actually smaller:
+    // qreal(4) + qreal(0.1) - qreal(0.1) - qreal(4)
+    // actual result: -4.440892098500626e-16
+    QImage img(5, 5, QImage::Format_RGB888);
+    QPainter p(&img);
+
+    QList<qreal> pattern {0.1, 0.3, 0.1, 0.1, 0.3, 0.1};
+    QPainterPathStroker stroker;
+    stroker.setDashPattern(pattern);
+
+    QPainterPath pp;
+    pp.moveTo(4.0, 0.0);
+    pp.lineTo(0.1, 0.0);
+    pp.lineTo(0.0, 0.0);
+    pp.lineTo(0.0, 5.0);
+
+    QPolygonF poly = stroker.createStroke(pp).toFillPolygon();
+    p.drawPolygon(poly);
+}
 
 QTEST_MAIN(tst_QPainter)
 
