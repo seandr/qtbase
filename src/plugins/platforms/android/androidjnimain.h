@@ -68,6 +68,7 @@ namespace QtAndroid
 
     const char *classErrorMsgFmt();
     const char *methodErrorMsgFmt();
+    const char *staticFieldErrorMsgFmt();
     const char *qtTagText();
 
     QString deviceName();

@@ -90,6 +90,7 @@ static AndroidBackendRegister *m_backendRegister = nullptr;
 static const char m_qtTag[] = "Qt";
 static const char m_classErrorMsg[] = "Can't find class \"%s\"";
 static const char m_methodErrorMsg[] = "Can't find method \"%s%s\"";
+static const char m_staticFieldErrorMsg[] = "Can't find static field \"%s\"";
 
 Q_CONSTINIT static QBasicAtomicInt startQtAndroidPluginCalled = Q_BASIC_ATOMIC_INITIALIZER(0);
 
@@ -338,6 +339,11 @@ namespace QtAndroid
     const char *methodErrorMsgFmt()
     {
         return m_methodErrorMsg;
+    }
+
+    const char *staticFieldErrorMsgFmt()
+    {
+        return m_staticFieldErrorMsg;
     }
 
     const char *qtTagText()
