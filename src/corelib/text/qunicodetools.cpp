@@ -1122,6 +1122,7 @@ static void getLineBreaks(const char16_t *string, qsizetype len, QCharAttributes
 static void getWhiteSpaces(const char16_t *string, qsizetype len, QCharAttributes *attributes)
 {
     for (qsizetype i = 0; i != len; ++i) {
+        const auto pos = i;
         uint ucs4 = string[i];
         if (QChar::isHighSurrogate(ucs4) && i + 1 != len) {
             ushort low = string[i + 1];
@@ -1132,7 +1133,7 @@ static void getWhiteSpaces(const char16_t *string, qsizetype len, QCharAttribute
         }
 
         if (Q_UNLIKELY(QChar::isSpace(ucs4)))
-            attributes[i].whiteSpace = true;
+            attributes[pos].whiteSpace = true;
     }
 }
 
