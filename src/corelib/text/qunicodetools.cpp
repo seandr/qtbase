@@ -247,7 +247,7 @@ static void getWordBreaks(const char16_t *string, qsizetype len, QCharAttributes
     auto real_cls = cls; // Unaffected by WB4
 
     for (qsizetype i = 0; i != len; ++i) {
-        qsizetype pos = i;
+        const qsizetype pos = i;
         char32_t ucs4 = string[i];
         if (QChar::isHighSurrogate(ucs4) && i + 1 != len) {
             ushort low = string[i + 1];
@@ -257,7 +257,7 @@ static void getWordBreaks(const char16_t *string, qsizetype len, QCharAttributes
             }
         }
 
-        const QUnicodeTables::Properties *prop = QUnicodeTables::properties(ucs4);
+        const auto prop = QUnicodeTables::properties(ucs4);
         QUnicodeTables::WordBreakClass ncls = (QUnicodeTables::WordBreakClass) prop->wordBreakClass;
         if (qt_initcharattributes_default_algorithm_only) {
             // as of Unicode 5.1, some punctuation marks were mapped to MidLetter and MidNumLet
@@ -299,7 +299,7 @@ static void getWordBreaks(const char16_t *string, qsizetype len, QCharAttributes
         case WB::Lookup:
         case WB::LookupW:
             for (qsizetype lookahead = i + 1; lookahead < len; ++lookahead) {
-                ucs4 = string[lookahead];
+                char32_t ucs4 = string[lookahead];
                 if (QChar::isHighSurrogate(ucs4) && lookahead + 1 != len) {
                     ushort low = string[lookahead + 1];
                     if (QChar::isLowSurrogate(low)) {
@@ -308,7 +308,7 @@ static void getWordBreaks(const char16_t *string, qsizetype len, QCharAttributes
                     }
                 }
 
-                prop = QUnicodeTables::properties(ucs4);
+                const auto prop = QUnicodeTables::properties(ucs4);
                 QUnicodeTables::WordBreakClass tcls = (QUnicodeTables::WordBreakClass) prop->wordBreakClass;
 
                 if (Q_UNLIKELY(tcls == QUnicodeTables::WordBreak_Extend || tcls == QUnicodeTables::WordBreak_ZWJ || tcls == QUnicodeTables::WordBreak_Format)) {
