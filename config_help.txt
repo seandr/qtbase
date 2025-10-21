@@ -269,7 +269,7 @@ Core options:
   -glib ................ Enable Glib support [no; auto on Unix]
   -inotify ............. Enable inotify support
   -icu ................. Enable ICU support [auto]
-  -pcre ................ Select used libpcre2 [system/qt/no]
+  -pcre ................ Select used libpcre2 [system/qt]
   -zlib ................ Select used zlib [system/qt]
 
   Logging backends:
