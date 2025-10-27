@@ -165,6 +165,7 @@ public:
 
     QFontPrivate();
     QFontPrivate(const QFontPrivate &other);
+    QFontPrivate &operator=(const QFontPrivate &) = delete;
     ~QFontPrivate();
 
     QFontEngine *engineForScript(int script) const;
@@ -205,9 +206,6 @@ public:
     void setVariableAxis(QFont::Tag tag, float value);
     void unsetVariableAxis(QFont::Tag tag);
     bool hasVariableAxis(QFont::Tag tag, float value) const;
-
-private:
-    QFontPrivate &operator=(const QFontPrivate &) { return *this; }
 };
 
 
