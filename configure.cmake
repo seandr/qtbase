@@ -1489,11 +1489,6 @@ qt_configure_add_report_entry(
     CONDITION QT_FEATURE_cxx20 AND MSVC AND MSVC_VERSION LESS "1930"
 )
 qt_configure_add_report_entry(
-    TYPE ERROR
-    MESSAGE "You cannot force both system and bundled libraries."
-    CONDITION QT_FEATURE_force_bundled_libs AND QT_FEATURE_force_system_libs
-)
-qt_configure_add_report_entry(
     TYPE NOTE
     MESSAGE "Building Qt for Android and user projects with 16KB page sizes."
     CONDITION QT_FEATURE_android_16kb_pages
