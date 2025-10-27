@@ -2973,7 +2973,7 @@ void QCoreApplication::requestPermission(const QPermission &requestedPermission,
         }
 
     private:
-        QtPrivate::SlotObjSharedPtr slotObject;
+        QtPrivate::SlotObjUniquePtr slotObject;
         QPointer<const QObject> context;
     };
 
