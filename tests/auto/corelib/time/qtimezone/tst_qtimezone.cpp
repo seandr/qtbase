@@ -3,7 +3,9 @@
 
 #include <QTest>
 #include <qtimezone.h>
-#include <private/qtimezoneprivate_p.h>
+#if QT_CONFIG(timezone)
+#  include <private/qtimezoneprivate_p.h>
+#endif
 #include <private/qcomparisontesthelper_p.h>
 
 #include <qlocale.h>
@@ -73,8 +75,8 @@ private Q_SLOTS:
 #endif // timezone backends
 
 private:
-    void printTimeZone(const QTimeZone &tz);
 #if QT_CONFIG(timezone)
+    void printTimeZone(const QTimeZone &tz);
 #  if defined(QT_BUILD_INTERNAL)
     // Generic tests of privates, called by implementation-specific private tests:
     void testCetPrivate(const QTimeZonePrivate &tzp);
@@ -104,6 +106,7 @@ private:
     static constexpr bool debug = false;
 };
 
+#if QT_CONFIG(timezone)
 void tst_QTimeZone::printTimeZone(const QTimeZone &tz)
 {
     QDateTime now = QDateTime::currentDateTime();
@@ -169,9 +172,11 @@ void tst_QTimeZone::printTimeZone(const QTimeZone &tz)
     qDebug() << "Transition before 1 Jun = " << tz.previousTransition(jun).atUtc;
     qDebug() << "";
 }
+#endif // feature timezone
 
 void tst_QTimeZone::createTest()
 {
+#if QT_CONFIG(timezone)
     const QTimeZone tz("Pacific/Auckland");
 
     if (debug)
@@ -267,13 +272,16 @@ void tst_QTimeZone::createTest()
             QCOMPARE(result.at(i).daylightTimeOffset, expected.at(i).daylightTimeOffset);
         }
     }
+#else
+    QSKIP("Test depends on backends, enabled by feature timezone");
+#endif // feature timezone
 }
 
 void tst_QTimeZone::nullTest()
 {
     QTimeZone nullTz1;
     QTimeZone nullTz2;
-    QTimeZone utc("UTC");
+    QTimeZone utc(QTimeZone::UTC);
 
     // Validity tests
     QCOMPARE(nullTz1.isValid(), false);
@@ -292,6 +300,7 @@ void tst_QTimeZone::nullTest()
     utc = nullTz1;
     QCOMPARE(utc.isValid(), false);
 
+#if QT_CONFIG(timezone)
     QCOMPARE(nullTz1.id(), QByteArray());
     QCOMPARE(nullTz1.territory(), QLocale::AnyTerritory);
     QCOMPARE(nullTz1.comment(), QString());
@@ -337,6 +346,7 @@ void tst_QTimeZone::nullTest()
     QCOMPARE(data.offsetFromUtc, invalidOffset);
     QCOMPARE(data.standardTimeOffset, invalidOffset);
     QCOMPARE(data.daylightTimeOffset, invalidOffset);
+#endif // feature timezone
 }
 
 void tst_QTimeZone::assign()
@@ -489,7 +499,7 @@ void tst_QTimeZone::offset()
 
 void tst_QTimeZone::dataStreamTest()
 {
-#ifndef QT_NO_DATASTREAM
+#if QT_CONFIG(timezone) && !defined(QT_NO_DATASTREAM)
     // Test the OffsetFromUtc backend serialization. First with a custom timezone:
     QTimeZone tz1("QST"_ba, 23456,
                   u"Qt Standard Time"_s, u"QST"_s, QLocale::Norway, u"Qt Testing"_s);
@@ -544,7 +554,7 @@ void tst_QTimeZone::dataStreamTest()
         ds >> tz2;
     }
     QCOMPARE(tz2.id(), tz1.id());
-#endif
+#endif // feature timezone and enabled datastream
 }
 
 #if QT_CONFIG(timezone)
