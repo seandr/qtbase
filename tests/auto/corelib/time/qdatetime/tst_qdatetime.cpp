@@ -1228,8 +1228,7 @@ void tst_QDateTime::toString_strformat()
     QCOMPARE(testDateTime.toString("yyyy-MM-dd hh:mm:ss tt"), QString("2013-01-01 01:02:03 +0000"));
     QCOMPARE(testDateTime.toString("yyyy-MM-dd hh:mm:ss ttt"), QString("2013-01-01 01:02:03 +00:00"));
 
-#if QT_CONFIG(icu) && !defined(Q_STL_DINKUMWARE)
-    // The Dinkum (VxWorks) exception may just be because it has an old ICU.
+#if QT_CONFIG(icu)
     // Hopefully other timezone backends shall eventually agree with this:
     const QString longForm = u"2013-01-01 01:02:03 Coordinated Universal Time"_s;
 #else

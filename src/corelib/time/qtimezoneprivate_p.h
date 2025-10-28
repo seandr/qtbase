@@ -261,7 +261,7 @@ private:
 // TODO: shuffle (almost reverse) order of and rework #if-ery here to use #elif
 // and match the #if-ery in each of QTZ's newBackendTimeZone() cascades for
 // backend selection.
-#if QT_CONFIG(icu) && !defined(Q_OS_UNIX)
+#if QT_CONFIG(icu) && (defined(Q_OS_VXWORKS) || !defined(Q_OS_UNIX))
 class Q_AUTOTEST_EXPORT QIcuTimeZonePrivate final : public QTimeZonePrivate
 {
 public:
@@ -306,7 +306,7 @@ private:
 };
 #endif // ICU not on Unix.
 
-#if defined(Q_OS_UNIX) && !defined(Q_OS_DARWIN) && !defined(Q_OS_ANDROID)
+#if defined(Q_OS_UNIX) && !defined(Q_OS_DARWIN) && !defined(Q_OS_ANDROID) && !defined(Q_OS_VXWORKS)
 struct QTzTransitionTime
 {
     qint64 atMSecsSinceEpoch;

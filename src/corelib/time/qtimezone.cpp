@@ -27,7 +27,7 @@ static QTimeZonePrivate *newBackendTimeZone()
     return new QMacTimeZonePrivate();
 #elif defined(Q_OS_ANDROID)
     return new QAndroidTimeZonePrivate();
-#elif defined(Q_OS_UNIX)
+#elif defined(Q_OS_UNIX) && !defined(Q_OS_VXWORKS)
     return new QTzTimeZonePrivate();
 #elif QT_CONFIG(icu)
     return new QIcuTimeZonePrivate();
@@ -46,7 +46,7 @@ static QTimeZonePrivate *newBackendTimeZone(const QByteArray &ianaId)
     return new QMacTimeZonePrivate(ianaId);
 #elif defined(Q_OS_ANDROID)
     return new QAndroidTimeZonePrivate(ianaId);
-#elif defined(Q_OS_UNIX)
+#elif defined(Q_OS_UNIX) && !defined(Q_OS_VXWORKS)
     return new QTzTimeZonePrivate(ianaId);
 #elif QT_CONFIG(icu)
     return new QIcuTimeZonePrivate(ianaId);
@@ -1468,7 +1468,7 @@ QTimeZone QTimeZone::utc()
 
 bool QTimeZone::isTimeZoneIdAvailable(const QByteArray &ianaId)
 {
-#if defined(Q_OS_UNIX) && !(defined(Q_OS_ANDROID) || defined(Q_OS_DARWIN))
+#if defined(Q_OS_UNIX) && !(defined(Q_OS_DARWIN) || defined(Q_OS_ANDROID) || defined(Q_OS_VXWORKS))
     // Keep #if-ery consistent with selection of QTzTimeZonePrivate in
     // newBackendTimeZone(). Skip the pre-check, as the TZ backend accepts POSIX
     // zone IDs, which need not be valid IANA IDs. See also QTBUG-112006.
