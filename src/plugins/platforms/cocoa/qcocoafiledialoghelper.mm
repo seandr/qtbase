@@ -489,7 +489,7 @@ typedef QSharedPointer<QFileDialogOptions> SharedPointerFileDialogOptions;
         return;
 
     if (m_panel.visible) {
-        const QString selection = QString::fromNSString(m_panel.URL.path);
+        const QString selection = QString::fromNSString(m_panel.URL.path).normalized(QString::NormalizationForm_C);
         if (selection != m_currentSelection) {
             m_currentSelection = selection;
             emit m_helper->currentChanged(QUrl::fromLocalFile(selection));
