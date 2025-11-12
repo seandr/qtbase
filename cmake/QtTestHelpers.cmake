@@ -733,13 +733,22 @@ function(qt_internal_add_test name)
 
         qt_internal_collect_command_environment(test_env_path test_env_plugin_path)
 
+        set(add_test_args "")
+        if(test_working_dir)
+            list(APPEND add_test_args WORKING_DIRECTORY "${test_working_dir}")
+        endif()
+
         if(arg_NO_WRAPPER OR QT_NO_TEST_WRAPPERS)
             if(QT_BUILD_TESTS_BATCHED)
                 message(FATAL_ERROR "Wrapperless tests are unspupported with test batching")
             endif()
 
-            add_test(NAME "${testname}" COMMAND ${test_executable} ${extra_test_args}
-                    WORKING_DIRECTORY "${test_working_dir}")
+
+
+            add_test(NAME "${testname}"
+                COMMAND ${test_executable} ${extra_test_args}
+                ${add_test_args}
+            )
             set_property(TEST "${testname}" APPEND PROPERTY
                          ENVIRONMENT "PATH=${test_env_path}"
                                      "QT_TEST_RUNNING_IN_CTEST=1"
@@ -750,7 +759,7 @@ function(qt_internal_add_test name)
             qt_internal_create_test_script(NAME "${testname}"
                                    COMMAND "${test_executable}"
                                    ARGS "${extra_test_args}"
-                                   WORKING_DIRECTORY "${test_working_dir}"
+                                   ${add_test_args}
                                    OUTPUT_FILE "${test_wrapper_file}"
                                    ENVIRONMENT "QT_TEST_RUNNING_IN_CTEST" 1
                                                "PATH" "${test_env_path}"
@@ -1007,8 +1016,14 @@ for this function. Will be ignored")
     if(is_in_batch)
         _qt_internal_test_batch_target_name(executable_name)
     endif()
+
+    set(add_test_working_dir "")
+    if(arg_WORKING_DIRECTORY)
+        list(APPEND add_test_working_dir WORKING_DIRECTORY "${arg_WORKING_DIRECTORY}")
+    endif()
+
     add_test(NAME "${arg_NAME}" COMMAND "${CMAKE_COMMAND}" "-P" "${arg_OUTPUT_FILE}"
-                WORKING_DIRECTORY "${arg_WORKING_DIRECTORY}")
+                ${add_test_working_dir})
 
     # If crosscompiling is enabled, we should avoid run cmake in emulator environment.
     # Prepend emulator to test command in generated cmake script instead. Keep in mind that
@@ -1027,7 +1042,7 @@ for this function. Will be ignored")
     _qt_internal_create_command_script(COMMAND "${crosscompiling_emulator} \${env_test_runner} \
 \"${executable_file}\" \${env_test_args} ${command_args}"
                                       OUTPUT_FILE "${arg_OUTPUT_FILE}"
-                                      WORKING_DIRECTORY "${arg_WORKING_DIRECTORY}"
+                                      ${add_test_working_dir}
                                       ENVIRONMENT ${arg_ENVIRONMENT}
                                       PRE_RUN "separate_arguments(env_test_args NATIVE_COMMAND \
 \"\$ENV{TESTARGS}\")"
