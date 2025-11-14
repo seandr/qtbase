@@ -18,6 +18,9 @@ macro(qt_internal_get_internal_add_module_keywords option_args single_args multi
         NO_HEADERSCLEAN_CHECK
         NO_GENERATE_CPP_EXPORTS
         NO_UNITY_BUILD
+        NO_PACKAGE_CONFIG_FILE
+        NO_MODULE_JSON_FILE
+        NO_QMAKE_SUPPORT_FILES
         ${__qt_internal_sbom_optional_args}
     )
     set(${single_args}
@@ -932,7 +935,9 @@ set(QT_ALLOW_MISSING_TOOLS_PACKAGES TRUE)")
         unset(arg_NO_PRIVATE_MODULE)
     endif()
 
-    qt_describe_module(${target})
+    if(NOT arg_NO_MODULE_JSON_FILE)
+        qt_describe_module(${target})
+    endif()
 
     if(QT_GENERATE_SBOM)
         set(sbom_args "")
@@ -987,7 +992,19 @@ set(QT_ALLOW_MISSING_TOOLS_PACKAGES TRUE)")
         qt_internal_extend_qt_entity_sbom(${target} ${sbom_args})
     endif()
 
-    qt_add_list_file_finalizer(qt_finalize_module ${target} ${arg_INTERNAL_MODULE} ${arg_NO_PRIVATE_MODULE})
+    if(arg_NO_PACKAGE_CONFIG_FILE)
+        set_target_properties("${target}" PROPERTIES _qt_no_package_config_file TRUE)
+    endif()
+
+    if(arg_NO_QMAKE_SUPPORT_FILES)
+        set_target_properties("${target}" PROPERTIES _qt_no_qmake_support_files TRUE)
+    endif()
+
+    qt_add_list_file_finalizer(qt_finalize_module
+        ${target}
+        ${arg_INTERNAL_MODULE}
+        ${arg_NO_PRIVATE_MODULE}
+    )
 endfunction()
 
 function(qt_internal_apply_apple_privacy_manifest target)
@@ -1035,9 +1052,18 @@ function(qt_finalize_module target)
     )
 
     qt_finalize_framework_headers_copy(${target})
-    qt_generate_prl_file(${target} "${INSTALL_LIBDIR}")
-    qt_generate_module_pri_file("${target}" ${ARGN})
-    qt_internal_generate_pkg_config_file(${target})
+
+    get_target_property(no_qmake_support_files "${target}" _qt_no_qmake_support_files)
+    if(NOT no_qmake_support_files)
+        qt_generate_prl_file(${target} "${INSTALL_LIBDIR}")
+        qt_generate_module_pri_file("${target}" ${ARGN})
+    endif()
+
+    get_target_property(no_package_config_file "${target}" _qt_no_package_config_file)
+    if(NOT no_package_config_file)
+        qt_internal_generate_pkg_config_file(${target})
+    endif()
+
     qt_internal_apply_apple_privacy_manifest(${target})
     _qt_internal_finalize_sbom(${target})
 endfunction()
