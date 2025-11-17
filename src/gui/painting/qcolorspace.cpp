@@ -1140,11 +1140,14 @@ QByteArray QColorSpace::iccProfile() const
 */
 QColorSpace QColorSpace::fromIccProfile(const QByteArray &iccProfile)
 {
+    // Must detach in case input is fromRawData()
+    QByteArray ownedIccProfile(iccProfile);
+    ownedIccProfile.detach();
     QColorSpace colorSpace;
-    if (QIcc::fromIccProfile(iccProfile, &colorSpace))
+    if (QIcc::fromIccProfile(ownedIccProfile, &colorSpace))
         return colorSpace;
     colorSpace.detach();
-    colorSpace.d_ptr->iccProfile = iccProfile;
+    colorSpace.d_ptr->iccProfile = ownedIccProfile;
     return colorSpace;
 }
 
