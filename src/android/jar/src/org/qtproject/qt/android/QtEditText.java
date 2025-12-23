@@ -40,6 +40,8 @@ class QtEditText extends View
     private final int ImhPreferLatin = 0x200;
 
     private final int ImhMultiLine = 0x400;
+    private final int ImhNoExtractUi = 0x2000;
+    private final int ImhNoFullscreen = 0x4000;
 
     private final int ImhDigitsOnly = 0x10000;
     private final int ImhFormattedNumbersOnly = 0x20000;
@@ -199,6 +201,11 @@ class QtEditText extends View
 
         if (enterKeyType == 0 && (inputHints & ImhMultiLine) != 0)
             imeOptions = android.view.inputmethod.EditorInfo.IME_FLAG_NO_ENTER_ACTION;
+
+        if ((inputHints & ImhNoExtractUi) != 0)
+            imeOptions |= android.view.inputmethod.EditorInfo.IME_FLAG_NO_EXTRACT_UI;
+        if ((inputHints & ImhNoFullscreen) != 0)
+            imeOptions |= android.view.inputmethod.EditorInfo.IME_FLAG_NO_FULLSCREEN;
 
         setInitialCapsMode(initialCapsMode);
         setImeOptions(imeOptions);
